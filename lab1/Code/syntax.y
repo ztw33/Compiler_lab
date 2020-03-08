@@ -9,6 +9,8 @@
 %token INT FLOAT ID
 %token IF ELSE WHILE TYPE STRUCT RETURN
 
+/* declared  */
+
 %%
 /* High-level Definitions */
 Program : ExtDefList {
