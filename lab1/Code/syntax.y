@@ -1,3 +1,5 @@
+%locations
+
 /* declared tokens */
 %token RELOP ASSIGNOP
 %token SEMI COMMA
