@@ -37,8 +37,18 @@ delimeter   [ \t\n\r]
             char c = input();
             while (c != '\n') c = input();
         }
-"/*"    { printf("block comment start\n"); }
-"*/"    { printf("block comment end\n"); }
+"/*"    { 
+            printf("block comment start\n"); 
+            char c = input();
+            while (1) {
+                if (c == '*') {
+                    c = input();
+                    if (c == '/')
+                        break;
+                }
+                c = input();
+            }
+        }
 {ID}    { printf("id, %s\n", yytext); }
 {delimeter}    { }
 .       { printf("Error type A at Line %d: Mysterious character \"%s\".\n", yylineno, yytext); }
