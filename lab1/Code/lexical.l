@@ -1,5 +1,12 @@
 %{
     #include "syntax.tab.h"
+    int yycolumn = 1;
+    int print_lex = 0;
+    #define YY_USER_ACTION \
+        yylloc.first_line = yylloc.last_line = yylineno; \
+	    yylloc.first_column = yycolumn; \
+	    yylloc.last_column = yycolumn + yyleng - 1; \
+	    yycolumn += yyleng;
 %}
 letter  [A-Za-z]
 digit   [0-9]
@@ -7,41 +14,52 @@ INT     ("+"|"-")?(0|([1-9]{digit}*))
 FLOAT   {INT}"."{digit}+
 ID      ({letter}|_)({letter}|{digit}|_)*
 RELOP   ">"|"<"|">="|"<="|"=="|"!="
-delimeter   [ \t\n\r]
+blank   [ \t\r]
 %option yylineno
 %%
-{RELOP} { printf("RELOP, %s\n", yytext); }
-";"     { printf("SEMI\n"); }
-","     { printf("COMMA\n"); }
-"="     { printf("ASSIGNOP\n"); }
-"+"     { printf("PLUS\n"); }
-"-"     { printf("MINUS\n"); }
-"*"     { printf("STAR\n"); }
-"/"     { printf("DIV\n"); }
-"&&"    { printf("AND\n"); }
-"||"    { printf("OR\n"); }
-"."     { printf("DOT\n"); }
-"!"     { printf("NOT\n"); }
-"("     { printf("LP\n"); }
-")"     { printf("RP\n"); }
-"["     { printf("LB\n"); }
-"]"     { printf("RB\n"); }
-"{"     { printf("LC\n"); }
-"}"     { printf("RC\n"); }
-{INT}   { printf("int, %d\n", atoi(yytext)); }
-{FLOAT} { printf("float, %f\n", atof(yytext)); }
-"if"    { printf("IF\n"); }
-"else"  { printf("ELSE\n"); }
-"while" { printf("WHILE\n"); }
-"int"|"float"   { printf("TYPE, %s\n", yytext); }
-"struct"    { printf("STRUCT\n"); }
-"return"    { printf("RETURN\n"); }
+{RELOP} { if (print_lex) printf("RELOP, %s\n", yytext); return RELOP; }
+";"     { if (print_lex) printf("SEMI\n"); return SEMI; }
+","     { if (print_lex) printf("COMMA\n"); return COMMA; }
+"="     { if (print_lex) printf("ASSIGNOP\n"); return ASSIGNOP; }
+"+"     { if (print_lex) printf("PLUS\n"); return PLUS; }
+"-"     { if (print_lex) printf("MINUS\n"); return MINUS; }
+"*"     { if (print_lex) printf("STAR\n"); return STAR; }
+"/"     { if (print_lex) printf("DIV\n"); return DIV; }
+"&&"    { if (print_lex) printf("AND\n"); return AND; }
+"||"    { if (print_lex) printf("OR\n"); return OR; }
+"."     { if (print_lex) printf("DOT\n"); return DOT; }
+"!"     { if (print_lex) printf("NOT\n"); return NOT; }
+"("     { if (print_lex) printf("LP\n"); return LP; }
+")"     { if (print_lex) printf("RP\n"); return RP; }
+"["     { if (print_lex) printf("LB\n"); return LB; }
+"]"     { if (print_lex) printf("RB\n"); return RB; }
+"{"     { if (print_lex) printf("LC\n"); return LC; }
+"}"     { if (print_lex) printf("RC\n"); return RC; }
+{INT}   { 
+            if (print_lex) printf("int, %d\n", atoi(yytext)); 
+            yylval.type_int = atoi(yytext);
+            return INT;
+        }
+{FLOAT} { 
+            if (print_lex) printf("float, %f\n", atof(yytext)); 
+            yylval.type_float = atof(yytext);
+            return FLOAT;
+        }
+"if"    { if (print_lex) printf("IF\n"); return IF; }
+"else"  { if (print_lex) printf("ELSE\n"); return ELSE; }
+"while" { if (print_lex) printf("WHILE\n"); return WHILE; }
+"int"|"float"   { if (print_lex) printf("TYPE, %s\n", yytext); 
+                    yylval.type_string = strdup(yytext);
+                    return TYPE; 
+                }
+"struct"    { if (print_lex) printf("STRUCT\n"); return STRUCT; }
+"return"    { if (print_lex) printf("RETURN\n"); return RETURN; }
 "//"    { 
             char c = input();
             while (c != '\n') c = input();
         }
 "/*"    { 
-            printf("block comment start\n"); 
+            if (print_lex) printf("block comment start\n"); 
             char c = input();
             while (1) {
                 if (c == '*') {
@@ -52,7 +70,11 @@ delimeter   [ \t\n\r]
                 c = input();
             }
         }
-{ID}    { printf("id, %s\n", yytext); }
-{delimeter}    { }
+{ID}    { if (print_lex) printf("id, %s\n", yytext);
+            yylval.type_string = strdup(yytext);
+            return ID; 
+        }
+\n      { yycolumn = 1; }
+{blank}    { }
 .       { printf("Error type A at Line %d: Mysterious character \"%s\".\n", yylineno, yytext); }
 %%

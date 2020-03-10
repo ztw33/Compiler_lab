@@ -1,8 +1,10 @@
 #include <stdio.h>
-#include "lex.yy.c"
 
 extern FILE* yyin;
-//extern int yylex (void);
+// extern int yylex (void);
+extern int yydebug;
+extern int yyparse (void);
+extern void yyrestart (FILE *input_file  );
 
 int main(int argc, char** argv) {
     // if (argc > 1) {
@@ -13,6 +15,7 @@ int main(int argc, char** argv) {
     // }
     // while (yylex() != 0);
     // return 0;
+
     if (argc <= 1) 
         return 1;
     FILE* f = fopen(argv[1], "r");
