@@ -10,7 +10,7 @@
 %}
 letter  [A-Za-z]
 digit   [0-9]
-INT     ("+"|"-")?(0|([1-9]{digit}*))
+INT     0|([1-9]{digit}*)
 FLOAT   {INT}"."{digit}+
 ID      ({letter}|_)({letter}|{digit}|_)*
 RELOP   ">"|"<"|">="|"<="|"=="|"!="
@@ -58,8 +58,7 @@ blank   [ \t\r]
             char c = input();
             while (c != '\n') c = input();
         }
-"/*"    { 
-            if (print_lex) printf("block comment start\n"); 
+"/*"    {
             char c = input();
             while (1) {
                 if (c == '*') {

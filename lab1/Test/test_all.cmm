@@ -1,0 +1,58 @@
+//test aa *~\\2iqhn?.   q+_=-<>
+/*
+ * test
+ */
+
+int global1;
+float global2, global3[0];
+
+struct {
+    int t1;
+    int t2;
+} s1, s2;
+
+struct Complex c1;
+
+struct Complex
+{
+    float real, image;
+};
+int;
+float;
+
+int _fun1() { //
+
+}
+
+int main2(int p[1], int p[1][2], struct Complex p[3]) {
+    int t1;
+    int t2;
+    int t3, t4[1] = 1+1;
+
+    e1=e2;
+    {
+        int t5;
+
+        t5=1.0;
+    }
+    return e3;
+    if(e4&&e5)
+        e6||e7;
+    if(e8==e9) {
+        e10*e11;
+    } else {
+        e12*e13;
+    }
+    if(e4)
+        if(e5)
+            e6;
+        else
+            e7;
+    while((-e15))
+        e16[e16];
+    
+    while(!e17){
+        e18=fun2();
+        fun3(s1.real,s1.a, fun4(0.01));
+    }
+}

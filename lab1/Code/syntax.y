@@ -4,7 +4,7 @@
     #include <string.h>
     #include "lex.yy.c"
     void yyerror(const char* s);
-
+    int print_syn = 1;
     /* 
      * Type of the node:
      *  - NonTerm: Non-Terminal, line number should be printed
@@ -140,15 +140,23 @@ Specifier : TYPE {
         }
     ;
 StructSpecifier : STRUCT OptTag LC DefList RC {
-            struct Node* nodeSTRUCT = createNewNode("STRUCT", NonValToken, @1.first_line);           
+            struct Node* nodeSTRUCT = createNewNode("STRUCT", NonValToken, @1.first_line);
             struct Node* nodeLC = createNewNode("LC", NonValToken, @3.first_line);
             struct Node* nodeRC = createNewNode("RC", NonValToken, @5.first_line);
-            nodeSTRUCT->nextSibling = $2;
-            $2->nextSibling = nodeLC;
-            nodeLC->nextSibling = $4;
-            $4->nextSibling = nodeRC;
-            struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);
-            nodeStructSpecifier->firstChild = nodeSTRUCT;
+            if ($2 == NULL) {
+                nodeSTRUCT->nextSibling = nodeLC;
+            } else {
+                nodeSTRUCT->nextSibling = $2;
+                $2->nextSibling = nodeLC;
+            }
+            if ($4 == NULL) {
+                nodeLC->nextSibling = nodeRC;
+            } else {
+                nodeLC->nextSibling = $4;
+                $4->nextSibling = nodeRC;
+            }
+            struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);           
+            nodeStructSpecifier->firstChild = nodeSTRUCT;           
             $$ = nodeStructSpecifier;
         }
     | STRUCT Tag {
@@ -250,9 +258,23 @@ ParamDec : Specifier VarDec {
 CompSt : LC DefList StmtList RC {
             struct Node* nodeLC = createNewNode("LC", NonValToken, @1.first_line);
             struct Node* nodeRC = createNewNode("RC", NonValToken, @4.first_line);
-            nodeLC->nextSibling = $2;
-            $2->nextSibling = $3;
-            $3->nextSibling = nodeRC;
+            if ($2 == NULL) {
+                if ($3 == NULL) {
+                    nodeLC->nextSibling = nodeRC;
+                } else {
+                    nodeLC->nextSibling = $3;
+                    $3->nextSibling = nodeRC;
+                }
+            } else {
+                if ($3 == NULL) {
+                    nodeLC->nextSibling = $2;
+                    $2->nextSibling = nodeRC;
+                } else {
+                    nodeLC->nextSibling = $2;
+                    $2->nextSibling = $3;
+                    $3->nextSibling = nodeRC;
+                }
+            }
             struct Node* nodeCompSt = createNewNode("CompSt", NonTerm, @$.first_line);
             nodeCompSt->firstChild = nodeLC;
             $$ = nodeCompSt;
@@ -372,7 +394,7 @@ Dec : VarDec {
     | VarDec ASSIGNOP Exp {
             struct Node* nodeASSIGNOP = createNewNode("ASSIGNOP", NonValToken, @2.first_line);
             $1->nextSibling = nodeASSIGNOP;
-            nodeASSIGNOP->$3;
+            nodeASSIGNOP->nextSibling = $3;
             struct Node* nodeDec = createNewNode("Dec", NonTerm, @$.first_line);
             nodeDec->firstChild = $1;
             $$ = nodeDec;
