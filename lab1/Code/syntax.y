@@ -2,9 +2,14 @@
 %{
     #include <stdio.h>
     #include <string.h>
+    #include <stdarg.h>
     #include "lex.yy.c"
+
     void yyerror(const char* s);
-    int print_syn = 1;
+
+    int errorNum = 0;
+    int lastErrorLineno = 0;
+
     /* 
      * Type of the node:
      *  - NonTerm: Non-Terminal, line number should be printed
@@ -28,7 +33,11 @@
     struct Node* syntaxTreeRootNode = NULL;
 
     struct Node* createNewNode(char* nodeName, enum NodeType nodeType, int lineNum);
+    void buildRel(struct Node* fatherNode, int childNodeNum, ...);
     void printSyntaxTree(struct Node* rootNode);
+
+    void printError(char errorType, int lineno, char* msg);
+    int isNewError(int errorLineno);
 %}
 
 /* declared types */
@@ -56,6 +65,7 @@
 %type <type_pnode> StmtList Stmt DefList Def DecList Dec Exp Args
 
 /* precedence and associativity */
+%nonassoc error
 %right ASSIGNOP
 %left OR
 %left AND
@@ -73,8 +83,10 @@ Program : ExtDefList {
             struct Node* nodeProgram = createNewNode("Program", NonTerm, @$.first_line);
             nodeProgram->firstChild = $1;
             $$ = nodeProgram;
-            syntaxTreeRootNode = nodeProgram;
-            printSyntaxTree(syntaxTreeRootNode);
+            if (errorNum == 0) {
+                syntaxTreeRootNode = nodeProgram;
+                printSyntaxTree(syntaxTreeRootNode);
+            }
         }
     ;
 ExtDefList : ExtDef ExtDefList {
@@ -108,6 +120,16 @@ ExtDef : Specifier ExtDecList SEMI {
             struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
             nodeExtDef->firstChild = $1;
             $$ = nodeExtDef;
+        }
+    | Specifier error {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Missing \";\"");
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
+                $1->nextSibling = nodeError;
+                struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
+                nodeExtDef->firstChild = $1;
+                $$ = nodeExtDef;
+            }
         }
     ;
 ExtDecList : VarDec {
@@ -231,6 +253,33 @@ FunDec : ID LP VarList RP {
             nodeFunDec->firstChild = nodeID;
             $$ = nodeFunDec;
         }
+    | error LP VarList RP {
+            if (isNewError(@1.first_line)) {
+                printError('A', @1.first_line, "Illegal ID");
+                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
+                nodeError->nextSibling = nodeLP;
+                nodeLP->nextSibling = $3;
+                $3->nextSibling = nodeRP;
+                struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
+                nodeFunDec->firstChild = nodeError;
+                $$ = nodeFunDec;
+            }
+        }
+    | error LP RP {
+            if (isNewError(@1.first_line)) {
+                printError('A', @1.first_line, "Illegal ID");
+                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @3.first_line);
+                nodeError->nextSibling = nodeLP;
+                nodeLP->nextSibling = nodeRP;
+                struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
+                nodeFunDec->firstChild = nodeError;
+                $$ = nodeFunDec;
+            }
+        }
     ;
 VarList : ParamDec COMMA VarList {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
@@ -290,7 +339,8 @@ StmtList : Stmt StmtList {
             $$ = NULL;
         }
     ;
-Stmt : Exp SEMI {
+Stmt : 
+      Exp SEMI {
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @2.first_line);
             $1->nextSibling = nodeSEMI;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
@@ -350,6 +400,25 @@ Stmt : Exp SEMI {
             nodeStmt->firstChild = nodeWHILE;
             $$ = nodeStmt;
         }
+    | Exp error {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Missing \";\"");
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);                
+                buildRel(nodeStmt, 2, $1, nodeError);
+                $$ = nodeStmt;
+            }
+        }
+    | RETURN Exp error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Missing \";\"");
+                struct Node* nodeRETURN = createNewNode("RETURN", NonValToken, @1.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);                
+                buildRel(nodeStmt, 3, nodeRETURN, $2, nodeError);
+                $$ = nodeStmt;
+            }
+        }
     ;
 
 /* Local Definitions */
@@ -370,6 +439,11 @@ Def : Specifier DecList SEMI {
             struct Node* nodeDef = createNewNode("Def", NonTerm, @$.first_line);
             nodeDef->firstChild = $1;
             $$ = nodeDef;
+        }
+    | Specifier error SEMI {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Syntax error in DecList");
+            }
         }
     ;
 DecList : Dec {
@@ -553,6 +627,76 @@ Exp : Exp ASSIGNOP Exp {
             nodeExp->firstChild = nodeFLOAT;
             $$ = nodeExp;
         }
+    | Exp LB error RB {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error between \"[]\"");
+            }
+        }
+    | error RP {
+            if (isNewError(@1.first_line)) {
+                printError('B', @1.first_line, "Missing \"(\"");
+            }
+        }
+    | ID LP Args error {
+            if (isNewError(@4.first_line)) {
+                printError('B', @4.first_line, "Missing \")\"");
+            }
+        }
+    | ID LP error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Missing \")\"");
+            }
+        }
+    | Exp ASSIGNOP error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp AND error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp OR error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp RELOP error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp PLUS error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp MINUS error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp STAR error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | Exp DIV error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+            }
+        }
+    | MINUS error {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Syntax error in Exp");
+            }
+        }
+    | NOT error {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Syntax error in Exp");
+            }
+        }
     ;
 Args : Exp COMMA Args {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
@@ -578,6 +722,29 @@ struct Node* createNewNode(char* nodeName, enum NodeType nodeType, int lineNum) 
     newNode->firstChild = NULL;
     newNode->nextSibling = NULL;
     return newNode;
+}
+
+void buildRel(struct Node* fatherNode, int childNodeNum, ...) {
+    va_list valist;
+    va_start(valist, childNodeNum);
+    struct Node* firstChild = NULL;
+    struct Node* lastChild = NULL;
+    for (int i = 0; i < childNodeNum; i++) {
+        struct Node* curNode = va_arg(valist, struct Node*);
+        if (firstChild == NULL) {
+            if (curNode != NULL) {
+                firstChild = curNode;
+                lastChild = firstChild;
+            }
+        } else {
+            if (curNode != NULL) {
+                lastChild->nextSibling = curNode;
+                lastChild = curNode;
+            }
+        }
+    }
+    va_end(valist);
+    fatherNode->firstChild = firstChild;
 }
 
 void _printSyntaxTree(struct Node* rootNode, int spaceNum) {
@@ -622,4 +789,20 @@ void _printSyntaxTree(struct Node* rootNode, int spaceNum) {
 
 void printSyntaxTree(struct Node* rootNode) {
     _printSyntaxTree(rootNode, 0);
+}
+
+void yyerror(const char* s) { }
+
+void printError(char errorType, int lineno, char* msg) {
+    fprintf(stderr, "\033[31mError type %c at Line %d: %s.\n\033[0m", errorType, lineno, msg);
+}
+
+int isNewError(int errorLineno) {
+    if (lastErrorLineno != errorLineno) {
+        errorNum++;
+        lastErrorLineno = errorLineno;
+        return 1;
+    } else {
+        return 0;
+    }
 }

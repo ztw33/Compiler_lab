@@ -1,12 +1,16 @@
 %{
     #include "syntax.tab.h"
+
     int yycolumn = 1;
-    int print_lex = 0;
     #define YY_USER_ACTION \
         yylloc.first_line = yylloc.last_line = yylineno; \
 	    yylloc.first_column = yycolumn; \
 	    yylloc.last_column = yycolumn + yyleng - 1; \
 	    yycolumn += yyleng;
+    
+    int print_lex = 0;
+    extern void printError(char errorType, int lineno, char* msg);
+    extern int isNewError(int errorLineno);
 %}
 letter  [A-Za-z]
 digit   [0-9]
@@ -69,11 +73,22 @@ blank   [ \t\r]
                 c = input();
             }
         }
+"*/"    {
+            if (isNewError(yylineno)) {
+                printError('A', yylineno, "Unmatched \"*/\"");
+            }
+        }
 {ID}    { if (print_lex) printf("id, %s\n", yytext);
             yylval.type_string = strdup(yytext);
             return ID; 
         }
 \n      { yycolumn = 1; }
 {blank}    { }
-.       { printf("Error type A at Line %d: Mysterious character \"%s\".\n", yylineno, yytext); }
+.       { 
+            if (isNewError(yylineno)) {
+                char msg[32];
+                sprintf(msg, "Mysterious character \"%s\"", yytext);
+                printError('A', yylineno, msg);
+            }
+        }
 %%
