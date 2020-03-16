@@ -69,6 +69,9 @@ blank   [ \t\r]
                     c = input();
                     if (c == '/')
                         break;
+                } else if (c == EOF) {
+                    printError('A', yylineno, "Unmatched \"/*\"");
+                    break;
                 }
                 c = input();
             }

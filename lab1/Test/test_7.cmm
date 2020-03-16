@@ -1,0 +1,86 @@
+struct S11 {
+  int S11_m0_a2_i[2];
+};
+
+struct S12 {
+  int S12_m0_i;
+  int S12_m1_a1_a2_i[1][2];
+  struct S11 S12_m2_a1_S11[1];
+};
+
+int a1_a1_a2_i_G0[1][1][2];
+
+
+
+int i_func_7(struct S11 i_func_7_S11_0, int i_func_7_i_0) {
+  struct S12 S12_L0;
+  S12_L0.S12_m2_a1_S11[0].S11_m0_a2_i[1] = 1209.212280;
+  S12_L0.S12_m2_a1_S11[0].S11_m0_a2_i[0] = 737254302;
+  S12_L0.S12_m1_a1_a2_i[0][1] = -51821.871094;
+  S12_L0.S12_m1_a1_a2_i[0][0] = -0.000000;
+  S12_L0.S12_m0_i = 61565378560.000000;
+  S12_L0.S12_m0_i = (S12_L0.S12_m0_i != S12_L0.S12_m0_i);
+  (S12_L0.S12_m0_i + S12_L0.S12_m0_i) * (!S12_L0.S12_m0_i);
+  (S12_L0.S12_m0_i <= S12_L0.S12_m0_i) - (S12_L0.S12_m0_i + S12_L0.S12_m0_i);
+  i_func_7(S12_L0.S12_m2_a1_S11[-300988288], S12_L0.S12_m0_i) / (-1194266344 * S12_L0.S12_m0_i);
+  (S12_L0.S12_m0_i && S12_L0.S12_m0_i) || (S12_L0.S12_m0_i && 517324216);
+  (S12_L0.S12_m0_i * S12_L0.S12_m0_i) + (S12_L0.S12_m0_i >= S12_L0.S12_m0_i);
+  i_func_7(S12_L0.S12_m2_a1_S11[-450582603], (!S12_L0.S12_m0_i));
+  S12_L0.S12_m0_i < S12_L0.S12_m0_i;
+  S12_L0.S12_m0_i = (S12_L0.S12_m0_i * S12_L0.S12_m0_i);
+  (S12_L0.S12_m0_i + S12_L0.S12_m0_i) - (S12_L0.S12_m0_i == S12_L0.S12_m0_i);
+  return (S12_L0.S12_m0_i = S12_L0.S12_m0_i) || (S12_L0.S12_m0_i >= S12_L0.S12_m0_i);
+}
+
+int i_func_6(struct S12 i_func_6_S12_0, struct S11 i_func_6_S11_0, struct S11 i_func_6_S11_1, int i_func_6_i_0, struct S11 i_func_6_S11_2) {
+  struct S11 a1_S11_L0[1];
+  a1_S11_L0[0].S11_m0_a2_i[1] = 301508026;
+  a1_S11_L0[0].S11_m0_a2_i[0] = -1163313133;
+  i_func_6_S11_0.S11_m0_a2_i[i_func_6_S12_0.S12_m0_i] - (i_func_6_S12_0.S12_m0_i < 1923381362);
+  i_func_6_S12_0.S12_m1_a1_a2_i[(i_func_6_S12_0.S12_m0_i < i_func_6_S12_0.S12_m0_i)][i_func_6(i_func_6_S12_0, i_func_6_S12_0.S12_m2_a1_S11[-622520686], i_func_6_S12_0.S12_m2_a1_S11[i_func_6_S12_0.S12_m0_i], i_func_6_S12_0.S12_m0_i, i_func_6_S12_0.S12_m2_a1_S11[i_func_6_S12_0.S12_m0_i])];
+  i_func_6(i_func_6_S12_0, (a1_S11_L0[(i_func_6_S12_0.S12_m0_i >= i_func_6_S12_0.S12_m0_i)] = (i_func_6_S12_0.S12_m2_a1_S11[(i_func_6_S12_0.S12_m0_i != i_func_6_S12_0.S12_m0_i)] = a1_S11_L0[(!i_func_6_S12_0.S12_m0_i)])), (i_func_6_S12_0.S12_m2_a1_S11[(i_func_6_S12_0.S12_m0_i / i_func_6_S12_0.S12_m0_i)] = (i_func_6_S12_0.S12_m2_a1_S11[(i_func_6_S12_0.S12_m0_i > 0.000000)] = a1_S11_L0[(i_func_6_S11_2.S11_m0_a2_i[i_func_6_S12_0.S12_m0_i] = i_func_6_S12_0.S12_m0_i)])), (i_func_6_S12_0.S12_m0_i - i_func_6_S12_0.S12_m0_i), (i_func_6_S12_0.S12_m2_a1_S11[(i_func_6_S12_0.S12_m0_i == i_func_6_S12_0.S12_m0_i)] = a1_S11_L0[(i_func_6_S12_0.S12_m0_i + i_func_6_S12_0.S12_m0_i)]));
+  (i_func_6_S12_0.S12_m0_i < i_func_6_S12_0.S12_m0_i) * (i_func_6_S12_0.S12_m0_i >= i_func_6_S12_0.S12_m0_i);
+  (-47639028 + i_func_6_S12_0.S12_m0_i) || (i_func_6_S12_0.S12_m0_i / i_func_6_S12_0.S12_m0_i);
+  (i_func_6_S12_0.S12_m0_i || i_func_6_S12_0.S12_m0_i) * (i_func_6_S12_0.S12_m0_i > i_func_6_S12_0.S12_m0_i);
+  (i_func_6_S12_0.S12_m0_i <= i_func_6_S12_0.S12_m0_i) != (i_func_6_S12_0.S12_m0_i - 2033415428);
+  (i_func_6_S12_0.S12_m0_i = i_func_6_S12_0.S12_m0_i) == (i_func_6_S12_0.S12_m0_i - i_func_6_S12_0.S12_m0_i);
+  return (i_func_6_S12_0.S12_m0_i > i_func_6_S12_0.S12_m0_i) && (i_func_6_S12_0.S12_m0_i != i_func_6_S12_0.S12_m0_i);
+}
+
+int top_caller() {
+  int a2_i_L0[2];
+  struct S11 a1_S11_L1[1];
+  struct S12 S12_L1;
+  struct S11 S11_L0;
+  a2_i_L0[1] = -748304882;
+  a2_i_L0[0] = 0.000000;
+  a1_S11_L1[0].S11_m0_a2_i[1] = -1323311172295852032.000000;
+  a1_S11_L1[0].S11_m0_a2_i[0] = 4508830288573654418680124014592.000000;
+  S12_L1.S12_m2_a1_S11[0].S11_m0_a2_i[1] = -1813549636;
+  S12_L1.S12_m2_a1_S11[0].S11_m0_a2_i[0] = -521607736;
+  S12_L1.S12_m1_a1_a2_i[0][1] = -320831888993272350060168835093233664.000000;
+  S12_L1.S12_m1_a1_a2_i[0][0] = -220303346;
+  S12_L1.S12_m0_i = 803227089;
+  S11_L0.S11_m0_a2_i[1] = 0.000003 == -1897034733;
+  S11_L0.S11_m0_a2_i[0] = -1413128231 != 868703306514432.000000;
+  a2_i_L0[i_func_7(a1_S11_L1[a2_i_L0[a2_i_L0[S12_L1.S12_m0_i]]], S12_L1.S12_m0_i)];
+  a2_i_L0[(S12_L1.S12_m0_i || S12_L1.S12_m0_i)] = i_func_6(S12_L1, a1_S11_L1[S12_L1.S12_m0_i], S12_L1.S12_m2_a1_S11[1454036814], -734209174, S12_L1.S12_m2_a1_S11[S12_L1.S12_m0_i]);
+  (S12_L1.S12_m0_i >= S12_L1.S12_m0_i) - i_func_6(S12_L1, S12_L1.S12_m2_a1_S11[S12_L1.S12_m0_i], S12_L1.S12_m2_a1_S11[S12_L1.S12_m0_i], S12_L1.S12_m0_i, a1_S11_L1[-1590330824]);
+  (S12_L1.S12_m0_i > S12_L1.S12_m0_i) == (S12_L1.S12_m0_i == S12_L1.S12_m0_i);
+  (-398255788 > S12_L1.S12_m0_i) || (S12_L1.S12_m0_i && 1174775883);
+  !(S12_L1.S12_m0_i < S12_L1.S12_m0_i);
+  (S12_L1.S12_m0_i < S12_L1.S12_m0_i) == (!S12_L1.S12_m0_i);
+  (S12_L1.S12_m0_i >= S12_L1.S12_m0_i) + (S12_L1.S12_m0_i + -1577341765);
+  return (S12_L1.S12_m0_i <= S12_L1.S12_m0_i) || (S12_L1.S12_m0_i == S12_L1.S12_m0_i);
+}
+
+int initialize_global_objects() {
+  a1_a1_a2_i_G0[0][0][1] = 894606248;
+  a1_a1_a2_i_G0[0][0][0] = -131299665 != 0.000000;
+  return 0;
+}
+
+int main() {
+  initialize_global_objects();
+  return 0;
+}

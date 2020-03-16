@@ -1,0 +1,16 @@
+/**
+ * this comment ends. /* ////\\asfdlkajhsldf\\\\<>@#$
+*/
+int main/*a comment is okey here 222*/() {
+    int a = //12;
+    /* a new comment*/
+     3;
+    int b = 0;
+    if (a > /* should still go*/ b) {
+        while(a > b) {
+            b = b + 1 //; this comma is lost!
+        }
+    }
+    return b;
+}
+/* end ?~!

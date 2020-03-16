@@ -1,0 +1,77 @@
+struct S0 {
+  int S0_m0_i;
+  int S0_m1_i;
+};
+
+struct S1 {
+  struct S0 S1_m0_a1_S0[1];
+  int S1_m1_i;
+  int S1_m2_i;
+  int S1_m3_a1_i[1];
+};
+
+struct S2 {
+  int S2_m0_a1_i[1];
+  int S2_m1_i;
+  int S2_m2_a1_a1_i[1][1];
+  int S2_m3_a2_i[2];
+  int S2_m4_i;
+  int S2_m5_i;
+};
+
+int a1_i_G0[1];
+
+
+
+int top_caller() {
+  struct S0 S0_L0;
+  struct S1 S1_L0;
+  S0_L0.S0_m1_i = 508648422;
+  S0_L0.S0_m0_i = 622909084;
+  S1_L0.S1_m3_a1_i[0] = -1666413054 || -1604135367;
+  S1_L0.S1_m2_i = 1109776060 >= 825147892;
+  S1_L0.S1_m1_i = -0.000000 >= 0.050100;
+  S1_L0.S1_m0_a1_S0[0].S0_m1_i = -239606076 * 2117001797;
+  S1_L0.S1_m0_a1_S0[0].S0_m0_i = 0.000000 >= -1296056339;
+  (S0_L0.S0_m0_i * S0_L0.S0_m1_i) < (-1609963105 && 686059695);
+  30380244;
+  a1_i_G0[(S0_L0.S0_m0_i && S0_L0.S0_m0_i)];
+  -50651140096.000000;
+  return (S0_L0.S0_m0_i && -1609421560) * (S0_L0.S0_m1_i && S0_L0.S0_m0_i);
+}
+
+int i_func_1() {
+  struct S2 S2_L0;
+  struct S0 a1_S0_L0[1];
+  S2_L0.S2_m5_i = 556036443;
+  S2_L0.S2_m4_i = 0.000000;
+  S2_L0.S2_m3_a2_i[1] = 0.000000;
+  S2_L0.S2_m3_a2_i[0] = 1273858932;
+  S2_L0.S2_m2_a1_a1_i[0][0] = -0.000000;
+  S2_L0.S2_m1_i = 137797097;
+  S2_L0.S2_m0_a1_i[0] = -1785254360;
+  a1_S0_L0[0].S0_m1_i = 76422594 / -981289842;
+  a1_S0_L0[0].S0_m0_i = 1436908257 && 1861981138;
+  (a1_i_G0[S2_L0.S2_m5_i] == S2_L0.S2_m1_i) == (S2_L0.S2_m1_i < S2_L0.S2_m1_i);
+  (S2_L0.S2_m1_i > S2_L0.S2_m5_i) - (!S2_L0.S2_m4_i);
+  return (!S2_L0.S2_m1_i) != (S2_L0.S2_m1_i >= S2_L0.S2_m1_i);
+}
+
+int i_func_0(struct S2 i_func_0_S2_0) {
+  !(i_func_0_S2_0.S2_m1_i < i_func_0_S2_0.S2_m1_i);
+  (i_func_0_S2_0.S2_m1_i == i_func_0_S2_0.S2_m1_i) == i_func_0_S2_0.S2_m0_a1_i[i_func_0_S2_0.S2_m5_i];
+  i_func_0(i_func_0_S2_0) + 1741140755;
+  (i_func_0_S2_0.S2_m1_i - i_func_0_S2_0.S2_m1_i) != (i_func_0_S2_0.S2_m1_i > i_func_0_S2_0.S2_m4_i);
+  (a1_i_G0[1509034572] = i_func_0_S2_0.S2_m1_i) < 797102876;
+  return (625682311 - i_func_0_S2_0.S2_m1_i) - -845135759;
+}
+
+int initialize_global_objects() {
+  a1_i_G0[0] = 36881243 - -883675829;
+  return 0;
+}
+
+int main() {
+  initialize_global_objects();
+  return 0;
+}

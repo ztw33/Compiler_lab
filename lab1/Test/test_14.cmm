@@ -1,0 +1,54 @@
+struct S23 {
+  int S23_m0_i;
+  int S23_m1_a2_i[2];
+  int S23_m2_i;
+  int S23_m3_i;
+  int S23_m4_a1_a2_i[1][2];
+  int S23_m5_i;
+  int S23_m6_i;
+};
+
+int i_G3;
+
+
+
+int top_caller() {
+  struct S23 S23_L0;
+  S23_L0.S23_m6_i = -1229366252;
+  S23_L0.S23_m5_i = -2083546816;
+  S23_L0.S23_m4_a1_a2_i[0][1] = 1443947903;
+  S23_L0.S23_m4_a1_a2_i[0][0] = -66130078507483485896720571326005248.000000;
+  S23_L0.S23_m3_i = 1399870974;
+  S23_L0.S23_m2_i = 7339641886989700035243678548099072.000000;
+  S23_L0.S23_m1_a2_i[1] = 1277256280;
+  S23_L0.S23_m1_a2_i[0] = 1971272412;
+  S23_L0.S23_m0_i = 1835617793;
+  top_caller() + (S23_L0.S23_m6_i / S23_L0.S23_m3_i);
+  (S23_L0.S23_m5_i - S23_L0.S23_m5_i) > (!0.000000);
+  (S23_L0.S23_m6_i > S23_L0.S23_m2_i) + -1267936822;
+  (S23_L0.S23_m5_i - S23_L0.S23_m0_i) <= (S23_L0.S23_m0_i || S23_L0.S23_m0_i);
+  i_func_20(S23_L0, S23_L0.S23_m5_i, (S23_L0 = (S23_L0 = S23_L0)), (S23_L0 = (S23_L0 = S23_L0)), (S23_L0 = (S23_L0 = (S23_L0 = (S23_L0 = (S23_L0 = (S23_L0 = (S23_L0 = S23_L0))))))));
+  (-183929568.000000 > S23_L0.S23_m0_i) / (S23_L0.S23_m3_i >= S23_L0.S23_m3_i);
+  (S23_L0.S23_m0_i = S23_L0.S23_m5_i) - (S23_L0.S23_m2_i == S23_L0.S23_m2_i);
+  return (S23_L0.S23_m6_i + S23_L0.S23_m3_i) >= -0.000001;
+}
+
+int i_func_20(struct S23 i_func_20_S23_0, int i_func_20_i_0, struct S23 i_func_20_S23_1, struct S23 i_func_20_S23_2, struct S23 i_func_20_S23_3) {
+  (i_func_20_S23_0.S23_m3_i - i_func_20_S23_0.S23_m2_i) + (i_func_20_S23_0.S23_m3_i && i_func_20_S23_3.S23_m6_i);
+  i_func_20_S23_1.S23_m5_i;
+  (i_func_20_S23_2.S23_m6_i - i_func_20_S23_0.S23_m2_i) / (-1770705936 * i_func_20_S23_2.S23_m2_i);
+  -657638084570000099547021312.000000 != (i_func_20_S23_3.S23_m0_i / i_func_20_S23_0.S23_m0_i);
+  (i_func_20_S23_1.S23_m0_i && i_func_20_S23_3.S23_m0_i) == 0.000000;
+  i_func_20_S23_3.S23_m4_a1_a2_i[(i_func_20_S23_1.S23_m6_i < i_func_20_S23_0.S23_m6_i)][(i_func_20_S23_3.S23_m0_i * -244543081)];
+  return i_func_20_S23_3.S23_m5_i = (i_func_20_S23_3.S23_m5_i + i_func_20_S23_2.S23_m6_i);
+}
+
+int initialize_global_objects() {
+  i_G3 = -1551383966 != 1288434368;
+  return 0;
+}
+
+int main() {
+  initialize_global_objects();
+  return 0;
+}

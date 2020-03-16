@@ -81,7 +81,7 @@
 /* High-level Definitions */
 Program : ExtDefList {
             struct Node* nodeProgram = createNewNode("Program", NonTerm, @$.first_line);
-            nodeProgram->firstChild = $1;
+            buildRel(nodeProgram, 1, $1);
             $$ = nodeProgram;
             if (errorNum == 0) {
                 syntaxTreeRootNode = nodeProgram;
@@ -90,9 +90,8 @@ Program : ExtDefList {
         }
     ;
 ExtDefList : ExtDef ExtDefList {
-            $1->nextSibling = $2;
             struct Node* nodeExtDefList = createNewNode("ExtDefList", NonTerm, @$.first_line);
-            nodeExtDefList->firstChild = $1;
+            buildRel(nodeExtDefList, 2, $1, $2);
             $$ = nodeExtDefList;
         }
     | /* empty */ {
@@ -101,48 +100,40 @@ ExtDefList : ExtDef ExtDefList {
     ;
 ExtDef : Specifier ExtDecList SEMI {
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @3.first_line);
-            $1->nextSibling = $2;
-            $2->nextSibling = nodeSEMI;
             struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
-            nodeExtDef->firstChild = $1;
+            buildRel(nodeExtDef, 3, $1, $2, nodeSEMI);
             $$ = nodeExtDef;
         }
     | Specifier SEMI {
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @2.first_line);
-            $1->nextSibling = nodeSEMI;
             struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
-            nodeExtDef->firstChild = $1;
+            buildRel(nodeExtDef, 2, $1, nodeSEMI);
             $$ = nodeExtDef;
         }
     | Specifier FunDec CompSt {
-            $1->nextSibling = $2;
-            $2->nextSibling = $3;
             struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
-            nodeExtDef->firstChild = $1;
+            buildRel(nodeExtDef, 3, $1, $2, $3);
             $$ = nodeExtDef;
         }
     | Specifier error {
             if (isNewError(@2.first_line)) {
                 printError('B', @2.first_line, "Missing \";\"");
                 struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
-                $1->nextSibling = nodeError;
                 struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
-                nodeExtDef->firstChild = $1;
+                buildRel(nodeExtDef, 2, $1, nodeError);
                 $$ = nodeExtDef;
             }
         }
     ;
 ExtDecList : VarDec {
             struct Node* nodeExtDecList = createNewNode("ExtDecList", NonTerm, @$.first_line);
-            nodeExtDecList->firstChild = $1;
+            buildRel(nodeExtDecList, 1, $1);
             $$ = nodeExtDecList;
         }
     | VarDec COMMA ExtDecList {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
-            $1->nextSibling = nodeCOMMA;
-            nodeCOMMA->nextSibling = $3;
             struct Node* nodeExtDecList = createNewNode("ExtDecList", NonTerm, @$.first_line);
-            nodeExtDecList->firstChild = $1;
+            buildRel(nodeExtDecList, 3, $1, nodeCOMMA, $3);
             $$ = nodeExtDecList;
         }
     ;
@@ -152,12 +143,12 @@ Specifier : TYPE {
             struct Node* nodeTYPE = createNewNode("TYPE", ValToken, @1.first_line);
             nodeTYPE->stringVal = $1;
             struct Node* nodeSpecifier = createNewNode("Specifier", NonTerm, @$.first_line);
-            nodeSpecifier->firstChild = nodeTYPE;
+            buildRel(nodeSpecifier, 1, nodeTYPE);
             $$ = nodeSpecifier;
         }
     | StructSpecifier {
             struct Node* nodeSpecifier = createNewNode("Specifier", NonTerm, @$.first_line);
-            nodeSpecifier->firstChild = $1;
+            buildRel(nodeSpecifier, 1, $1);
             $$ = nodeSpecifier;
         }
     ;
@@ -165,27 +156,14 @@ StructSpecifier : STRUCT OptTag LC DefList RC {
             struct Node* nodeSTRUCT = createNewNode("STRUCT", NonValToken, @1.first_line);
             struct Node* nodeLC = createNewNode("LC", NonValToken, @3.first_line);
             struct Node* nodeRC = createNewNode("RC", NonValToken, @5.first_line);
-            if ($2 == NULL) {
-                nodeSTRUCT->nextSibling = nodeLC;
-            } else {
-                nodeSTRUCT->nextSibling = $2;
-                $2->nextSibling = nodeLC;
-            }
-            if ($4 == NULL) {
-                nodeLC->nextSibling = nodeRC;
-            } else {
-                nodeLC->nextSibling = $4;
-                $4->nextSibling = nodeRC;
-            }
             struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);           
-            nodeStructSpecifier->firstChild = nodeSTRUCT;           
+            buildRel(nodeStructSpecifier, 5, nodeSTRUCT, $2, nodeLC, $4, nodeRC);          
             $$ = nodeStructSpecifier;
         }
     | STRUCT Tag {
             struct Node* nodeSTRUCT = createNewNode("STRUCT", NonValToken, @1.first_line);           
-            nodeSTRUCT->nextSibling = $2;
             struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);
-            nodeStructSpecifier->firstChild = nodeSTRUCT;
+            buildRel(nodeStructSpecifier, 2, nodeSTRUCT, $2);
             $$ = nodeStructSpecifier;
         }
     ;
@@ -193,7 +171,7 @@ OptTag : ID {
             struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
             nodeID->stringVal = $1;
             struct Node* nodeOptTag = createNewNode("OptTag", NonTerm, @$.first_line);
-            nodeOptTag->firstChild = nodeID;
+            buildRel(nodeOptTag, 1, nodeID);
             $$ = nodeOptTag;
         }
     | /* empty */ {
@@ -204,7 +182,7 @@ Tag : ID {
             struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
             nodeID->stringVal = $1;
             struct Node* nodeTag = createNewNode("Tag", NonTerm, @$.first_line);
-            nodeTag->firstChild = nodeID;
+            buildRel(nodeTag, 1, nodeID);
             $$ = nodeTag;
         }
     ;
@@ -222,11 +200,8 @@ VarDec : ID {
             struct Node* nodeINT = createNewNode("INT", ValToken, @3.first_line);
             nodeINT->intVal = $3;
             struct Node* nodeRB = createNewNode("RB", NonValToken, @4.first_line);
-            $1->nextSibling = nodeLB;
-            nodeLB->nextSibling = nodeINT;
-            nodeINT->nextSibling = nodeRB;
             struct Node* nodeVarDec = createNewNode("VarDec", NonTerm, @$.first_line);
-            nodeVarDec->firstChild = $1;
+            buildRel(nodeVarDec, 4, $1, nodeLB, nodeINT, nodeRB);
             $$ = nodeVarDec;
         }
     ;
@@ -235,11 +210,8 @@ FunDec : ID LP VarList RP {
             nodeID->stringVal = $1;
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
-            nodeID->nextSibling = nodeLP;
-            nodeLP->nextSibling = $3;
-            $3->nextSibling = nodeRP;
             struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
-            nodeFunDec->firstChild = nodeID;
+            buildRel(nodeFunDec, 4, nodeID, nodeLP, $3, nodeRP);
             $$ = nodeFunDec;
         }
     | ID LP RP {
@@ -247,10 +219,8 @@ FunDec : ID LP VarList RP {
             nodeID->stringVal = $1;
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @3.first_line);
-            nodeID->nextSibling = nodeLP;
-            nodeLP->nextSibling = nodeRP;
             struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
-            nodeFunDec->firstChild = nodeID;
+            buildRel(nodeFunDec, 3, nodeID, nodeLP, nodeRP);
             $$ = nodeFunDec;
         }
     | error LP VarList RP {
@@ -259,11 +229,8 @@ FunDec : ID LP VarList RP {
                 struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
                 struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
                 struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
-                nodeError->nextSibling = nodeLP;
-                nodeLP->nextSibling = $3;
-                $3->nextSibling = nodeRP;
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
-                nodeFunDec->firstChild = nodeError;
+                buildRel(nodeFunDec, 4, nodeError, nodeLP, $3, nodeRP);
                 $$ = nodeFunDec;
             }
         }
@@ -283,10 +250,8 @@ FunDec : ID LP VarList RP {
     ;
 VarList : ParamDec COMMA VarList {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
-            $1->nextSibling = nodeCOMMA;
-            nodeCOMMA->nextSibling = $3;
             struct Node* nodeVarList = createNewNode("VarList", NonTerm, @$.first_line);
-            nodeVarList->firstChild = $1;
+            buildRel(nodeVarList, 3, $1, nodeCOMMA, $3);
             $$ = nodeVarList;
         }
     | ParamDec {
@@ -296,9 +261,8 @@ VarList : ParamDec COMMA VarList {
         }
     ;
 ParamDec : Specifier VarDec {
-            $1->nextSibling = $2;
             struct Node* nodeParamDec = createNewNode("ParamDec", NonTerm, @$.first_line);
-            nodeParamDec->firstChild = $1;
+            buildRel(nodeParamDec, 2, $1, $2);
             $$ = nodeParamDec;
         }
     ;
@@ -307,44 +271,24 @@ ParamDec : Specifier VarDec {
 CompSt : LC DefList StmtList RC {
             struct Node* nodeLC = createNewNode("LC", NonValToken, @1.first_line);
             struct Node* nodeRC = createNewNode("RC", NonValToken, @4.first_line);
-            if ($2 == NULL) {
-                if ($3 == NULL) {
-                    nodeLC->nextSibling = nodeRC;
-                } else {
-                    nodeLC->nextSibling = $3;
-                    $3->nextSibling = nodeRC;
-                }
-            } else {
-                if ($3 == NULL) {
-                    nodeLC->nextSibling = $2;
-                    $2->nextSibling = nodeRC;
-                } else {
-                    nodeLC->nextSibling = $2;
-                    $2->nextSibling = $3;
-                    $3->nextSibling = nodeRC;
-                }
-            }
             struct Node* nodeCompSt = createNewNode("CompSt", NonTerm, @$.first_line);
-            nodeCompSt->firstChild = nodeLC;
+            buildRel(nodeCompSt, 4, nodeLC, $2, $3, nodeRC);
             $$ = nodeCompSt;
         }
     ;
 StmtList : Stmt StmtList {
-            $1->nextSibling = $2;
             struct Node* nodeStmtList = createNewNode("StmtList", NonTerm, @$.first_line);
-            nodeStmtList->firstChild = $1;
+            buildRel(nodeStmtList, 2, $1, $2);
             $$ = nodeStmtList;
         }
     | /* empty */ {
             $$ = NULL;
         }
     ;
-Stmt : 
-      Exp SEMI {
+Stmt : Exp SEMI {
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @2.first_line);
-            $1->nextSibling = nodeSEMI;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
-            nodeStmt->firstChild = $1;
+            buildRel(nodeStmt, 2, $1, nodeSEMI);
             $$ = nodeStmt;
         }
     | CompSt {
@@ -355,22 +299,16 @@ Stmt :
     | RETURN Exp SEMI {
             struct Node* nodeRETURN = createNewNode("RETURN", NonValToken, @1.first_line);
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @3.first_line);
-            nodeRETURN->nextSibling = $2;
-            $2->nextSibling = nodeSEMI;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
-            nodeStmt->firstChild = nodeRETURN;
+            buildRel(nodeStmt, 3, nodeRETURN, $2, nodeSEMI);
             $$ = nodeStmt;
         }
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
             struct Node* nodeIF = createNewNode("IF", NonValToken, @1.first_line);
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
-            nodeIF->nextSibling = nodeLP;
-            nodeLP->nextSibling = $3;
-            $3->nextSibling = nodeRP;
-            nodeRP->nextSibling = $5;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
-            nodeStmt->firstChild = nodeIF;
+            buildRel(nodeStmt, 5, nodeIF, nodeLP, $3, nodeRP, $5);
             $$ = nodeStmt;
         }
     | IF LP Exp RP Stmt ELSE Stmt {
@@ -378,26 +316,16 @@ Stmt :
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
             struct Node* nodeELSE = createNewNode("ELSE", NonValToken, @6.first_line);
-            nodeIF->nextSibling = nodeLP;
-            nodeLP->nextSibling = $3;
-            $3->nextSibling = nodeRP;
-            nodeRP->nextSibling = $5;
-            $5->nextSibling = nodeELSE;
-            nodeELSE->nextSibling = $7;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
-            nodeStmt->firstChild = nodeIF;
+            buildRel(nodeStmt, 7, nodeIF, nodeLP, $3, nodeRP, $5, nodeELSE, $7);
             $$ = nodeStmt;
         }
     | WHILE LP Exp RP Stmt {
             struct Node* nodeWHILE = createNewNode("WHILE", NonValToken, @1.first_line);
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
-            nodeWHILE->nextSibling = nodeLP;
-            nodeLP->nextSibling = $3;
-            $3->nextSibling = nodeRP;
-            nodeRP->nextSibling = $5;
             struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
-            nodeStmt->firstChild = nodeWHILE;
+            buildRel(nodeStmt, 5, nodeWHILE, nodeLP, $3, nodeRP, $5);
             $$ = nodeStmt;
         }
     | Exp error {
@@ -423,9 +351,8 @@ Stmt :
 
 /* Local Definitions */
 DefList : Def DefList {
-            $1->nextSibling = $2;
             struct Node* nodeDefList = createNewNode("DefList", NonTerm, @$.first_line);
-            nodeDefList->firstChild = $1;
+            buildRel(nodeDefList, 2, $1, $2);
             $$ = nodeDefList;
         }
     | /* empty */ {
@@ -434,15 +361,18 @@ DefList : Def DefList {
     ;
 Def : Specifier DecList SEMI {
             struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @3.first_line);
-            $1->nextSibling = $2;
-            $2->nextSibling = nodeSEMI;
             struct Node* nodeDef = createNewNode("Def", NonTerm, @$.first_line);
-            nodeDef->firstChild = $1;
+            buildRel(nodeDef, 3, $1, $2, nodeSEMI);
             $$ = nodeDef;
         }
     | Specifier error SEMI {
             if (isNewError(@2.first_line)) {
                 printError('B', @2.first_line, "Syntax error in DecList");
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
+                struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @3.first_line);
+                struct Node* nodeDef = createNewNode("Def", NonTerm, @$.first_line);
+                buildRel(nodeDef, 3, $1, nodeError, nodeSEMI);
+                $$ = nodeDef;
             }
         }
     ;
@@ -453,10 +383,8 @@ DecList : Dec {
         }
     | Dec COMMA DecList {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
-            $1->nextSibling = nodeCOMMA;
-            nodeCOMMA->nextSibling = $3;
             struct Node* nodeDecList = createNewNode("DecList", NonTerm, @$.first_line);
-            nodeDecList->firstChild = $1;
+            buildRel(nodeDecList, 3, $1, nodeCOMMA, $3);
             $$ = nodeDecList;
         }
     ;
@@ -467,100 +395,88 @@ Dec : VarDec {
         }
     | VarDec ASSIGNOP Exp {
             struct Node* nodeASSIGNOP = createNewNode("ASSIGNOP", NonValToken, @2.first_line);
-            $1->nextSibling = nodeASSIGNOP;
-            nodeASSIGNOP->nextSibling = $3;
             struct Node* nodeDec = createNewNode("Dec", NonTerm, @$.first_line);
-            nodeDec->firstChild = $1;
+            buildRel(nodeDec, 3, $1, nodeASSIGNOP, $3);
             $$ = nodeDec;
+        }
+    | VarDec ASSIGNOP error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeASSIGNOP = createNewNode("ASSIGNOP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeDec = createNewNode("Dec", NonTerm, @$.first_line);
+                buildRel(nodeDec, 3, $1, nodeASSIGNOP, nodeError);
+                $$ = nodeDec;
+            }
         }
     ;
 
 /* Expressions */
 Exp : Exp ASSIGNOP Exp {
             struct Node* nodeASSIGNOP = createNewNode("ASSIGNOP", NonValToken, @2.first_line);
-            $1->nextSibling = nodeASSIGNOP;
-            nodeASSIGNOP->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeASSIGNOP, $3);
             $$ = nodeExp;
         }
     | Exp AND Exp {
             struct Node* nodeAND = createNewNode("AND", NonValToken, @2.first_line);
-            $1->nextSibling = nodeAND;
-            nodeAND->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeAND, $3);
             $$ = nodeExp;
         }
     | Exp OR Exp {
             struct Node* nodeOR = createNewNode("OR", NonValToken, @2.first_line);
-            $1->nextSibling = nodeOR;
-            nodeOR->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeOR, $3);
             $$ = nodeExp;
         }
     | Exp RELOP Exp {
             struct Node* nodeRELOP = createNewNode("RELOP", NonValToken, @2.first_line);
-            $1->nextSibling = nodeRELOP;
-            nodeRELOP->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeRELOP, $3);
             $$ = nodeExp;
         }
     | Exp PLUS Exp {
             struct Node* nodePLUS = createNewNode("PLUS", NonValToken, @2.first_line);
-            $1->nextSibling = nodePLUS;
-            nodePLUS->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodePLUS, $3);
             $$ = nodeExp;
         }
     | Exp MINUS Exp {
             struct Node* nodeMINUS = createNewNode("MINUS", NonValToken, @2.first_line);
-            $1->nextSibling = nodeMINUS;
-            nodeMINUS->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeMINUS, $3);
             $$ = nodeExp;
         }
     | Exp STAR Exp {
             struct Node* nodeSTAR = createNewNode("STAR", NonValToken, @2.first_line);
-            $1->nextSibling = nodeSTAR;
-            nodeSTAR->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeSTAR, $3);
             $$ = nodeExp;
         }
     | Exp DIV Exp {
             struct Node* nodeDIV = createNewNode("DIV", NonValToken, @2.first_line);
-            $1->nextSibling = nodeDIV;
-            nodeDIV->nextSibling = $3;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeDIV, $3);
             $$ = nodeExp;
         }
     | LP Exp RP {
             struct Node* nodeLP = createNewNode("LP", NonValToken, @1.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @3.first_line);
-            nodeLP->nextSibling = $2;
-            $2->nextSibling = nodeRP;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = nodeLP;
+            buildRel(nodeExp, 3, nodeLP, $2, nodeRP);
             $$ = nodeExp;
         }
     | MINUS Exp {
             struct Node* nodeMINUS = createNewNode("MINUS", NonValToken, @1.first_line);
-            nodeMINUS->nextSibling = $2;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = nodeMINUS;
+            buildRel(nodeExp, 2, nodeMINUS, $2);
             $$ = nodeExp;
         }
     | NOT Exp {
             struct Node* nodeNOT = createNewNode("NOT", NonValToken, @1.first_line);
-            nodeNOT->nextSibling = $2;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = nodeNOT;
+            buildRel(nodeExp, 2, nodeNOT, $2);
             $$ = nodeExp;
         }
     | ID LP Args RP {
@@ -568,11 +484,8 @@ Exp : Exp ASSIGNOP Exp {
             nodeID->stringVal = $1;
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
-            nodeID->nextSibling = nodeLP;
-            nodeLP->nextSibling = $3;
-            $3->nextSibling = nodeRP;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = nodeID;
+            buildRel(nodeExp, 4, nodeID, nodeLP, $3, nodeRP);
             $$ = nodeExp;
         }
     | ID LP RP {
@@ -580,30 +493,23 @@ Exp : Exp ASSIGNOP Exp {
             nodeID->stringVal = $1;
             struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
             struct Node* nodeRP = createNewNode("RP", NonValToken, @3.first_line);
-            nodeID->nextSibling = nodeLP;
-            nodeLP->nextSibling = nodeRP;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = nodeID;
+            buildRel(nodeExp, 3, nodeID, nodeLP, nodeRP);
             $$ = nodeExp;
         }
     | Exp LB Exp RB {
             struct Node* nodeLB = createNewNode("LB", NonValToken, @2.first_line);
             struct Node* nodeRB = createNewNode("RB", NonValToken, @4.first_line);
-            $1->nextSibling = nodeLB;
-            nodeLB->nextSibling = $3;
-            $3->nextSibling = nodeRB;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 4, $1, nodeLB, $3, nodeRB);
             $$ = nodeExp;
         }
     | Exp DOT ID {
             struct Node* nodeDOT = createNewNode("DOT", NonValToken, @2.first_line);
             struct Node* nodeID = createNewNode("ID", ValToken, @3.first_line);
             nodeID->stringVal = $3;
-            $1->nextSibling = nodeDOT;
-            nodeDOT->nextSibling = nodeID;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
-            nodeExp->firstChild = $1;
+            buildRel(nodeExp, 3, $1, nodeDOT, nodeID);
             $$ = nodeExp;
         }
     | ID {
@@ -630,80 +536,163 @@ Exp : Exp ASSIGNOP Exp {
     | Exp LB error RB {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error between \"[]\"");
+                struct Node* nodeLB = createNewNode("LB", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeRB = createNewNode("RB", NonValToken, @4.first_line);
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 4, $1, nodeLB, nodeError, nodeRB);
+                $$ = nodeExp;
             }
         }
     | error RP {
             if (isNewError(@1.first_line)) {
                 printError('B', @1.first_line, "Missing \"(\"");
+                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @2.first_line);
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 2, nodeError, nodeRP);
+                $$ = nodeExp;
             }
         }
     | ID LP Args error {
             if (isNewError(@4.first_line)) {
                 printError('B', @4.first_line, "Missing \")\"");
+                struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
+                nodeID->stringVal = $1;
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @4.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 4, nodeID, nodeLP, $3, nodeError);
+                $$ = nodeExp;
             }
         }
     | ID LP error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Missing \")\"");
+                struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
+                nodeID->stringVal = $1;
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, nodeID, nodeLP, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp ASSIGNOP error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeASSIGNOP = createNewNode("ASSIGNOP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeASSIGNOP, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp AND error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeAND = createNewNode("AND", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeAND, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp OR error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeOR = createNewNode("OR", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeOR, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp RELOP error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeRELOP = createNewNode("RELOP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeRELOP, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp PLUS error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodePLUS = createNewNode("PLUS", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodePLUS, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp MINUS error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeMINUS = createNewNode("MINUS", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeMINUS, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp STAR error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeSTAR = createNewNode("STAR", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeSTAR, nodeError);
+                $$ = nodeExp;
             }
         }
     | Exp DIV error {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeDIV = createNewNode("DIV", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, $1, nodeDIV, nodeError);
+                $$ = nodeExp;
             }
         }
     | MINUS error {
             if (isNewError(@2.first_line)) {
                 printError('B', @2.first_line, "Syntax error in Exp");
+                struct Node* nodeMINUS = createNewNode("MINUS", NonValToken, @1.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 2, nodeMINUS, nodeError);
+                $$ = nodeExp;
             }
         }
     | NOT error {
             if (isNewError(@2.first_line)) {
                 printError('B', @2.first_line, "Syntax error in Exp");
+                struct Node* nodeNOT = createNewNode("NOT", NonValToken, @1.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 2, nodeNOT, nodeError);
+                $$ = nodeExp;
+            }
+        }
+    | LP Exp error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Missing \")\"");
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @1.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
+                struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
+                buildRel(nodeExp, 3, nodeLP, $2, nodeError);
+                $$ = nodeExp;
             }
         }
     ;
 Args : Exp COMMA Args {
             struct Node* nodeCOMMA = createNewNode("COMMA", NonValToken, @2.first_line);
-            $1->nextSibling = nodeCOMMA;
-            nodeCOMMA->nextSibling = $3;
             struct Node* nodeArgs = createNewNode("Args", NonTerm, @$.first_line);
-            nodeArgs->firstChild = $1;
+            buildRel(nodeArgs, 3, $1, nodeCOMMA, $3);
             $$ = nodeArgs;
         }
     | Exp {

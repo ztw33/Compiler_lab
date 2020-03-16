@@ -1,0 +1,51 @@
+int i_G2;
+
+
+
+int top_caller() {
+  (i_G2 == i_G2) != (i_G2 <= i_G2);
+  (i_G2 > i_G2) == (i_G2 > i_G2);
+  (i_G2 / i_G2) - (i_G2 < i_G2);
+  top_caller();
+  -1657840694 + (i_G2 == 7618739819476156416.000000);
+  (i_G2 || i_G2) >= (i_G2 - -2007416492);
+  (i_G2 <= i_G2) <= (1307303624 >= i_G2);
+  !(i_G2 + i_G2);
+  (i_G2 > i_G2) * (i_G2 || 1680251118);
+  !(-610507407 * i_G2);
+  return !(i_G2 - -18515795);
+}
+
+int i_func_15(int i_func_15_i_0, int i_func_15_i_1, int i_func_15_i_2) {
+  (i_func_15_i_0 * i_func_15_i_2) + (-1022629821 < i_func_15_i_1);
+  i_func_15_i_0;
+  (i_G2 || i_func_15_i_1) > i_func_15(i_func_15_i_1, i_func_15_i_0, 1199890373);
+  (i_G2 >= -27034173905782203781652414464.000000) || (664548418637846813074530886483968.000000 <= i_G2);
+  1 / (i_func_15_i_0 - i_func_15_i_1);
+  1171140332 || i_func_15_i_1;
+  (i_func_15_i_1 >= -1614044298) <= (!i_func_15_i_0);
+  (i_G2 / i_G2) + (i_func_15_i_0 == i_func_15_i_0);
+  i_func_15(i_G2, i_func_15_i_2, i_func_15_i_0) >= (i_func_15_i_0 && i_func_15_i_2);
+  return (i_func_15_i_1 - i_G2) && i_func_15(i_func_15_i_0, i_func_15_i_1, i_func_15_i_1);
+}
+
+int i_func_16(int i_func_16_i_0) {
+  !(i_G2 > i_G2);
+  (i_func_16_i_0 != i_func_16_i_0) == (i_func_16_i_0 + 1796825574);
+  (i_func_16_i_0 > i_func_16_i_0) != (i_func_16_i_0 / i_func_16_i_0);
+  (i_func_16_i_0 - i_G2) - (i_func_16_i_0 + i_G2);
+  (i_G2 <= i_G2) - (i_func_16_i_0 + -1699265988);
+  (-0.000513 > i_func_16_i_0) > (i_func_16_i_0 + i_G2);
+  (i_G2 != i_G2) * (1250353298 != i_func_16_i_0);
+  return (i_G2 < i_func_16_i_0) >= i_G2;
+}
+
+int initialize_global_objects() {
+  i_G2 = 989403802 != -581323262;
+  return 0;
+}
+
+int main() {
+  initialize_global_objects();
+  return 0;
+}
