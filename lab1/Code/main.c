@@ -1,9 +1,12 @@
 #include <stdio.h>
 
 extern FILE* yyin;
-// extern int yydebug;
+extern int yydebug;
 extern int yyparse (void);
 extern void yyrestart (FILE *input_file  );
+extern int errorNum;
+extern struct Node* syntaxTreeRootNode;
+extern void printSyntaxTree(struct Node* rootNode);
 
 int main(int argc, char** argv) {
     if (argc <= 1) 
@@ -16,5 +19,8 @@ int main(int argc, char** argv) {
     yyrestart(f);
     // yydebug = 1;
     yyparse();
+    if (errorNum == 0) {
+        printSyntaxTree(syntaxTreeRootNode);
+    }
     return 0;
 }

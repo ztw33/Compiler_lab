@@ -11,7 +11,7 @@ struct Application generateApplication(int gId, float gName,int gDestination) {
 	app.destination = gDestination + gId && (gId || 12);
 	return app;
 }
-/*
+
 int verify(struct Application appp) {
 	if (appp.id == 0) {
 		return 0;
@@ -29,4 +29,3 @@ int main() {
 	float k = 1.2;
 	return verify(generateApplication(a, k, b);
 }
-*/

@@ -72,7 +72,7 @@
 %left RELOP
 %left PLUS MINUS
 %left STAR DIV
-%right NOT // 取负符号怎么与减号区分？
+%right NOT
 %left LP RP LB RB DOT
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
@@ -83,9 +83,15 @@ Program : ExtDefList {
             struct Node* nodeProgram = createNewNode("Program", NonTerm, @$.first_line);
             buildRel(nodeProgram, 1, $1);
             $$ = nodeProgram;
-            if (errorNum == 0) {
-                syntaxTreeRootNode = nodeProgram;
-                printSyntaxTree(syntaxTreeRootNode);
+            syntaxTreeRootNode = nodeProgram;
+        }
+    | ExtDefList error {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Unexpected character");
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
+                struct Node* nodeProgram = createNewNode("Program", NonTerm, @$.first_line);
+                buildRel(nodeProgram, 2, $1, nodeError);
+                $$ = nodeProgram;
             }
         }
     ;
@@ -166,6 +172,17 @@ StructSpecifier : STRUCT OptTag LC DefList RC {
             buildRel(nodeStructSpecifier, 2, nodeSTRUCT, $2);
             $$ = nodeStructSpecifier;
         }
+    | STRUCT OptTag LC DefList error {
+            if (isNewError(@5.first_line)) {
+                printError('B', @5.first_line, "Missing \"}\"");
+                struct Node* nodeSTRUCT = createNewNode("STRUCT", NonValToken, @1.first_line);
+                struct Node* nodeLC = createNewNode("LC", NonValToken, @3.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @5.first_line);
+                struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);           
+                buildRel(nodeStructSpecifier, 5, nodeSTRUCT, $2, nodeLC, $4, nodeError);          
+                $$ = nodeStructSpecifier;
+            }
+        }
     ;
 OptTag : ID {
             struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
@@ -204,6 +221,17 @@ VarDec : ID {
             buildRel(nodeVarDec, 4, $1, nodeLB, nodeINT, nodeRB);
             $$ = nodeVarDec;
         }
+    | VarDec LB error RB {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error between \"[]\"");
+                struct Node* nodeLB = createNewNode("LB", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeRB = createNewNode("RB", NonValToken, @4.first_line);
+                struct Node* nodeVarDec = createNewNode("VarDec", NonTerm, @$.first_line);
+                buildRel(nodeVarDec, 4, $1, nodeLB, nodeError, nodeRB);
+                $$ = nodeVarDec;
+            }
+        }
     ;
 FunDec : ID LP VarList RP {
             struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
@@ -223,27 +251,40 @@ FunDec : ID LP VarList RP {
             buildRel(nodeFunDec, 3, nodeID, nodeLP, nodeRP);
             $$ = nodeFunDec;
         }
-    | error LP VarList RP {
-            if (isNewError(@1.first_line)) {
-                printError('A', @1.first_line, "Illegal ID");
-                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
+    | ID LP error {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Missing \")\"");
+                struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
+                nodeID->stringVal = $1;
                 struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
+                buildRel(nodeFunDec, 3, nodeID, nodeLP, nodeError);
+                $$ = nodeFunDec;
+            } 
+        }
+    | ID LP error RP {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error between ()");
+                struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
+                nodeID->stringVal = $1;
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
                 struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
-                buildRel(nodeFunDec, 4, nodeError, nodeLP, $3, nodeRP);
+                buildRel(nodeFunDec, 4, nodeID, nodeLP, nodeError, nodeRP);
                 $$ = nodeFunDec;
             }
         }
-    | error LP RP {
-            if (isNewError(@1.first_line)) {
-                printError('A', @1.first_line, "Illegal ID");
-                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
-                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+    | ID error RP {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Missing \"(\"");
+                struct Node* nodeID = createNewNode("ID", ValToken, @1.first_line);
+                nodeID->stringVal = $1;
+                struct Node* nodeError = createNewNode("error", NonValToken, @2.first_line);
                 struct Node* nodeRP = createNewNode("RP", NonValToken, @3.first_line);
-                nodeError->nextSibling = nodeLP;
-                nodeLP->nextSibling = nodeRP;
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
-                nodeFunDec->firstChild = nodeError;
+                buildRel(nodeFunDec, 3, nodeID, nodeError, nodeRP);
                 $$ = nodeFunDec;
             }
         }
@@ -274,6 +315,16 @@ CompSt : LC DefList StmtList RC {
             struct Node* nodeCompSt = createNewNode("CompSt", NonTerm, @$.first_line);
             buildRel(nodeCompSt, 4, nodeLC, $2, $3, nodeRC);
             $$ = nodeCompSt;
+        }
+    | error DefList StmtList RC {
+            if (isNewError(@1.first_line)) {
+                printError('B', @1.first_line, "Missing \"{\"");
+                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);
+                struct Node* nodeRC = createNewNode("LC", NonValToken, @4.first_line);
+                struct Node* nodeCompSt = createNewNode("CompSt", NonTerm, @$.first_line);
+                buildRel(nodeCompSt, 4, nodeError, $2, $3, nodeRC);
+                $$ = nodeCompSt;
+            }
         }
     ;
 StmtList : Stmt StmtList {
@@ -344,6 +395,87 @@ Stmt : Exp SEMI {
                 struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);                
                 buildRel(nodeStmt, 3, nodeRETURN, $2, nodeError);
+                $$ = nodeStmt;
+            }
+        }
+    | error SEMI {
+            if (isNewError(@1.first_line)) {
+                printError('B', @1.first_line, "Syntax error in Exp");
+                struct Node* nodeError = createNewNode("error", NonValToken, @1.first_line);                
+                struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @2.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 2, nodeError, nodeSEMI);
+                $$ = nodeStmt;
+            }
+        }
+    | IF LP error RP Stmt %prec LOWER_THAN_ELSE {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeIF = createNewNode("IF", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);                
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 5, nodeIF, nodeLP, nodeError, nodeRP, $5);
+                $$ = nodeStmt;
+            }
+        }
+    | IF LP Exp error Stmt %prec LOWER_THAN_ELSE {
+            if (isNewError(@4.first_line)) {
+                printError('B', @4.first_line, "Missing \")\"");
+                struct Node* nodeIF = createNewNode("IF", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @4.first_line);                
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 5, nodeIF, nodeLP, $3, nodeError, $5);
+                $$ = nodeStmt;
+            }
+        }
+    | IF LP error RP Stmt ELSE Stmt {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeIF = createNewNode("IF", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);                
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
+                struct Node* nodeELSE = createNewNode("ELSE", NonValToken, @6.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 7, nodeIF, nodeLP, nodeError, nodeRP, $5, nodeELSE, $7);
+                $$ = nodeStmt;
+            }
+        }
+    | IF LP Exp error Stmt ELSE Stmt {
+            if (isNewError(@4.first_line)) {
+                printError('B', @4.first_line, "Missing \")\"");
+                struct Node* nodeIF = createNewNode("IF", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @4.first_line);                
+                struct Node* nodeELSE = createNewNode("ELSE", NonValToken, @6.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 7, nodeIF, nodeLP, $3, nodeError, $5, nodeELSE, $7);
+                $$ = nodeStmt;
+            }
+        }
+    | WHILE LP error RP Stmt {
+            if (isNewError(@3.first_line)) {
+                printError('B', @3.first_line, "Syntax error in Exp");
+                struct Node* nodeWHILE = createNewNode("WHILE", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);
+                struct Node* nodeRP = createNewNode("RP", NonValToken, @4.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 5, nodeWHILE, nodeLP, nodeError, nodeRP, $5);
+                $$ = nodeStmt;
+            }
+        }
+    | WHILE LP Exp error Stmt {
+            if (isNewError(@4.first_line)) {
+                printError('B', @4.first_line, "Missing \")\"");
+                struct Node* nodeWHILE = createNewNode("WHILE", NonValToken, @1.first_line);
+                struct Node* nodeLP = createNewNode("LP", NonValToken, @2.first_line);
+                struct Node* nodeError = createNewNode("error", NonValToken, @4.first_line);
+                struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
+                buildRel(nodeStmt, 5, nodeWHILE, nodeLP, $3, nodeError, $5);
                 $$ = nodeStmt;
             }
         }
@@ -783,7 +915,7 @@ void printSyntaxTree(struct Node* rootNode) {
 void yyerror(const char* s) { }
 
 void printError(char errorType, int lineno, char* msg) {
-    fprintf(stderr, "\033[31mError type %c at Line %d: %s.\n\033[0m", errorType, lineno, msg);
+    fprintf(stderr, "\033[31mError type %c\033[0m at \033[31mLine %d\033[0m: %s.\n\033[0m", errorType, lineno, msg);
 }
 
 int isNewError(int errorLineno) {

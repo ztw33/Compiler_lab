@@ -12,11 +12,12 @@
     extern void printError(char errorType, int lineno, char* msg);
     extern int isNewError(int errorLineno);
 %}
+/* 对于ID，先不设置其必须为下划线或者字母开头，识别出来后再去判断 */
 letter  [A-Za-z]
 digit   [0-9]
 INT     0|([1-9]{digit}*)
 FLOAT   {INT}"."{digit}+
-ID      ({letter}|_)({letter}|{digit}|_)*
+ID      ({letter}|{digit}|_)*
 RELOP   ">"|"<"|">="|"<="|"=="|"!="
 blank   [ \t\r]
 %option yylineno
@@ -70,7 +71,9 @@ blank   [ \t\r]
                     if (c == '/')
                         break;
                 } else if (c == EOF) {
-                    printError('A', yylineno, "Unmatched \"/*\"");
+                    if (isNewError(yylineno)) {
+                        printError('A', yylineno, "Unmatched \"/*\"");
+                    }
                     break;
                 }
                 c = input();
@@ -82,6 +85,11 @@ blank   [ \t\r]
             }
         }
 {ID}    { if (print_lex) printf("id, %s\n", yytext);
+            if (yytext[0] >= '0' && yytext[0] <= '9') {
+                if (isNewError(yylineno)) {
+                    printError('A', yylineno, "Illegal ID");
+                }
+            }
             yylval.type_string = strdup(yytext);
             return ID; 
         }
