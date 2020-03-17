@@ -7,6 +7,7 @@ extern void yyrestart (FILE *input_file  );
 extern int errorNum;
 extern struct Node* syntaxTreeRootNode;
 extern void printSyntaxTree(struct Node* rootNode);
+extern void destroySyntaxTree(struct Node* rootNode);
 
 int main(int argc, char** argv) {
     if (argc <= 1) 
@@ -22,5 +23,6 @@ int main(int argc, char** argv) {
     if (errorNum == 0) {
         printSyntaxTree(syntaxTreeRootNode);
     }
+    destroySyntaxTree(syntaxTreeRootNode);
     return 0;
 }

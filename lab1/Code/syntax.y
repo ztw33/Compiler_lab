@@ -92,6 +92,7 @@ Program : ExtDefList {
                 struct Node* nodeProgram = createNewNode("Program", NonTerm, @$.first_line);
                 buildRel(nodeProgram, 2, $1, nodeError);
                 $$ = nodeProgram;
+                syntaxTreeRootNode = nodeProgram;
             }
         }
     ;
@@ -926,4 +927,23 @@ int isNewError(int errorLineno) {
     } else {
         return 0;
     }
+}
+
+void destroySyntaxTree(struct Node* rootNode) {
+    if (rootNode == NULL) {
+        return;
+    }
+    struct Node* curNode = rootNode->firstChild;
+    struct Node* nextNode = NULL;
+    while (curNode != NULL) {
+        nextNode = curNode->nextSibling;
+        destroySyntaxTree(curNode);
+        curNode = nextNode;
+    }
+    if ((strcmp(rootNode->nodeName, "TYPE") == 0) || (strcmp(rootNode->nodeName, "ID") == 0)) {
+        free(rootNode->stringVal);
+        rootNode->stringVal = NULL;
+    }
+    free(rootNode);
+    rootNode = NULL;
 }
