@@ -17,7 +17,7 @@ letter  [A-Za-z]
 digit   [0-9]
 INT     0|([1-9]{digit}*)
 FLOAT   {INT}"."{digit}+
-ID      ({letter}|{digit}|_)*
+ID      ({letter}|{digit}|_)+
 RELOP   ">"|"<"|">="|"<="|"=="|"!="
 blank   [ \t\r]
 %option yylineno
