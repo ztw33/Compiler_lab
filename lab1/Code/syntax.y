@@ -93,6 +93,8 @@ Program : ExtDefList {
                 buildRel(nodeProgram, 2, $1, nodeError);
                 $$ = nodeProgram;
                 syntaxTreeRootNode = nodeProgram;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -129,6 +131,8 @@ ExtDef : Specifier ExtDecList SEMI {
                 struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
                 buildRel(nodeExtDef, 2, $1, nodeError);
                 $$ = nodeExtDef;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -182,6 +186,8 @@ StructSpecifier : STRUCT OptTag LC DefList RC {
                 struct Node* nodeStructSpecifier = createNewNode("StructSpecifier", NonTerm, @$.first_line);           
                 buildRel(nodeStructSpecifier, 5, nodeSTRUCT, $2, nodeLC, $4, nodeError);          
                 $$ = nodeStructSpecifier;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -231,6 +237,8 @@ VarDec : ID {
                 struct Node* nodeVarDec = createNewNode("VarDec", NonTerm, @$.first_line);
                 buildRel(nodeVarDec, 4, $1, nodeLB, nodeError, nodeRB);
                 $$ = nodeVarDec;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -262,6 +270,8 @@ FunDec : ID LP VarList RP {
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
                 buildRel(nodeFunDec, 3, nodeID, nodeLP, nodeError);
                 $$ = nodeFunDec;
+            } else {
+            	$$ = NULL;
             } 
         }
     | ID LP error RP {
@@ -275,6 +285,8 @@ FunDec : ID LP VarList RP {
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
                 buildRel(nodeFunDec, 4, nodeID, nodeLP, nodeError, nodeRP);
                 $$ = nodeFunDec;
+            } else {
+            	$$ = NULL;
             }
         }
     | ID error RP {
@@ -287,6 +299,8 @@ FunDec : ID LP VarList RP {
                 struct Node* nodeFunDec = createNewNode("FunDec", NonTerm, @$.first_line);
                 buildRel(nodeFunDec, 3, nodeID, nodeError, nodeRP);
                 $$ = nodeFunDec;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -325,6 +339,8 @@ CompSt : LC DefList StmtList RC {
                 struct Node* nodeCompSt = createNewNode("CompSt", NonTerm, @$.first_line);
                 buildRel(nodeCompSt, 4, nodeError, $2, $3, nodeRC);
                 $$ = nodeCompSt;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -387,6 +403,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);                
                 buildRel(nodeStmt, 2, $1, nodeError);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | RETURN Exp error {
@@ -397,6 +415,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);                
                 buildRel(nodeStmt, 3, nodeRETURN, $2, nodeError);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | error SEMI {
@@ -407,6 +427,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 2, nodeError, nodeSEMI);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | IF LP error RP Stmt %prec LOWER_THAN_ELSE {
@@ -419,6 +441,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 5, nodeIF, nodeLP, nodeError, nodeRP, $5);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | IF LP Exp error Stmt %prec LOWER_THAN_ELSE {
@@ -430,6 +454,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 5, nodeIF, nodeLP, $3, nodeError, $5);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | IF LP error RP Stmt ELSE Stmt {
@@ -443,6 +469,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 7, nodeIF, nodeLP, nodeError, nodeRP, $5, nodeELSE, $7);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | IF LP Exp error Stmt ELSE Stmt {
@@ -455,6 +483,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 7, nodeIF, nodeLP, $3, nodeError, $5, nodeELSE, $7);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | WHILE LP error RP Stmt {
@@ -467,6 +497,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 5, nodeWHILE, nodeLP, nodeError, nodeRP, $5);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     | WHILE LP Exp error Stmt {
@@ -478,6 +510,8 @@ Stmt : Exp SEMI {
                 struct Node* nodeStmt = createNewNode("Stmt", NonTerm, @$.first_line);
                 buildRel(nodeStmt, 5, nodeWHILE, nodeLP, $3, nodeError, $5);
                 $$ = nodeStmt;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -506,6 +540,8 @@ Def : Specifier DecList SEMI {
                 struct Node* nodeDef = createNewNode("Def", NonTerm, @$.first_line);
                 buildRel(nodeDef, 3, $1, nodeError, nodeSEMI);
                 $$ = nodeDef;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -540,6 +576,8 @@ Dec : VarDec {
                 struct Node* nodeDec = createNewNode("Dec", NonTerm, @$.first_line);
                 buildRel(nodeDec, 3, $1, nodeASSIGNOP, nodeError);
                 $$ = nodeDec;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -675,6 +713,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 4, $1, nodeLB, nodeError, nodeRB);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | error RP {
@@ -685,6 +725,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 2, nodeError, nodeRP);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | ID LP Args error {
@@ -697,6 +739,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 4, nodeID, nodeLP, $3, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | ID LP error {
@@ -709,6 +753,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, nodeID, nodeLP, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp ASSIGNOP error {
@@ -719,6 +765,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeASSIGNOP, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp AND error {
@@ -729,6 +777,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeAND, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp OR error {
@@ -739,6 +789,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeOR, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp RELOP error {
@@ -749,6 +801,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeRELOP, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp PLUS error {
@@ -759,6 +813,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodePLUS, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp MINUS error {
@@ -769,6 +825,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeMINUS, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp STAR error {
@@ -779,6 +837,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeSTAR, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | Exp DIV error {
@@ -789,6 +849,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeDIV, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | MINUS error {
@@ -799,6 +861,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 2, nodeMINUS, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | NOT error {
@@ -809,6 +873,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 2, nodeNOT, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     | LP Exp error {
@@ -819,6 +885,8 @@ Exp : Exp ASSIGNOP Exp {
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, nodeLP, $2, nodeError);
                 $$ = nodeExp;
+            } else {
+            	$$ = NULL;
             }
         }
     ;
@@ -916,7 +984,7 @@ void printSyntaxTree(struct Node* rootNode) {
 void yyerror(const char* s) { }
 
 void printError(char errorType, int lineno, char* msg) {
-    fprintf(stderr, "\033[31mError type %c\033[0m at \033[31mLine %d\033[0m: %s.\n\033[0m", errorType, lineno, msg);
+    fprintf(stderr, "Error type %c at Line %d: %s.\n", errorType, lineno, msg);
 }
 
 int isNewError(int errorLineno) {
