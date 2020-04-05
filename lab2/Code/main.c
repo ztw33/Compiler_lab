@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "semantic.h"
 
 extern FILE* yyin;
@@ -7,8 +6,6 @@ extern int yyparse (void);
 extern void yyrestart (FILE *input_file  );
 extern int errorNum;
 extern struct Node* syntaxTreeRootNode;
-extern void printSyntaxTree(struct Node* rootNode);
-extern void destroySyntaxTree(struct Node* rootNode);
 
 int main(int argc, char** argv) {
     if (argc <= 1) 
