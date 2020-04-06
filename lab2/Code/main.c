@@ -1,3 +1,4 @@
+#include "SyntaxTree.h"
 #include "semantic.h"
 
 extern FILE* yyin;

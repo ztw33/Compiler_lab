@@ -1,3 +1,6 @@
+#ifndef __SYNTAXTREE__
+#define __SYNTAXTREE__
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,3 +30,5 @@ struct Node* createNewNode(char* nodeName, enum NodeType nodeType, int lineNum);
 void buildRel(struct Node* fatherNode, int childNodeNum, ...);
 void printSyntaxTree(struct Node* rootNode);
 void destroySyntaxTree(struct Node* rootNode);
+
+#endif
