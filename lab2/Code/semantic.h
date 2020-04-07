@@ -5,9 +5,13 @@
 #include "Symbol.h"
 #include "HashSet.h"
 
+// 全局变量
 HashSet symbolTable;
 int lastErrorLineno;
-
+Type typeInt;
+Type typeFloat;
+#define TYPE_INT &typeInt
+#define TYPE_FLOAT &typeFloat
 
 typedef struct Node Node;
 
@@ -27,8 +31,11 @@ SymbolList* analyseDecList(const Node* DecList, SymbolKind kind, Type* type);
 Symbol* analyseDec(const Node* Dec, SymbolKind kind, Type* type);
 Symbol* analyseVarDec(const Node* VarDec, SymbolKind kind, Type* type);
 Type* analyseExp(const Node* Exp);
-void analyseStmtList(const Node* StmtList);
-void analyseStmt(const Node* Stmt);
+void analyseStmtList(const Node* StmtList, Symbol* func);
+void analyseStmt(const Node* Stmt, Symbol* func);
+Param* analyseArgs(const Node* Args);
+Param* analyseVarList(const Node* VarList);
+Param* analyseParamDec(const Node* ParamDec);
 
 bool equalString(char* s1, char* s2);
 

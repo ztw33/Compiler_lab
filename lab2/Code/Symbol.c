@@ -20,3 +20,16 @@ Symbol* createSymbol(char* name, SymbolKind kind) {
         return NULL;
     }
 }
+
+void printType(Type* type) {
+    char *k[] = {"BASIC", "ARRAY", "STRUCTURE"};
+    printf("kind: %s\n", k[type->kind]);
+    if (type->kind == BASIC) {
+        char *b[] = {"INT", "FLOAT"};
+        printf("basic: %s\n", b[type->basic]);
+    } else if (type->kind == ARRAY) {
+
+    } else {
+
+    }
+}

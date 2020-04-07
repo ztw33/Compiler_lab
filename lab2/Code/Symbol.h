@@ -39,7 +39,6 @@ struct Symbol_ {
 };
 
 struct Param_ {
-    char* name; // 函数参数的名字
     Type* type; // 参数的类型
     Param* next; // 下一个参数
 };
@@ -56,4 +55,6 @@ struct SymbolList {
 };
 
 Symbol* createSymbol(char* name, SymbolKind kind);
+
+void printType(Type* type);
 #endif
