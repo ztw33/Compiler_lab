@@ -1,7 +1,7 @@
 #include "semantic.h"
 #include "HashSet.h"
 
-#define debug 1
+#define debug 0
 
 bool equalString(char* s1, char* s2) {
     if (strcmp(s1, s2) == 0)
@@ -17,7 +17,7 @@ bool equalType(Type* t1, Type* t2) {
     if (t1->kind == BASIC && t2->kind == BASIC) {
         return t1->basic == t2->basic;
     } else if (t1->kind == ARRAY && t2->kind == ARRAY) {
-        // TODO
+        return equalType(t1->array.elem, t2->array.elem);
     } else if (t1->kind == STRUCTURE && t2->kind == STRUCTURE) {
         Field* f1 = t1->structure.fields;
         Field* f2 = t2->structure.fields;
@@ -138,10 +138,12 @@ void initGlobalVar() {
 }
 
 void sementicAnalysis(const Node* syntaxTreeRoot) {
-    if(debug) printf("\n---------Sementic Analysis---------\n");
+    // if(debug) 
+        printf("\n---------Sementic Analysis---------\n");
     initGlobalVar();
     analyseProgram(syntaxTreeRoot);
-    if(debug) printSymbolTable(symbolTable);
+    // if(debug) 
+        printSymbolTable(symbolTable);
 }
 
 void analyseProgram(const Node* Program) {
@@ -159,6 +161,7 @@ void analyseProgram(const Node* Program) {
 
 void analyseExtDefList(const Node* ExtDefList) {
     if(debug) printf("analyseExtDefList:\t");
+    if (ExtDefList == NULL) return;
 
     if (usedThisProd(ExtDefList, 1, "ExtDef")) {
         // ExtDefList := ExtDef ExtDefList(== NULL)
@@ -181,33 +184,40 @@ void analyseExtDef(const Node* ExtDef) {
         //ExtDef := Specifier ExtDecList SEMI
         if(debug) printf("ExtDef := Specifier ExtDecList SEMI\n");
         Type* type = analyseSpecifier(ExtDef->firstChild);
-        if (type == NULL) {
-            fprintf(stderr, "\033[31mERROR in analyseExtDef->analyseSpecifier!\033[0m\n");
-            return;
-        }
-
-        // TODO
+        analyseExtDecList(ExtDef->firstChild->nextSibling, type);
 
     } else if (usedThisProd(ExtDef, 2, "Specifier", "SEMI")) {
         //ExtDef := Specifier SEMI
         if(debug) printf("ExtDef := Specifier SEMI\n");
         Type* type = analyseSpecifier(ExtDef->firstChild);
-        if (type == NULL) {
-            fprintf(stderr, "\033[31mERROR in analyseExtDef->analyseSpecifier!\033[0m\n");
-            return;
-        }
 
     } else if (usedThisProd(ExtDef, 3, "Specifier", "FunDec", "CompSt")) {
         //ExtDef := Specifier FunDec CompSt
         if(debug) printf("ExtDef := Specifier FunDec CompSt\n");
         Type* type = analyseSpecifier(ExtDef->firstChild);
-        if (type == NULL) {
-            fprintf(stderr, "\033[31mERROR in analyseExtDef->analyseSpecifier!\033[0m\n");
-            return;
+        if (type != NULL) {
+            type->Rvalue = true; // 函数返回值都是右值
         }
 
         Symbol* funDec = analyseFunDec(ExtDef->firstChild->nextSibling, type);
         analyseCompSt(ExtDef->firstChild->nextSibling->nextSibling, funDec);
+    } else {
+        fprintf(stderr, "\033[31mERROR in analyseExtDef! No matched production.\033[0m\n");
+    }
+}
+
+void analyseExtDecList(const Node* ExtDecList, Type* type) {
+    if(debug) printf("analyseExtDecList:\t");
+
+    if (usedThisProd(ExtDecList, 1, "VarDec")) {
+        // ExtDecList := VarDec
+        if(debug) printf("ExtDecList := VarDec\n");
+        Symbol* var = analyseVarDec(ExtDecList->firstChild, VAR, type);
+    } else if (usedThisProd(ExtDecList, 3, "VarDec", "COMMA", "ExtDecList")) {
+        // ExtDecList := VarDec COMMA ExtDecList
+        if(debug) printf("ExtDecList := VarDec COMMA ExtDecList\n");
+        Symbol* var = analyseVarDec(ExtDecList->firstChild, VAR, type);
+        analyseExtDecList(ExtDecList->firstChild->nextSibling->nextSibling, type);
     } else {
         fprintf(stderr, "\033[31mERROR in analyseExtDef! No matched production.\033[0m\n");
     }
@@ -374,7 +384,7 @@ void analyseCompSt(const Node* CompSt, Symbol* func) {
 
 /*
  * if kind == VAR, return NULL; if kind == FIELD, return fieldlist.
-*/
+ */
 Field* analyseDefList(const Node* DefList, SymbolKind kind) {
     if(debug) printf("analyseDefList:\t");
 
@@ -420,7 +430,7 @@ Field* analyseDefList(const Node* DefList, SymbolKind kind) {
 
 /*
  * if kind == VAR, return NULL; if kind == FIELD, return field.
-*/
+ */
 Field* analyseDef(const Node* Def, SymbolKind kind) {
     if(debug) printf("analyseDef:\t");
     if (usedThisProd(Def, 3, "Specifier", "DecList", "SEMI")) {
@@ -568,47 +578,71 @@ Type* analyseExp(const Node* Exp) {
         if (left != NULL && left->Rvalue) {
             printSemanticError(6, Exp->firstChild->lineNum, "The left-hand side of an assignment must be a variable");
         }
-        return left;
-    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp") || usedThisProd(Exp, 3, "Exp", "OR", "Exp")) {
+        if (left != NULL)
+            return left;
+        else
+            return right;
+    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp") || usedThisProd(Exp, 3, "Exp", "OR", "Exp") || usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
         /* 逻辑运算
         // Exp := Exp AND Exp
         // Exp := Exp OR Exp
+        // Exp := Exp RELOP Exp
         */
-        if(debug) printf("Exp := Exp AND/OR Exp\n");
-        // TODO
+        if(debug) printf("Exp := Exp AND/OR/RELOP Exp\n");
 
+        Type* left = analyseExp(Exp->firstChild);
+        Type* right = analyseExp(Exp->firstChild->nextSibling->nextSibling);
+        if (!(equalType(left, TYPE_INT) && equalType(right, TYPE_INT))) {
+            printSemanticError(7, Exp->firstChild->nextSibling->lineNum, "Type mismatched for operands");
+        }
+        Type* intType = (Type*)malloc(sizeof(Type));
+        intType->kind = BASIC;
+        intType->basic = INT;
+        intType->Rvalue = true;
+        return intType; // 逻辑运算返回新构建的int类型
     } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
         /* 逻辑运算
         // Exp := NOT Exp
         */
         if(debug) printf("Exp := NOT Exp\n");
-        // TODO
 
-    } else if (usedThisProd(Exp, 3, "Exp", "RELOP", "Exp") || usedThisProd(Exp, 3, "Exp", "PLUS", "Exp") || usedThisProd(Exp, 3, "Exp", "MINUS", "Exp") || usedThisProd(Exp, 3, "Exp", "STAR", "Exp") || usedThisProd(Exp, 3, "Exp", "DIV", "Exp")) {
+        Type* type = analyseExp(Exp->firstChild->nextSibling);
+        if (!equalType(type, TYPE_INT)) {
+            printSemanticError(7, Exp->firstChild->lineNum, "Type mismatched for operands");
+        }
+        Type* intType = (Type*)malloc(sizeof(Type));
+        intType->kind = BASIC;
+        intType->basic = INT;
+        intType->Rvalue = true;
+        return intType; // 逻辑运算返回新构建的int类型
+    } else if (usedThisProd(Exp, 3, "Exp", "PLUS", "Exp") || usedThisProd(Exp, 3, "Exp", "MINUS", "Exp") || usedThisProd(Exp, 3, "Exp", "STAR", "Exp") || usedThisProd(Exp, 3, "Exp", "DIV", "Exp")) {
         /* 算术运算
-        // Exp := Exp RELOP Exp
         // Exp := Exp PLUS Exp
         // Exp := Exp MINUS Exp
         // Exp := Exp STAR Exp
         // Exp := Exp DIV Exp
         */
-        if(debug) printf("Exp := Exp RELOP/PLUS/MINUS/STAR/DIV Exp\n");
+        if(debug) printf("Exp := Exp PLUS/MINUS/STAR/DIV Exp\n");
         Type* left = analyseExp(Exp->firstChild);
         Type* right = analyseExp(Exp->firstChild->nextSibling->nextSibling);
-        if (!equalType(left, right)) {
-            printSemanticError(7, Exp->firstChild->nextSibling->lineNum, "Type mismatched for operands");
-        }
         if (!(equalType(left, TYPE_INT) && equalType(right, TYPE_INT) || equalType(left, TYPE_FLOAT) && equalType(right, TYPE_FLOAT))) {
             printSemanticError(7, Exp->firstChild->nextSibling->lineNum, "Type mismatched for operands");
         }
-        return left;
+        if (left != NULL)
+            return left;
+        else
+            return right;
     } else if (usedThisProd(Exp, 2, "MINUS", "Exp")) {
         /* 算术运算
         // Exp := MINUS Exp
         */
         if(debug) printf("Exp := MINUS Exp\n");
-        //TODO
 
+        Type* type = analyseExp(Exp->firstChild->nextSibling);
+        if (!(equalType(type, TYPE_INT) || equalType(type, TYPE_FLOAT))) {
+            printSemanticError(7, Exp->firstChild->lineNum, "Type mismatched for the operand");
+        }
+        return type;
     } else if (usedThisProd(Exp, 3, "LP", "Exp", "RP")) {
         // Exp := LP Exp RP
         if(debug) printf("Exp := LP Exp RP\n");
@@ -662,6 +696,7 @@ Type* analyseExp(const Node* Exp) {
         // Exp := Exp LB Exp RB
         if(debug) printf("Exp := Exp LB Exp RB\n");
         Type* varType = analyseExp(Exp->firstChild);
+        if (varType == NULL) return NULL;
         Type* indexType = analyseExp(Exp->firstChild->nextSibling->nextSibling);
         if (varType->kind != ARRAY) {
             printSemanticError(10, Exp->firstChild->lineNum, "This variable is not an array");
@@ -675,6 +710,7 @@ Type* analyseExp(const Node* Exp) {
         // Exp := Exp DOT ID
         if(debug) printf("Exp := Exp DOT ID\n");
         Type* varType = analyseExp(Exp->firstChild);
+        if (varType == NULL) return NULL;
         if (varType->kind != STRUCTURE) {
             printSemanticError(13, Exp->firstChild->lineNum, "Illegal use of \".\"");
             return NULL;
@@ -771,6 +807,30 @@ void analyseStmt(const Node* Stmt, Symbol* func) {
         Type* cond = analyseExp(exp);
         if (!equalType(cond, TYPE_INT)) {
             printSemanticError(7, exp->lineNum, "Type mismatched for \"if\"(int only)");
+        }
+        analyseStmt(exp->nextSibling->nextSibling, func);
+    } else if (usedThisProd(Stmt, 7, "IF", "LP", "Exp", "RP", "Stmt", "ELSE", "Stmt")) {
+        // Stmt := IF LP Exp RP Stmt ELSE Stmt
+        if(debug) printf("Stmt := IF LP Exp RP Stmt ELSE Stmt\n");
+
+        Node* exp = Stmt->firstChild->nextSibling->nextSibling;
+        Type* cond = analyseExp(exp);
+        if (!equalType(cond, TYPE_INT)) {
+            printSemanticError(7, exp->lineNum, "Type mismatched for \"if\"(int only)");
+        }
+        analyseStmt(exp->nextSibling->nextSibling, func);
+        analyseStmt(exp->nextSibling->nextSibling->nextSibling->nextSibling, func);
+    } else if (usedThisProd(Stmt, 1, "CompSt")) {
+        // Stmt := CompSt
+        if(debug) printf("Stmt := CompSt\n");
+        analyseCompSt(Stmt->firstChild, func);
+    } else if (usedThisProd(Stmt, 5, "WHILE", "LP", "Exp", "RP", "Stmt")) {
+        // Stmt := WHILE LP Exp RP Stmt
+        if(debug) printf("Stmt := WHILE LP Exp RP Stmt\n");
+        Node* exp = Stmt->firstChild->nextSibling->nextSibling;
+        Type* cond = analyseExp(exp);
+        if (!equalType(cond, TYPE_INT)) {
+            printSemanticError(7, exp->lineNum, "Type mismatched for \"while\"(int only)");
         }
         analyseStmt(exp->nextSibling->nextSibling, func);
     } else {

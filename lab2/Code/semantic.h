@@ -20,6 +20,7 @@ void sementicAnalysis(const Node* syntaxTreeRootNode);
 void analyseProgram(const Node* Program);
 void analyseExtDefList(const Node* ExtDefList);
 void analyseExtDef(const Node* ExtDef);
+void analyseExtDecList(const Node* ExtDecList, Type* type);
 Type* analyseSpecifier(const Node* Specifier);
 Type* analyseTYPE(const Node* TYPE);
 Type* analyseStructSpecifier(const Node* StructSpecifier);
