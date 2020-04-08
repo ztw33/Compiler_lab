@@ -109,6 +109,17 @@ ExtDef : Specifier ExtDecList SEMI {
             	$$ = NULL;
             }
         }
+    | Specifier FunDec SEMI {
+            if (isNewError(@2.first_line)) {
+                printError('B', @2.first_line, "Incomplete definition of function");
+                struct Node* nodeSEMI = createNewNode("SEMI", NonValToken, @2.first_line);
+                struct Node* nodeExtDef = createNewNode("ExtDef", NonTerm, @$.first_line);
+                buildRel(nodeExtDef, 3, $1, $2, nodeSEMI);
+                $$ = nodeExtDef;
+            } else {
+            	$$ = NULL;
+            }
+        }
     ;
 ExtDecList : VarDec {
             struct Node* nodeExtDecList = createNewNode("ExtDecList", NonTerm, @$.first_line);

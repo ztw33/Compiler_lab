@@ -19,7 +19,19 @@ bool equalType(Type* t1, Type* t2) {
     } else if (t1->kind == ARRAY && t2->kind == ARRAY) {
         // TODO
     } else if (t1->kind == STRUCTURE && t2->kind == STRUCTURE) {
-        // TODO
+        Field* f1 = t1->structure.fields;
+        Field* f2 = t2->structure.fields;
+        while (f1 != NULL && f2 != NULL) {
+            if (!equalType(f1->type, f2->type)) {
+                return false;
+            }
+            f1 = f1->next;
+            f2 = f2->next;
+        }
+        if (f1 != NULL || f2 != NULL)
+            return false;
+        else
+            return true;
     } else {
         fprintf(stderr, "\033[31mERROR when compare Type! Unknown Type kind.\033[0m\n");
         return false;
@@ -46,6 +58,22 @@ bool argsCheck(Param* args, Param* params, int paramNum) {
     }
     if (pa != NULL) return false;
     return true;
+}
+
+Field* concatField(SymbolList* symbols) {
+    if (symbols == NULL) return NULL;
+    SymbolList* head = symbols;
+    if (head->symbol == NULL) {
+        if (head->next == NULL)
+            return NULL;
+        else
+            return concatField(head->next);       
+    }
+    Field* field = (Field*)malloc(sizeof(Field));
+    field->name = head->symbol->name;
+    field->type = head->symbol->type;
+    field->next = concatField(head->next);
+    return field;
 }
 
 void printSymbolTable(HashSet table) {
@@ -169,8 +197,6 @@ void analyseExtDef(const Node* ExtDef) {
             return;
         }
 
-        // TODO
-
     } else if (usedThisProd(ExtDef, 3, "Specifier", "FunDec", "CompSt")) {
         //ExtDef := Specifier FunDec CompSt
         if(debug) printf("ExtDef := Specifier FunDec CompSt\n");
@@ -224,24 +250,48 @@ Type* analyseTYPE(const Node* TYPE) {
 }
 
 Type* analyseStructSpecifier(const Node* StructSpecifier) {
-    if(debug) printf("analyseStructSpecifier\n");
+    if(debug) printf("analyseStructSpecifier:\t");
 
     if (usedThisProd(StructSpecifier, 2, "STRUCT", "Tag")) {
         //StructSpecifier := STRUCT Tag
+        if(debug) printf("StructSpecifier := STRUCT Tag\nTag := ID\n");
         
-        // TODO
-
+        Node* ID = StructSpecifier->firstChild->nextSibling->firstChild;
+        if (contains(symbolTable, ID->stringVal, STRUCT)) {
+            Symbol* struct_ = get(symbolTable, ID->stringVal, STRUCT);
+            return struct_->type;
+        } else {
+            printSemanticError(17, ID->lineNum, "Undefined structure");
+            return NULL;
+        }
     } else if (usedThisProd(StructSpecifier, 4, "STRUCT", "LC", "DefList", "RC")) {
-        //StructSpecifier := STRUCT OptTag(== NULL) LC DefList RC
-
+        //StructSpecifier := STRUCT OptTag(== NULL) LC DefList(!=NULL) RC
+        if(debug) printf("StructSpecifier := STRUCT OptTag(== NULL) LC DefList(!=NULL) RC\n");
         // TODO
 
     } else if (usedThisProd(StructSpecifier, 5, "STRUCT", "OptTag", "LC", "DefList", "RC")) {
-        //StructSpecifier := STRUCT OptTag(!= NULL) LC DefList RC
+        //StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(!=NULL) RC
+        if(debug) printf("StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(!=NULL) RC\nOptTag := ID\n");
         
-        // TODO
-
-    } else {
+        Node* ID = StructSpecifier->firstChild->nextSibling->firstChild;
+        bool insertFlag = true;
+        if (contains(symbolTable, ID->stringVal, STRUCT)) {
+            printSemanticError(16, ID->lineNum, "Duplicated name");
+            insertFlag = false;
+        }
+        Type* newStruct = (Type*)malloc(sizeof(Type));
+        newStruct->kind = STRUCTURE;
+        newStruct->structure.name = ID->stringVal;
+        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling->nextSibling, FIELD);
+        if (insertFlag) {
+            Symbol* symbol = createSymbol(ID->stringVal, STRUCT);
+            symbol->type = newStruct;
+            insert(symbolTable, symbol);
+        }
+        return newStruct;
+    } 
+    // TODO: DefList == NULL的情况
+    else {
         fprintf(stderr, "\033[31mERROR in analyseStructSpecifier! No matched production.\033[0m\n");
         return NULL;
     }
@@ -322,24 +372,56 @@ void analyseCompSt(const Node* CompSt, Symbol* func) {
     }
 }
 
-void analyseDefList(const Node* DefList, SymbolKind kind) {
+/*
+ * if kind == VAR, return NULL; if kind == FIELD, return fieldlist.
+*/
+Field* analyseDefList(const Node* DefList, SymbolKind kind) {
     if(debug) printf("analyseDefList:\t");
 
     if (usedThisProd(DefList, 2, "Def", "DefList")) {
         // DefList := Def DefList(!=NULL)
         if(debug) printf("DefList := Def DefList(!=NULL)\n");
-        analyseDef(DefList->firstChild, kind);
-        analyseDefList(DefList->firstChild->nextSibling, kind);
+        if (kind == VAR) {
+            analyseDef(DefList->firstChild, kind);
+            analyseDefList(DefList->firstChild->nextSibling, kind);
+            return NULL;
+        } else if (kind == FIELD) {
+            Field* field = analyseDef(DefList->firstChild, kind);
+            if (field == NULL) {
+                return analyseDefList(DefList->firstChild->nextSibling, kind);
+            } else {
+                Field* tail = field;
+                for (; tail->next != NULL; tail = tail->next);
+                tail->next = analyseDefList(DefList->firstChild->nextSibling, kind);
+                return field;
+            }
+        } else {
+            fprintf(stderr, "\033[31mERROR in analyseDefList! Wrong symbol kind.\033[0m\n");
+            return NULL;
+        }
+        
     } else if (usedThisProd(DefList, 1, "Def")) {
         // DefList := Def DefList(==NULL)
         if(debug) printf("DefList := Def DefList(==NULL)\n");
-        analyseDef(DefList->firstChild, kind);
+        if (kind == VAR) {
+            analyseDef(DefList->firstChild, kind);
+            return NULL;
+        } else if (kind == FIELD) {
+            return analyseDef(DefList->firstChild, kind);
+        } else {
+            fprintf(stderr, "\033[31mERROR in analyseDefList! Wrong symbol kind.\033[0m\n");
+            return NULL;
+        }
     } else {
         fprintf(stderr, "\033[31mERROR in analyseDefList! No matched production.\033[0m\n");
+        return NULL;
     }
 }
 
-void analyseDef(const Node* Def, SymbolKind kind) {
+/*
+ * if kind == VAR, return NULL; if kind == FIELD, return field.
+*/
+Field* analyseDef(const Node* Def, SymbolKind kind) {
     if(debug) printf("analyseDef:\t");
     if (usedThisProd(Def, 3, "Specifier", "DecList", "SEMI")) {
         // Def := Specifier DecList SEMI
@@ -347,8 +429,18 @@ void analyseDef(const Node* Def, SymbolKind kind) {
         Node* Specifier = Def->firstChild;
         Type* type = analyseSpecifier(Specifier);
         SymbolList* decList = analyseDecList(Specifier->nextSibling, kind, type);
+
+        if (kind == VAR) {
+            return NULL;
+        } else if (kind == FIELD) {
+            return concatField(decList);
+        } else {
+            fprintf(stderr, "\033[31mERROR in analyseDef! Wrong symbol kind.\033[0m\n");
+            return NULL;
+        }
     } else {
         fprintf(stderr, "\033[31mERROR in analyseDef! No matched production.\033[0m\n");
+        return NULL;
     }
 }
 
@@ -357,7 +449,9 @@ SymbolList* analyseDecList(const Node* DecList, SymbolKind kind, Type* type) {
     if (usedThisProd(DecList, 1, "Dec")) {
         // DecList := Dec
         if(debug) printf("DecList := Dec\n");
+
         Symbol* dec = analyseDec(DecList->firstChild, kind, type);
+        if (dec == NULL) return NULL;
         SymbolList* decList = (SymbolList*)malloc(sizeof(SymbolList));
         decList->symbol = dec;
         decList->next = NULL;
@@ -365,11 +459,16 @@ SymbolList* analyseDecList(const Node* DecList, SymbolKind kind, Type* type) {
     } else if (usedThisProd(DecList, 3, "Dec", "COMMA", "DecList")) {
         // DecList := Dec COMMA DecList
         if(debug) printf("DecList := Dec COMMA DecList\n");
+
         Symbol* dec = analyseDec(DecList->firstChild, kind, type);
-        SymbolList* decList = (SymbolList*)malloc(sizeof(SymbolList));
-        decList->symbol = dec;
-        decList->next = analyseDecList(DecList->firstChild->nextSibling->nextSibling, kind, type);
-        return decList;
+        if (dec == NULL) {
+            return analyseDecList(DecList->firstChild->nextSibling->nextSibling, kind, type);
+        } else {
+            SymbolList* decList = (SymbolList*)malloc(sizeof(SymbolList));
+            decList->symbol = dec;
+            decList->next = analyseDecList(DecList->firstChild->nextSibling->nextSibling, kind, type);
+            return decList;
+        }
     } else {
         fprintf(stderr, "\033[31mERROR in analyseDecList! No matched production.\033[0m\n");
         return NULL;
@@ -388,11 +487,20 @@ Symbol* analyseDec(const Node* Dec, SymbolKind kind, Type* type) {
         if(debug) printf("Dec := VarDec ASSIGNOP Exp\n");
         Node* VarDec = Dec->firstChild;
         Symbol* dec = analyseVarDec(VarDec, kind, type);
-        Type* expType = analyseExp(VarDec->nextSibling->nextSibling);
-        if (!equalType(type, expType)) {
-            printSemanticError(5, VarDec->nextSibling->lineNum, "Type mismatched for assignment");
+        if (kind == VAR) {
+            Type* expType = analyseExp(VarDec->nextSibling->nextSibling);
+            if (!equalType(type, expType)) {
+                printSemanticError(5, VarDec->nextSibling->lineNum, "Type mismatched for assignment");
+            }
+            return dec;
+        } else if (kind == FIELD) {
+            printSemanticError(15, VarDec->nextSibling->lineNum, "Initialize field at definition time");
+            return dec;
+        } else {
+            fprintf(stderr, "\033[31mERROR in analyseDec! Wrong symbol kind.\033[0m\n");
+            return NULL;
         }
-        return dec;
+        
     } else {
         fprintf(stderr, "\033[31mERROR in analyseDec! No matched production.\033[0m\n");
         return NULL;
@@ -417,7 +525,7 @@ Symbol* analyseVarDec(const Node* VarDec, SymbolKind kind, Type* type) {
                 break;
             case FIELD:
                 printSemanticError(15, ID->lineNum, "Redefined field");
-                break;
+                return NULL;
             default:
                 fprintf(stderr, "\033[31mERROR in analyseVarDec! Wrong symbol kind.\033[0m\n");
                 break;
@@ -430,8 +538,15 @@ Symbol* analyseVarDec(const Node* VarDec, SymbolKind kind, Type* type) {
     } else if (usedThisProd(VarDec, 4, "VarDec", "LB", "INT", "RB")) {
         // VarDec := VarDec LB INT RB
         if(debug) printf("VarDec := VarDec LB INT RB\n");
-
-        // TODO
+        Symbol* elem = analyseVarDec(VarDec->firstChild, kind, type);
+        if (elem != NULL) {
+            Type* arrayType = (Type*)malloc(sizeof(Type));
+            arrayType->kind = ARRAY;
+            arrayType->array.elem = elem->type;
+            arrayType->array.size = VarDec->firstChild->nextSibling->nextSibling->intVal;
+            elem->type = arrayType;
+        }
+        return elem;
     } else {
         fprintf(stderr, "\033[31mERROR in analyseVarDec! No matched production.\033[0m\n");
         return NULL;
@@ -446,10 +561,11 @@ Type* analyseExp(const Node* Exp) {
         if(debug) printf("Exp := Exp ASSIGNOP Exp\n");
         Type* left = analyseExp(Exp->firstChild);
         Type* right = analyseExp(Exp->firstChild->nextSibling->nextSibling);
+        
         if (!equalType(left, right)) {
             printSemanticError(5, Exp->firstChild->nextSibling->lineNum, "Type mismatched for assignment");
         }
-        if (left != NULL && !left->Lvalue) {
+        if (left != NULL && left->Rvalue) {
             printSemanticError(6, Exp->firstChild->lineNum, "The left-hand side of an assignment must be a variable");
         }
         return left;
@@ -508,11 +624,14 @@ Type* analyseExp(const Node* Exp) {
                 if (!argsCheck(args, func->funcSign->paramList, func->funcSign->paramNum)) {
                     printSemanticError(9, ID->lineNum, "Function is not applicable for arguments");
                 }
-                return func->type;
+                return func->funcSign->retType;
             } else {
                 fprintf(stderr, "\033[31mERROR in analyseExp when get func symbol from table! .\033[0m\n");
                 return NULL;
             }
+        } else if (contains(symbolTable, ID->stringVal, VAR)) {
+            printSemanticError(11, ID->lineNum, "This variable is not a function");
+            return NULL;
         } else {
             printSemanticError(2, ID->lineNum, "Undefined function");
             return NULL;
@@ -527,15 +646,53 @@ Type* analyseExp(const Node* Exp) {
                 if (func->funcSign->paramNum != 0) {
                     printSemanticError(9, ID->lineNum, "Function is not applicable for arguments");
                 }
-                return func->type;
+                return func->funcSign->retType;
             } else {
                 fprintf(stderr, "\033[31mERROR in analyseExp when get func symbol from table! .\033[0m\n");
                 return NULL;
             }
-        } else {
+        } else if (contains(symbolTable, ID->stringVal, VAR)) {
+            printSemanticError(11, ID->lineNum, "This variable is not a function");
+            return NULL;
+        }  else {
             printSemanticError(2, ID->lineNum, "Undefined function");
             return NULL;
         }
+    } else if (usedThisProd(Exp, 4, "Exp", "LB", "Exp", "RB")) {
+        // Exp := Exp LB Exp RB
+        if(debug) printf("Exp := Exp LB Exp RB\n");
+        Type* varType = analyseExp(Exp->firstChild);
+        Type* indexType = analyseExp(Exp->firstChild->nextSibling->nextSibling);
+        if (varType->kind != ARRAY) {
+            printSemanticError(10, Exp->firstChild->lineNum, "This variable is not an array");
+            return NULL;
+        }
+        if (!equalType(indexType, TYPE_INT)) {
+            printSemanticError(12, Exp->firstChild->nextSibling->nextSibling->lineNum, "Expression between \"[]\" is not an integer");
+        }
+        return varType->array.elem;
+    } else if (usedThisProd(Exp, 3, "Exp", "DOT", "ID")) {
+        // Exp := Exp DOT ID
+        if(debug) printf("Exp := Exp DOT ID\n");
+        Type* varType = analyseExp(Exp->firstChild);
+        if (varType->kind != STRUCTURE) {
+            printSemanticError(13, Exp->firstChild->lineNum, "Illegal use of \".\"");
+            return NULL;
+        }
+        Symbol* struct_ = get(symbolTable, varType->structure.name, STRUCT);
+        if (struct_ == NULL) {
+            fprintf(stderr, "\033[31mERROR in analyseExp when get struct symbol from table! .\033[0m\n");
+            return NULL;
+        }
+        Node* ID = Exp->firstChild->nextSibling->nextSibling;
+        Field* fields = varType->structure.fields;
+        for (Field* f = fields; f != NULL; f = f->next) {
+            if (equalString(f->name, ID->stringVal)) {
+                return f->type;
+            }
+        }
+        printSemanticError(14, ID->lineNum, "Non-existent field");
+        return NULL;
     } else if (usedThisProd(Exp, 1, "ID")) {
         // Exp := ID
         if(debug) printf("Exp := ID\n");
@@ -558,7 +715,7 @@ Type* analyseExp(const Node* Exp) {
         Type* type = (Type*)malloc(sizeof(Type));
         type->kind = BASIC;
         type->basic = INT;
-        type->Lvalue = false;
+        type->Rvalue = true;
         return type;
     } else if (usedThisProd(Exp, 1, "FLOAT")) {
         // Exp := FLOAT
@@ -566,7 +723,7 @@ Type* analyseExp(const Node* Exp) {
         Type* type = (Type*)malloc(sizeof(Type));
         type->kind = BASIC;
         type->basic = FLOAT;
-        type->Lvalue = false;
+        type->Rvalue = true;
         return type;
     } else {
         fprintf(stderr, "\033[31mERROR in analyseExp! No matched production.\033[0m\n");
@@ -597,13 +754,25 @@ void analyseStmt(const Node* Stmt, Symbol* func) {
     if (usedThisProd(Stmt, 2, "Exp", "SEMI")) {
         // Stmt := Exp SEMI
         if(debug) printf("Stmt := Exp SEMI\n");
+
         Type* type = analyseExp(Stmt->firstChild);
     } else if(usedThisProd(Stmt, 3, "RETURN", "Exp", "SEMI")) {
         // Stmt := RETURN Exp SEMI
         if(debug) printf("Stmt := RETURN Exp SEMI\n");
+
         if (!equalType(func->funcSign->retType, analyseExp(Stmt->firstChild->nextSibling))) {
             printSemanticError(8, Stmt->firstChild->nextSibling->lineNum, "Type mismatched for return");
         }
+    } else if (usedThisProd(Stmt, 5, "IF", "LP", "Exp", "RP", "Stmt")) {
+        // Stmt := IF LP Exp RP Stmt
+        if(debug) printf("Stmt := IF LP Exp RP Stmt\n");
+
+        Node* exp = Stmt->firstChild->nextSibling->nextSibling;
+        Type* cond = analyseExp(exp);
+        if (!equalType(cond, TYPE_INT)) {
+            printSemanticError(7, exp->lineNum, "Type mismatched for \"if\"(int only)");
+        }
+        analyseStmt(exp->nextSibling->nextSibling, func);
     } else {
         fprintf(stderr, "\033[31mERROR in analyseStmt! No matched production.\033[0m\n");
     }
