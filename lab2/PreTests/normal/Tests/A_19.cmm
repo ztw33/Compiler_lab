@@ -1,0 +1,22 @@
+int compare1(int a, int b) {
+	if(a==b) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+int compare2(int aa, int bb, int cc) {
+	if(aa == bb) {
+		return 0;
+	} else if (bb == cc){
+		return 1;
+	} else {
+		return -1;
+	}
+}
+
+int main() {
+	int i = 1, j = 3, k = 12;
+	return compare1(i,j,k);
+}

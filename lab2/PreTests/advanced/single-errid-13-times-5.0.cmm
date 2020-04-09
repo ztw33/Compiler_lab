@@ -1,0 +1,160 @@
+struct S413 {
+  int S413_m0_a2_i[2];
+};
+
+struct S414 {
+  int S414_m0_i;
+  int S414_m1_i;
+};
+
+
+
+
+int i_func_1129(float i_func_1129_f_0, struct S414 i_func_1129_S414_0, int i_func_1129_i_0, struct S413 i_func_1129_S413_0, struct S413 i_func_1129_S413_1) {
+  i_func_1129_S414_0.S414_m0_i = (i_func_1129_S414_0.S414_m0_i - i_func_1129_S414_0.S414_m0_i);
+  i_func_1129((i_func_1129_f_0 * i_func_1129_f_0), i_func_1129_S414_0, i_func_1129(i_func_1129_f_0, i_func_1129_S414_0, i_func_1129_S414_0.S414_m0_i, i_func_1129_S413_0, i_func_1129_S413_1), (i_func_1129_S413_1 = i_func_1129_S413_0), i_func_1129_S413_0);
+  i_func_1129_S414_0.S414_m0_i = i_func_1129(i_func_1129_f_0, i_func_1129_S414_0, i_func_1129_S414_0.S414_m1_i, i_func_1129_S413_0, i_func_1129_S413_1);
+  i_func_1129_S413_1.S413_m0_a2_i[-210142950] = i_func_1129(i_func_1129_f_0, i_func_1129_S414_0, i_func_1129_S414_0.S414_m1_i, i_func_1129_S413_1, i_func_1129_S413_1);
+  i_func_1129_f_0 = (i_func_1129_f_0 - i_func_1129_f_0);
+  return i_func_1129_S413_1 = i_func_1129_S413_0 = (i_func_1129_S413_1 = (i_func_1129_S413_0 = (i_func_1129_S413_0 = i_func_1129_S413_0)));
+  while (i_func_1129_S414_0.S414_m1_i = (i_func_1129_S414_0.S414_m0_i + i_func_1129_S414_0.S414_m1_i)) {
+    i_func_1129_S414_0.S414_m0_i = i_func_1129_S413_0.S413_m0_a2_i[-1288375611];
+    i_func_1129_f_0 = (i_func_1129_f_0 * i_func_1129_f_0);
+    i_func_1129_S413_1.S413_m0_a2_i[i_func_1129_S414_0.S414_m1_i] = i_func_1129(i_func_1129_f_0, i_func_1129_S414_0, i_func_1129_S414_0.S414_m0_i, i_func_1129_S413_0, i_func_1129_S413_1);
+    i_func_1129_S414_0.S414_m1_i = (i_func_1129_S414_0.S414_m0_i >= i_func_1129_S414_0.S414_m1_i);
+  }
+  return i_func_1129_S414_0.S414_m1_i = i_func_1129(i_func_1129_f_0, i_func_1129_S414_0, i_func_1129_S414_0.S414_m1_i, i_func_1129_S413_1, i_func_1129_S413_0);
+}
+
+int i_func_1130(struct S413 i_func_1130_S413_0, struct S414 i_func_1130_S414_0) {
+  float f_L75;
+  float f_L74;
+  f_L75 = -94296650472860155904.000000;
+  f_L74 = f_L75 + f_L75;
+  f_L74 = (f_L75 * -0.000000);
+  i_func_1130(i_func_1130_S413_0, (i_func_1130_S414_0 = (i_func_1130_S414_0 = i_func_1130_S414_0)));
+  f_L74 = -208074035503145109915347867277534953472.000000;
+  f_L75 = (f_L75 * f_L74);
+  i_func_1130_S414_0.S414_m1_i = (i_func_1130_S414_0.S414_m1_i / i_func_1130_S414_0.S414_m1_i);
+  return i_func_1130_S414_0 = i_func_1130_S414_0 = i_func_1130_S414_0;
+  f_L75 = (f_L75 * -73705075872708427776.000000);
+  return i_func_1130_S414_0.S414_m0_i = i_func_1130(i_func_1130_S413_0, i_func_1130_S414_0);
+}
+
+int i_func_1131(float i_func_1131_f_0, struct S413 i_func_1131_S413_0, struct S413 i_func_1131_S413_1) {
+  int a2_i_L21[2];
+  struct S414 S414_L0;
+  int a2_i_L20[2];
+  a2_i_L21[1] = -1819261509;
+  a2_i_L21[0] = 412235501;
+  S414_L0.S414_m1_i = -2133109449;
+  S414_L0.S414_m0_i = 1649623573;
+  a2_i_L20[1] = a2_i_L21[-1499099284] == a2_i_L21[656420748];
+  a2_i_L20[0] = S414_L0.S414_m1_i || S414_L0.S414_m0_i;
+  i_func_1131_f_0 = (i_func_1131_f_0 - i_func_1131_f_0);
+  a2_i_L20[S414_L0.S414_m1_i] = (!S414_L0.S414_m1_i);
+  return S414_L0 = S414_L0 = S414_L0;
+  i_func_1131_f_0 = (i_func_1131_f_0 * i_func_1131_f_0);
+  {
+    i_func_1131_f_0 = (i_func_1131_f_0 / i_func_1131_f_0);
+    i_func_1131_f_0 = (i_func_1131_f_0 - i_func_1131_f_0);
+    i_func_1131_f_0 = (2756376061280256.000000 - i_func_1131_f_0);
+    i_func_1131((i_func_1131_f_0 - i_func_1131_f_0), i_func_1131_S413_0, (i_func_1131_S413_1 = i_func_1131_S413_1));
+  }
+  return i_func_1130(i_func_1131_S413_0, S414_L0);
+}
+
+int i_func_1132(int i_func_1132_a2_i_0[2]) {
+  struct S414 S414_L1;
+  float f_L76;
+  struct S413 S413_L1;
+  struct S413 S413_L0;
+  S414_L1.S414_m1_i = 1661222500;
+  S414_L1.S414_m0_i = 1597922065;
+  f_L76 = 2.224708;
+  S413_L1.S413_m0_a2_i[1] = S414_L1.S414_m0_i;
+  S413_L1.S413_m0_a2_i[0] = S414_L1.S414_m0_i;
+  S413_L0.S413_m0_a2_i[1] = i_func_1129(f_L76, S414_L1, S414_L1.S414_m1_i, S413_L1, S413_L1);
+  S413_L0.S413_m0_a2_i[0] = S413_L1.S413_m0_a2_i[669558376] = 2137120173;
+  i_func_1132_a2_i_0[S414_L1.S414_m1_i] = (S414_L1.S414_m1_i != S414_L1.S414_m0_i);
+  S414_L1.S414_m1_i = (S414_L1.S414_m0_i == S414_L1.S414_m0_i);
+  i_func_1130(S413_L0, S414_L1);
+  S414_L1.S414_m1_i = i_func_1130(S413_L1, S414_L1);
+  {
+    S413_L0.S413_m0_a2_i[-25361877] = i_func_1129(f_L76, S414_L1, S414_L1.S414_m0_i, S413_L1, S413_L0);
+  }
+  i_func_1132_a2_i_0[S414_L1.S414_m0_i] = (1306289785 - S414_L1.S414_m1_i);
+  f_L76 = (f_L76 / f_L76);
+  i_func_1132(S413_L0.S413_m0_a2_i);
+  f_L76 = (f_L76 / f_L76);
+  return S413_L0.S413_m0_a2_i;
+}
+
+int i_func_1133() {
+  float f_L77;
+  struct S414 S414_L3;
+  struct S413 S413_L2;
+  struct S414 S414_L2;
+  f_L77 = 0.000020;
+  S414_L3.S414_m1_i = 1274008817;
+  S414_L3.S414_m0_i = 1574669090;
+  S413_L2.S413_m0_a2_i[1] = S414_L3.S414_m0_i;
+  S413_L2.S413_m0_a2_i[0] = 1381121654;
+  S414_L2.S414_m1_i = i_func_1131(f_L77, S413_L2, S413_L2);
+  S414_L2.S414_m0_i = S414_L3.S414_m0_i <= S414_L3.S414_m0_i;
+  S414_L2.S414_m1_i = -23598367;
+  S414_L3.S414_m1_i = i_func_1131(f_L77, S413_L2, S413_L2);
+  S413_L2.S413_m0_a2_i[S414_L2.S414_m0_i] = (!S414_L2.S414_m0_i);
+  f_L77 = (f_L77 / -0.000000);
+  f_L77 = (f_L77 / f_L77);
+  return S414_L2.S414_m0_i = (S414_L3.S414_m1_i <= S414_L3.S414_m0_i);
+}
+
+int top_caller() {
+  struct S414 S414_L4;
+  float f_L79;
+  float f_L78;
+  struct S413 S413_L4;
+  struct S413 S413_L3;
+  S414_L4.S414_m1_i = i_func_1133();
+  S414_L4.S414_m0_i = -433828459;
+  f_L79 = 253.697449;
+  f_L78 = f_L79 + f_L79;
+  S413_L4.S413_m0_a2_i[1] = S414_L4.S414_m1_i;
+  S413_L4.S413_m0_a2_i[0] = 76015204;
+  S413_L3.S413_m0_a2_i[1] = S414_L4.S414_m0_i = i_func_1129(f_L79, S414_L4, S414_L4.S414_m1_i, S413_L4, S413_L4);
+  S413_L3.S413_m0_a2_i[0] = S413_L4.S413_m0_a2_i[S414_L4.S414_m0_i] = i_func_1129(-1739818.625000, S414_L4, S414_L4.S414_m0_i, S413_L4, S413_L4);
+  S414_L4.S414_m0_i = (S414_L4.S414_m0_i || S414_L4.S414_m1_i);
+  f_L78 = 1613169033216.000000;
+  return S413_L3.S413_m0_a2_i;
+  S414_L4.S414_m0_i = top_caller();
+  S413_L3.S413_m0_a2_i[S414_L4.S414_m1_i] = (S414_L4.S414_m1_i || -1055977532);
+  top_caller();
+  S414_L4.S414_m1_i = top_caller();
+  S414_L4.S414_m1_i = i_func_1131(f_L78, S413_L3, S413_L4);
+  if (S413_L3.S413_m0_a2_i[S414_L4.S414_m0_i] = (446081061 >= S414_L4.S414_m0_i)) {
+    f_L78 = (0.000000 - f_L78);
+    S414_L4.S414_m1_i = i_func_1132(S413_L4.S413_m0_a2_i);
+    S413_L3.S413_m0_a2_i[S414_L4.S414_m1_i] = i_func_1130(S413_L4, S414_L4);
+    S414_L4.S414_m1_i = (S414_L4.S414_m1_i / S414_L4.S414_m0_i);
+    S414_L4.S414_m0_i = (641596997 - S414_L4.S414_m0_i);
+  }
+  else {
+    S414_L4.S414_m1_i = 1221363771;
+    i_func_1131(0.000000, S413_L4, (S413_L4 = S413_L3));
+    f_L78 = 0.065069;
+    i_func_1133();
+    f_L78 = (f_L78 / f_L79);
+  }
+  S413_L3.S413_m0_a2_i[2058114062] = (!S414_L4.S414_m0_i);
+  return S414_L4.S414_m1_i = (S414_L4.S414_m0_i * S414_L4.S414_m1_i);
+}
+
+int initialize_global_objects() {
+  return 0;
+}
+
+int main() {
+  initialize_global_objects();
+  return 0;
+}

@@ -1,0 +1,27 @@
+struct Apple {
+	int weight;
+	float round;
+};
+
+struct Pen {
+	int length;
+	int used;
+};
+
+int add(struct Apple a, struct Pen p) {
+	return a.weight + p.length;
+}
+
+int main() {
+	struct Apple aa;
+	struct Pen pp;
+	int sum;
+	aa.weight = 3;
+	pp.length = 12;
+	sum = add(aa, pp);
+	if(sum > 5) {
+		return aa / pp.length;
+	} else {
+		return 0;
+	}
+}

@@ -1,0 +1,32 @@
+struct Bio {
+	int id;
+	int list[100];
+	float price;
+};
+
+struct Bio newBio(int id, float p){
+	struct Bio b;
+	struct Bio bb;
+	int i = 0;
+	float bb = 3.0;
+	b.id = id;
+	b.price = p;
+	while(i < 0) {
+		b.list[i] = 0;
+		i = i + 1;
+	}
+	return b;
+}
+
+float main() {
+	struct Bio b = newBio(12,3.5);
+	float id = 1.2;
+	int list[100];
+	int i = 0;
+	while(i < 100) {
+		float i = 3.0;
+		list[i] = b.list[i];
+		i = i + 1;	
+	}
+	return id;
+}

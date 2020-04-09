@@ -1,0 +1,7 @@
+int main(int x1, int x2) {
+	int p = x1;
+	int i = 3;
+	int k = x2 + p;
+	i = x1 + x3;
+	return k;
+}

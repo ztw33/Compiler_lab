@@ -1,0 +1,25 @@
+struct Cake{
+	int name;
+	float weight;
+	int size;
+}c;
+
+struct Candle{
+	struct Cake cc;
+	int number;
+	float length;
+}can;
+
+int main() {
+	int wei = 3;
+	int s = 2;
+	int num = 15;
+	float len = 1.2;
+	can.cc = c;
+	c.name = 0;
+	c.weight = wei;
+	c.size = s;
+	can.number = num;
+	can.length = len;
+	return 0;
+}

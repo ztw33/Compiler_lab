@@ -1,0 +1,22 @@
+Error Type 15 at Line 84: Redefined field.
+Error Type 15 at Line 87: Initialize field at definition time.
+Error Type 10 at Line 100: This variable is not an array.
+Error Type 13 at Line 100: Illegal use of ".".
+Error Type 7 at Line 100: Type mismatched for operands.
+Error Type 1 at Line 103: Undefined variable.
+Error Type 7 at Line 103: Type mismatched for operands.
+Error Type 2 at Line 106: Undefined function.
+Error Type 11 at Line 106: This variable is not a function.
+Error Type 7 at Line 106: Type mismatched for operands.
+Error Type 5 at Line 106: Type mismatched for assignment.
+Error Type 4 at Line 122: Redefined function.
+Error Type 5 at Line 129: Type mismatched for assignment.
+Error Type 16 at Line 135: Duplicated name.
+Error Type 14 at Line 170: Non-existent field.
+Error Type 5 at Line 170: Type mismatched for assignment.
+Error Type 3 at Line 199: Redefined variable.
+Error Type 7 at Line 458: Type mismatched for operands.
+Error Type 6 at Line 761: The left-hand side of an assignment must be a variable.
+Error Type 9 at Line 769: Function is not applicable for arguments.
+Error Type 17 at Line 972: Undefined structure.
+Error Type 8 at Line 2044: Type mismatched for return.

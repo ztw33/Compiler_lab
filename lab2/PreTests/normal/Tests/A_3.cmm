@@ -1,0 +1,13 @@
+struct Danger{
+	int what;
+	int up;
+}d;
+
+int main(){
+	struct Danger x1;
+	int x2 = 3;
+	float Danger = 1.2;
+	x1.what = x2;
+	x1.up = 0;
+	return x1.what;
+}

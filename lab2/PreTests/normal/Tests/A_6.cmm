@@ -1,0 +1,13 @@
+int add(int a, int b){
+	return a + b;
+}
+
+int main() {
+	int i = 10;
+	int sum = 0;
+	while (i > 0) {
+		sum = add(sum, i);
+		add(i, -1) = i;
+	}
+	return sum;
+}

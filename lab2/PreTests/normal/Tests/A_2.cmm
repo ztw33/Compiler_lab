@@ -1,0 +1,20 @@
+struct Student{
+	int id;
+	int weight;
+	int grades;
+};
+
+int newStudent(int a, int b) {
+	struct Student st;
+	st.id = a;
+	st.weight = b;
+	st.grades = 0;
+	return 0;
+}
+
+int main() {
+	int k = 3;
+	int p = 14;
+	newStdent(k, p);
+	return 0;
+}

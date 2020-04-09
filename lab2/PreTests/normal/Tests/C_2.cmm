@@ -1,0 +1,40 @@
+struct Actor{
+	int age;
+	int hair;
+}Di;
+
+struct Actress{
+	int height;
+	float cup;
+}M;
+
+struct Actor newGuy(int a, int h) {
+	struct Actor ac;
+	ac.age = a;
+	ac.hair = h;
+	return ac;
+}
+
+struct Actress newGal(int hh, float cc) {
+	struct Actress as;
+	as.height = hh;
+	as.cup = cc;
+	return as;
+}
+
+struct Actor newGay(int aa, int hhh, int bbb) {
+	struct Actor gay;
+	gay.age = aa + bbb;
+	gay.hair = hhh;
+}
+
+int numberOfHair(struct Actor random) {
+	return random.hair;
+}
+
+int main(){
+	struct Actor cap = newGuy(1, 2);
+	Di.age = cap.age;
+	Di.hair = cap.hair;
+	return newGal(Di.age, 1.5).height;
+}

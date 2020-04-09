@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
     // yydebug = 1;
     yyparse();
     if (errorNum == 0) {
-        printSyntaxTree(syntaxTreeRootNode);
+        // printSyntaxTree(syntaxTreeRootNode);
         sementicAnalysis(syntaxTreeRootNode);
     }
     destroySyntaxTree(syntaxTreeRootNode);

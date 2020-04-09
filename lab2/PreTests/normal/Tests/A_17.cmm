@@ -1,0 +1,21 @@
+struct Spider {
+	int legs;
+	float weight;
+}man;
+
+struct Venom{
+	int height;
+	int gender;
+}edi;
+
+struct Carnage{
+	int number;
+	float sex;
+}end;
+
+int main() {
+	struct Spider p;
+	struct Venom vv;
+	struct Cranage cc;
+	return 0;
+}

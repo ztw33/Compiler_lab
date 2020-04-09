@@ -1,0 +1,14 @@
+struct Food {
+	int cal;
+	int name, price;
+	float name1;
+};
+
+int main() {
+	struct person {
+		struct Food burger;
+		int age;
+		float time, burger;
+	}p;
+	return 0;
+}

@@ -1,0 +1,110 @@
+Error Type 15 at Line 96: try to init struct member when define it
+Error Type 15 at Line 97: try to init struct member when define it
+Error Type 15 at Line 98: redefined struct member
+Error Type 15 at Line 99: redefined struct member
+Error Type 15 at Line 100: try to init struct member when define it
+Error Type 15 at Line 101: try to init struct member when define it
+Error Type 10 at Line 111: subscripted value is not an array
+Error Type 12 at Line 111: subscript is not integer
+Error Type 7 at Line 111: mismatched operands
+Error Type 11 at Line 112: called object isn't function
+Error Type 10 at Line 112: subscripted value is not an array
+Error Type 12 at Line 112: subscript is not integer
+Error Type 10 at Line 113: subscripted value is not an array
+Error Type 12 at Line 113: subscript is not integer
+Error Type 2 at Line 113: undefined function
+Error Type 2 at Line 114: undefined function
+Error Type 1 at Line 115: undefined variable
+Error Type 17 at Line 116: use undefined struct
+Error Type 10 at Line 118: subscripted value is not an array
+Error Type 12 at Line 118: subscript is not integer
+Error Type 1 at Line 118: undefined variable
+Error Type 11 at Line 118: called object isn't function
+Error Type 6 at Line 119: assign to rvalue
+Error Type 11 at Line 119: called object isn't function
+Error Type 6 at Line 120: assign to rvalue
+Error Type 1 at Line 120: undefined variable
+Error Type 12 at Line 121: subscript is not integer
+Error Type 1 at Line 121: undefined variable
+Error Type 1 at Line 121: undefined variable
+Error Type 14 at Line 122: request nonexistent member
+Error Type 12 at Line 123: subscript is not integer
+Error Type 13 at Line 123: request member from something not an struct
+Error Type 14 at Line 123: request nonexistent member
+Error Type 13 at Line 124: request member from something not an struct
+Error Type 2 at Line 124: undefined function
+Error Type 1 at Line 126: undefined variable
+Error Type 5 at Line 126: mismatched assignment
+Error Type 1 at Line 127: undefined variable
+Error Type 13 at Line 127: request member from something not an struct
+Error Type 2 at Line 129: undefined function
+Error Type 14 at Line 130: request nonexistent member
+Error Type 11 at Line 130: called object isn't function
+Error Type 6 at Line 131: assign to rvalue
+Error Type 11 at Line 131: called object isn't function
+Error Type 1 at Line 131: undefined variable
+Error Type 14 at Line 132: request nonexistent member
+Error Type 14 at Line 132: request nonexistent member
+Error Type 14 at Line 134: request nonexistent member
+Error Type 14 at Line 134: request nonexistent member
+Error Type 8 at Line 137: mismatched return
+Error Type 4 at Line 139: redefined function
+Error Type 3 at Line 141: redefined variable
+Error Type 7 at Line 149: mismatched operands
+Error Type 6 at Line 152: assign to rvalue
+Error Type 6 at Line 154: assign to rvalue
+Error Type 5 at Line 161: mismatched assignment
+Error Type 5 at Line 165: mismatched assignment
+Error Type 5 at Line 175: mismatched assignment
+Error Type 6 at Line 184: assign to rvalue
+Error Type 5 at Line 184: mismatched assignment
+Error Type 5 at Line 187: mismatched assignment
+Error Type 6 at Line 188: assign to rvalue
+Error Type 6 at Line 189: assign to rvalue
+Error Type 5 at Line 192: mismatched assignment
+Error Type 5 at Line 196: mismatched assignment
+Error Type 5 at Line 201: mismatched assignment
+Error Type 6 at Line 202: assign to rvalue
+Error Type 8 at Line 205: mismatched return
+Error Type 16 at Line 208: struct id duplicated with normal id :(
+Error Type 16 at Line 212: struct id duplicated with normal id :(
+Error Type 16 at Line 216: struct id duplicated with normal id :(
+Error Type 16 at Line 220: struct id duplicated with normal id :(
+Error Type 3 at Line 226: redefined variable
+Error Type 9 at Line 273: invocation arguments mismatched
+Error Type 17 at Line 298: use undefined struct
+Error Type 3 at Line 304: redefined variable
+Error Type 17 at Line 305: use undefined struct
+Error Type 9 at Line 313: invocation arguments mismatched
+Error Type 3 at Line 340: redefined variable
+Error Type 9 at Line 346: invocation arguments mismatched
+Error Type 8 at Line 364: mismatched return
+Error Type 17 at Line 368: use undefined struct
+Error Type 9 at Line 449: invocation arguments mismatched
+Error Type 9 at Line 456: invocation arguments mismatched
+Error Type 8 at Line 471: mismatched return
+Error Type 9 at Line 564: invocation arguments mismatched
+Error Type 17 at Line 566: use undefined struct
+Error Type 3 at Line 568: redefined variable
+Error Type 8 at Line 570: mismatched return
+Error Type 8 at Line 574: mismatched return
+Error Type 3 at Line 579: redefined variable
+Error Type 3 at Line 581: redefined variable
+Error Type 9 at Line 601: invocation arguments mismatched
+Error Type 9 at Line 602: invocation arguments mismatched
+Error Type 17 at Line 663: use undefined struct
+Error Type 3 at Line 665: redefined variable
+Error Type 17 at Line 666: use undefined struct
+Error Type 9 at Line 775: invocation arguments mismatched
+Error Type 17 at Line 782: use undefined struct
+Error Type 3 at Line 784: redefined variable
+Error Type 8 at Line 858: mismatched return
+Error Type 17 at Line 917: use undefined struct
+Error Type 8 at Line 980: mismatched return
+Error Type 7 at Line 987: mismatched operands
+Error Type 7 at Line 992: mismatched operands
+Error Type 7 at Line 1004: mismatched operands
+Error Type 7 at Line 1008: mismatched operands
+Error Type 7 at Line 1010: mismatched operands
+Error Type 7 at Line 1018: mismatched operands
+Error Type 7 at Line 1021: mismatched operands

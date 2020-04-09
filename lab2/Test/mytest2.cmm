@@ -1,0 +1,3 @@
+int func(int i[1][1]) {
+    func(i);
+}

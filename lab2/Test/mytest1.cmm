@@ -1,0 +1,7 @@
+struct {int a;} A1;
+struct {};
+struct {int b;} A2;
+
+int main() {
+    A1 = A2;
+}

@@ -1,0 +1,28 @@
+struct Javalin{
+	int head;
+	int shoulder;
+	float foot;
+	struct Pilot{
+		int gender;
+		int age;
+	}freelancer;
+};
+
+struct Anthem{
+	struct Javalin army[100];
+	int missions[100];
+}game;
+
+int main() {
+	int i = 0;
+	struct Javalin lin;
+	while(i < 100) {
+		game.army[i] = lin;
+		i = i + 1;
+		lin.head = i;
+		lin.shoulder = i * i;
+		lin.freelancer.gender = i / 2;
+		lin.age = i * 2; 
+	}
+	return i;
+}

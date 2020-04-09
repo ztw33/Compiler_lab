@@ -1,0 +1,37 @@
+struct Square{
+	int length;
+	int width;
+};
+
+int compare(int a, int b);
+
+int generate(int t) {
+	return 5*3;
+}
+
+int compare(int a, int b){
+	return a * b;
+}
+
+struct Square ChangeSquare(int ttt, int kkk);
+
+struct Square newSquare(int l, float w);
+
+int main(){
+	int aaa = 3;
+	int bbb = generate(12);
+	int tt = compare(aaa,bbb);
+	struct Square ss = newSquare(tt, aaa);
+	return 0; 
+}
+
+int newSquare(int l, int w);
+
+struct Square newSquare(int l, int w){
+	struct Square sq;
+	sq.length = l;
+	sq.width = w;
+	return sq;
+}
+
+

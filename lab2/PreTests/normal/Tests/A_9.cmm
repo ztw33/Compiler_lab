@@ -1,0 +1,23 @@
+int compareInt(int a, int b) {
+	if (a == b) {
+		return 0;
+	} else {
+		return -1;
+	}
+}
+
+float compareFloat(float aa, float bb) {
+	return aa - bb;
+}
+
+int main() {
+	int i = 3;
+	int j = 4;
+	float p = 1.2;
+	float k = 2.3;
+	if(i == 4) {
+		return compareInt(i,j);
+	} else {
+		return compareInt(j,k);
+	}
+}

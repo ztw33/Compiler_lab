@@ -1,0 +1,22 @@
+struct Apple{
+	int size;
+	int price;
+};
+
+struct Apples{
+	struct Apple a[100];
+	struct Bucket{
+		struct base {
+			int s;
+			float t;
+		}bb;
+		int p;
+	}buck;
+}lots;
+
+int main() {
+	struct Product {
+		struct Apples app = lots;
+	}pro;
+	return 0;
+}

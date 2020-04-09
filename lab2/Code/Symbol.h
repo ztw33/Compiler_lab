@@ -13,12 +13,12 @@ typedef struct SymbolList SymbolList;
 
 struct Type_ {
     enum { BASIC, ARRAY, STRUCTURE } kind;
+    bool Rvalue; // 是否为右值
     union {
         enum { INT, FLOAT } basic; // 基本类型
         struct { Type* elem; int size; } array; // 数组类型信息包括元素类型与数组大小构成
         struct { char* name; Field* fields; } structure; // 结构体类型信息包括结构体名和结构体域
     };
-    bool Rvalue; // 是否为右值
 };
 
 struct Field_ {

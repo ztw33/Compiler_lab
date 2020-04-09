@@ -1,0 +1,19 @@
+struct Paper{
+	int name;
+	int words[100];
+}pp;
+
+int main() {
+	struct Paper papers[10][10];
+	int i = 0;
+	int j = 0;
+	while (i < 10) {
+		pp.words[i+j] = j;
+		while (j < 10) {
+			papers[i][j].words[i] = i + j;
+			j = j + 1;
+		}
+		i = i + 1;
+	}
+	return pp[i+j];
+}

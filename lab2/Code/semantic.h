@@ -7,11 +7,11 @@
 
 // 全局变量
 HashSet symbolTable;
-int lastErrorLineno;
 Type typeInt;
 Type typeFloat;
 #define TYPE_INT &typeInt
 #define TYPE_FLOAT &typeFloat
+int unnamedCount;
 
 typedef struct Node Node;
 

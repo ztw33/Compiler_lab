@@ -1,0 +1,54 @@
+struct Leaf{
+	int number;
+	int isGreen;
+};
+
+struct Tree {
+	struct Leaf leaves[100];
+	int height;
+	float weight;
+	int hasFruit;
+};
+
+struct AppleTree {
+	struct Tree t;
+	int numberApple;
+	float priceApple;
+	int highQuality;
+};
+
+struct AppleTree newAppleTree() {
+	int i = 0;
+	int x = 1;
+	struct AppleTree at = x();
+	struct Tree tt;
+	struct Leaf sto[100];
+	while (i < 100) {
+		sto[i].number = x;
+		tt.leaves[i].number = sto[i].number;
+		sto[i].isGreen = 1;
+		tt.leaves[i].isGreen = sto[i].isGreen;
+		i = i + 1;
+	}
+	tt.height = 100;
+	tt.weight = 2.5;
+	tt.hasFruit = 0;
+	at.numberApple = 1;
+	at.priceApple = 1.2;
+	i = 0;
+	while(i < 100) {
+		at.t[i].leaves[i].number = tt.leaves[i].number;
+		at.t.leaves[i].isGreen = tt.leaves[i].isGreen;
+		i = i + 1;
+	}
+	at.t.height = tt.height;
+	at.t.weight = tt.weight;
+	at.hasFruit = 1;
+	at.highQuality = at.t.hasFruit * at.t.weight;
+	return at;
+}
+
+int main() {
+	struct AppleTree aat = newAppleTree();
+	return 0;
+}

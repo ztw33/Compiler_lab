@@ -1,0 +1,25 @@
+struct Pad{
+	int size;
+	int storage;
+};
+
+int iPad(int ss, int st) {
+	struct Pad ip;
+	ip.size = ss;
+	ip.storage = st;
+	return ss;
+}
+
+int miPad(int s, int t) {
+	struct Mi{
+		struct Pad core;
+		int brand;		
+	}myMi;
+	myMi.core = myMi(s,t);
+	myMi.brand = 0;
+	return 0;
+}
+
+int main() {
+	return miPad(3,4);
+}

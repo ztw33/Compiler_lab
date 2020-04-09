@@ -1,0 +1,43 @@
+struct A{
+	int a;
+	int aArr[100][12];
+	struct AA{
+		float aType[12];
+	}aNode;
+};
+
+struct B{
+	int b;
+	int Barr[12][15];
+	struct BB{
+		float bType[26];
+	}bNode;
+};
+
+struct C{
+	int c;
+	float bArr[10][12][23];
+	struct CC{
+		int cType;
+	}cNode;
+};
+
+struct D{
+	int d;
+	float dArr[100][5][23];
+	struct DD{
+		int h;
+	}dNode;
+};
+
+int main(){
+	struct A tempA, tempA2;
+	struct B tempB, tempB2;
+	struct C tempC, tempC2;
+	struct D tempD, tempD2;
+	tempA = tempB;
+	tempC = tempD;
+	tempA2 = tempA;
+	tempD = tempD2;
+	return 0;
+}

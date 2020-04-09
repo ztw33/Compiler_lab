@@ -132,17 +132,17 @@ bool usedThisProd(const Node* father, int nodeNum, ...) {
 
 void initGlobalVar() {
     symbolTable = initHashSet(HASH_SIZE);
-    lastErrorLineno = 0;
-    typeInt.kind = BASIC; typeInt.basic = INT;
-    typeFloat.kind = BASIC; typeFloat.basic = FLOAT;
+    typeInt.kind = BASIC; typeInt.basic = INT; typeInt.Rvalue = false;
+    typeFloat.kind = BASIC; typeFloat.basic = FLOAT; typeInt.Rvalue = false;
+    unnamedCount = 0;
 }
 
 void sementicAnalysis(const Node* syntaxTreeRoot) {
-    // if(debug) 
+    if(debug) 
         printf("\n---------Sementic Analysis---------\n");
     initGlobalVar();
     analyseProgram(syntaxTreeRoot);
-    // if(debug) 
+    if(debug) 
         printSymbolTable(symbolTable);
 }
 
@@ -247,11 +247,13 @@ Type* analyseTYPE(const Node* TYPE) {
         Type* newType = (Type*)malloc(sizeof(Type));
         newType->kind = BASIC;
         newType->basic = INT;
+        newType->Rvalue = false;
         return newType;
     } else if (equalString(TYPE->stringVal, "float")) {
         Type* newType = (Type*)malloc(sizeof(Type));
         newType->kind = BASIC;
         newType->basic = FLOAT;
+        newType->Rvalue = false;
         return newType;
     } else {
         fprintf(stderr, "\033[31mERROR in analyseTYPE! Unknown TYPE!\033[0m\n");
@@ -277,8 +279,23 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
     } else if (usedThisProd(StructSpecifier, 4, "STRUCT", "LC", "DefList", "RC")) {
         //StructSpecifier := STRUCT OptTag(== NULL) LC DefList(!=NULL) RC
         if(debug) printf("StructSpecifier := STRUCT OptTag(== NULL) LC DefList(!=NULL) RC\n");
-        // TODO
 
+        unnamedCount++;
+        char name[32]; // 为每个匿名结构体生成一个独一无二的名字: {id}_unnamed
+        sprintf(name, "%d_unnamed", unnamedCount);
+        char* structName = (char*)malloc(32*sizeof(char));
+        strcpy(structName, name);
+        
+        Type* newStruct = (Type*)malloc(sizeof(Type));
+        newStruct->kind = STRUCTURE;
+        newStruct->Rvalue = false;
+        newStruct->structure.name = structName;
+        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling, FIELD);
+        
+        Symbol* symbol = createSymbol(structName, STRUCT);
+        symbol->type = newStruct;
+        insert(symbolTable, symbol);
+        return newStruct;
     } else if (usedThisProd(StructSpecifier, 5, "STRUCT", "OptTag", "LC", "DefList", "RC")) {
         //StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(!=NULL) RC
         if(debug) printf("StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(!=NULL) RC\nOptTag := ID\n");
@@ -291,6 +308,7 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
         }
         Type* newStruct = (Type*)malloc(sizeof(Type));
         newStruct->kind = STRUCTURE;
+        newStruct->Rvalue = false;
         newStruct->structure.name = ID->stringVal;
         newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling->nextSibling, FIELD);
         if (insertFlag) {
@@ -299,9 +317,48 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
             insert(symbolTable, symbol);
         }
         return newStruct;
-    } 
-    // TODO: DefList == NULL的情况
-    else {
+    } else if (usedThisProd(StructSpecifier, 3, "STRUCT", "LC", "RC")) {
+        //StructSpecifier := STRUCT OptTag(== NULL) LC DefList(==NULL) RC
+        if(debug) printf("StructSpecifier := STRUCT OptTag(== NULL) LC DefList(==NULL) RC\n");
+
+        unnamedCount++;
+        char name[32]; // 为每个匿名结构体生成一个独一无二的名字: {id}_unnamed
+        sprintf(name, "%d_unnamed", unnamedCount);
+        char* structName = (char*)malloc(32*sizeof(char));
+        strcpy(structName, name);
+
+        Type* newStruct = (Type*)malloc(sizeof(Type));
+        newStruct->kind = STRUCTURE;
+        newStruct->Rvalue = false;
+        newStruct->structure.name = structName;
+        newStruct->structure.fields = NULL;
+        
+        Symbol* symbol = createSymbol(structName, STRUCT);
+        symbol->type = newStruct;
+        insert(symbolTable, symbol);
+        return newStruct;
+    } else if(usedThisProd(StructSpecifier, 4, "STRUCT", "OptTag", "LC", "RC")) {
+        //StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(==NULL) RC
+        if(debug) printf("StructSpecifier := STRUCT OptTag(!= NULL) LC DefList(==NULL) RC\n");
+
+        Node* ID = StructSpecifier->firstChild->nextSibling->firstChild;
+        bool insertFlag = true;
+        if (contains(symbolTable, ID->stringVal, STRUCT)) {
+            printSemanticError(16, ID->lineNum, "Duplicated name");
+            insertFlag = false;
+        }
+        Type* newStruct = (Type*)malloc(sizeof(Type));
+        newStruct->kind = STRUCTURE;
+        newStruct->Rvalue = false;
+        newStruct->structure.name = ID->stringVal;
+        newStruct->structure.fields = NULL;
+        if (insertFlag) {
+            Symbol* symbol = createSymbol(ID->stringVal, STRUCT);
+            symbol->type = newStruct;
+            insert(symbolTable, symbol);
+        }
+        return newStruct;
+    } else {
         fprintf(stderr, "\033[31mERROR in analyseStructSpecifier! No matched production.\033[0m\n");
         return NULL;
     }
@@ -552,6 +609,7 @@ Symbol* analyseVarDec(const Node* VarDec, SymbolKind kind, Type* type) {
         if (elem != NULL) {
             Type* arrayType = (Type*)malloc(sizeof(Type));
             arrayType->kind = ARRAY;
+            arrayType->Rvalue = false;
             arrayType->array.elem = elem->type;
             arrayType->array.size = VarDec->firstChild->nextSibling->nextSibling->intVal;
             elem->type = arrayType;
@@ -572,12 +630,16 @@ Type* analyseExp(const Node* Exp) {
         Type* left = analyseExp(Exp->firstChild);
         Type* right = analyseExp(Exp->firstChild->nextSibling->nextSibling);
         
+        if (left != NULL && left->Rvalue) {
+            printSemanticError(6, Exp->firstChild->lineNum, "The left-hand side of an assignment must be a variable");
+            if (!equalType(left, right)) {
+                printSemanticError(5, Exp->firstChild->nextSibling->lineNum, "Type mismatched for assignment");
+            }
+        }
         if (!equalType(left, right)) {
             printSemanticError(5, Exp->firstChild->nextSibling->lineNum, "Type mismatched for assignment");
         }
-        if (left != NULL && left->Rvalue) {
-            printSemanticError(6, Exp->firstChild->lineNum, "The left-hand side of an assignment must be a variable");
-        }
+    
         if (left != NULL)
             return left;
         else
@@ -700,6 +762,9 @@ Type* analyseExp(const Node* Exp) {
         Type* indexType = analyseExp(Exp->firstChild->nextSibling->nextSibling);
         if (varType->kind != ARRAY) {
             printSemanticError(10, Exp->firstChild->lineNum, "This variable is not an array");
+            if (!equalType(indexType, TYPE_INT)) {
+                printSemanticError(12, Exp->firstChild->nextSibling->nextSibling->lineNum, "Expression between \"[]\" is not an integer");
+            }
             return NULL;
         }
         if (!equalType(indexType, TYPE_INT)) {
@@ -889,7 +954,7 @@ Param* analyseParamDec(const Node* ParamDec) {
         Type* type = analyseSpecifier(ParamDec->firstChild);
         Symbol* symbol = analyseVarDec(ParamDec->firstChild->nextSibling, VAR, type);
         Param* param = (Param*)malloc(sizeof(Param));
-        param->type = type;
+        param->type = symbol->type;
         param->next = NULL;
         return param;
     } else {
@@ -899,8 +964,5 @@ Param* analyseParamDec(const Node* ParamDec) {
 }
 
 void printSemanticError(int errorType, int lineNum, char* msg) {
-    if (lastErrorLineno != lineNum) {
-        fprintf(stderr, "Error type %d at Line %d: %s.\n", errorType, lineNum, msg);
-        lastErrorLineno = lineNum;
-    }     
+    fprintf(stderr, "Error type %d at Line %d: %s.\n", errorType, lineNum, msg);
 }

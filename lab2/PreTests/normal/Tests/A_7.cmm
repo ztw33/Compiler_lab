@@ -1,0 +1,25 @@
+struct IntArray{
+	int id;
+	int ia[10];
+};
+
+struct FloatArray{
+	int name;
+	float fa[10];
+};
+
+int main(){
+	struct IntArray inta;
+	struct FloatArray floa;
+	int i = 0;
+	int k = 1;
+	float p = 1.0;
+	while (i < 10) {
+		i = i + k;
+		inta.ia[i] = k;
+		k = k + 1;
+		floa.fa[i] = p;
+		p = p + 1;	
+	}
+	return 0;
+}

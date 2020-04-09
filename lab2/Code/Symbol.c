@@ -28,6 +28,7 @@ void printType(Type* type) {
     }
     char *k[] = {"BASIC", "ARRAY", "STRUCTURE"};
     printf("type kind: %s\n", k[type->kind]);
+    printf("Rvalue: %s\n", type->Rvalue ? "yes" : "no");
     if (type->kind == BASIC) {
         char *b[] = {"INT", "FLOAT"};
         printf("basic: %s\n", b[type->basic]);

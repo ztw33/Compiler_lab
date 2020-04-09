@@ -1,0 +1,24 @@
+int main() {
+	int fib[100];
+	int i = 0, a = 1, b = 1;
+	int tem;
+	float floatFib[100];
+	float fa = 1.0, fb = 1.0;
+	float ftem;
+	while (i < 100) {
+		fib[i] = a + b;
+		tem = a + b;
+		a = b;
+		b = tem;
+		i = i + 1;
+	}
+	i = 0;
+	while (i < 100) {
+		ftem = fa + fb;
+		floatFib[ftem] = ftem;
+		fa = fb;
+		fb = ftem;
+		i = i + 1;
+	}
+	return i;
+} 

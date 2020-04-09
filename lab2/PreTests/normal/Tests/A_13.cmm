@@ -1,0 +1,18 @@
+struct Building{
+	struct base{
+		int size;
+		float height;	
+	}b;
+	int bh;
+}Yangzhou;
+
+int main(){
+	struct Building newOne;
+	Yangzhou.b.size = 1;
+	Yangzhou.b.height = 3.4;
+	Yangzhou.bh = 100;
+	newOne.b.size = Yangzhou.b.size;
+	newOne.bh.height = Yangzhou.b.height;
+	newOne.bh = Yangzhou.bh;
+	return 0;
+}
