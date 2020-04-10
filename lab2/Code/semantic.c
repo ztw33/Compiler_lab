@@ -271,7 +271,12 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
         Node* ID = StructSpecifier->firstChild->nextSibling->firstChild;
         if (contains(symbolTable, ID->stringVal, STRUCT)) {
             Symbol* struct_ = get(symbolTable, ID->stringVal, STRUCT);
-            return struct_->type;
+            if (struct_ == NULL) {
+                printSemanticError(17, ID->lineNum, "Undefined structure");
+                return NULL;
+            } else {
+                return struct_->type;
+            }
         } else {
             printSemanticError(17, ID->lineNum, "Undefined structure");
             return NULL;
