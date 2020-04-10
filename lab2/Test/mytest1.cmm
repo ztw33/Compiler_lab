@@ -1,7 +1,19 @@
 struct {int a;} A1;
-struct {};
+struct S {} S1;
 struct {int b;} A2;
+struct {int c; float d;} A3;
+struct {float e; int f;} A4;
 
 int main() {
+    int B1[2][3];
+    int B2[5][6];
+    float B3[2];
+    int B4[4];
+    B1 = B2;
+    B1 = B4;
+    B3 = B4;
+    B1 = B3;
     A1 = A2;
+    A1 = S;
+    A3 = A4;
 }

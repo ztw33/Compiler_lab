@@ -85,6 +85,7 @@ Symbol* get(HashSet set, char* name, SymbolKind kind) {
     }
 }
 
+
 unsigned int hash_pjw(char* name) {
     unsigned int val = 0, i;
     for (; *name; ++name) {

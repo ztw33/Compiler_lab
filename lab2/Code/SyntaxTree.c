@@ -88,7 +88,7 @@ void destroySyntaxTree(struct Node* rootNode) {
         destroySyntaxTree(curNode);
         curNode = nextNode;
     }
-    if ((strcmp(rootNode->nodeName, "TYPE") == 0) || (strcmp(rootNode->nodeName, "ID") == 0)) {
+    if (rootNode->nodeName != NULL && ((strcmp(rootNode->nodeName, "TYPE") == 0) || (strcmp(rootNode->nodeName, "ID") == 0))) {
         free(rootNode->stringVal);
         rootNode->stringVal = NULL;
     }

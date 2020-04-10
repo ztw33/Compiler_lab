@@ -4,6 +4,12 @@ def extract(oldS):
     oldS = oldS[: oldS.find(":")]
     return re.sub('[^a-zA-Z0-9]', '', oldS)
 
+def templateMatch(line):
+    if re.match("ErrorType[0-9]+atLine[0-9]+", line) is None:
+        return False
+    else:
+        return True
+
 def compare(output, correctOutput):
     dict_o = {}
     dict_c = {}
@@ -23,6 +29,11 @@ def compare(output, correctOutput):
         for k in dict_c.keys():
             if not k in dict_o:
                 print(k)
+                return False
+        
+        for line in dict_o.keys():
+            if not templateMatch(line):
+                print(line)
                 return False
         return True
 

@@ -802,9 +802,15 @@ Type* analyseExp(const Node* Exp) {
             Symbol* symbol = get(symbolTable, ID->stringVal, VAR);
             if (symbol != NULL) {
                 return symbol->type;
-            } else {
-                fprintf(stderr, "\033[31mERROR in analyseExp when get var symbol from table! .\033[0m\n");
-                return NULL;
+            } else { // 由于contains函数实现的原因，可能有重名但类型不是VAR的元素也被认为被包含了
+                Symbol* wrongSymbol = get(symbolTable, ID->stringVal, FIELD);
+                if (wrongSymbol == NULL) {
+                    wrongSymbol = get(symbolTable, ID->stringVal, STRUCT);
+                }
+                if (wrongSymbol == NULL) {
+                    fprintf(stderr, "\033[31mERROR in analyseExp when get var symbol from table! ID_name:%s\033[0m\n", ID->stringVal);
+                }
+                return wrongSymbol->type;
             }
         } else {
             printSemanticError(1, ID->lineNum, "Undefined variable");

@@ -15,7 +15,7 @@ typedef struct Bucket_ {
 
 struct HashSet_ {
     int size;
-    Bucket* buckets;
+    Bucket* buckets; // 数组
 };
 
 HashSet initHashSet(int size);
@@ -24,6 +24,5 @@ void insert(HashSet set, Symbol* symbol);
 Symbol* get(HashSet set, char* name, SymbolKind kind);
 
 unsigned int hash_pjw(char* name);
-
 
 #endif
