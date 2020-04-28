@@ -195,11 +195,25 @@ void analyseExtDef(const Node* ExtDef) {
         //ExtDef := Specifier FunDec CompSt
         if(debug) printf("ExtDef := Specifier FunDec CompSt\n");
         Type* type = analyseSpecifier(ExtDef->firstChild);
-        if (type != NULL) {
-            type->Rvalue = true; // 函数返回值都是右值
+        
+        /* 写错了的地方 */
+        // if (type != NULL) {
+        //     type->Rvalue = true; // 函数返回值都是右值
+        // }
+        /* 修改 */
+        // 函数返回值都是右值, 但是要新建一个结构体啊！
+        Type* newType = (Type*)malloc(sizeof(Type));
+        newType->kind = type->kind;
+        if (newType->kind == BASIC) {
+            newType->basic = type->basic;
+        } else if (newType->kind == ARRAY) {
+            newType->array = type->array;
+        } else {
+            newType->structure = type->structure;
         }
+        newType->Rvalue = true;
 
-        Symbol* funDec = analyseFunDec(ExtDef->firstChild->nextSibling, type);
+        Symbol* funDec = analyseFunDec(ExtDef->firstChild->nextSibling, newType);
         analyseCompSt(ExtDef->firstChild->nextSibling->nextSibling, funDec);
     } else {
         fprintf(stderr, "\033[31mERROR in analyseExtDef! No matched production.\033[0m\n");
