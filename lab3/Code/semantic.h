@@ -13,9 +13,6 @@ Type typeFloat;
 #define TYPE_FLOAT &typeFloat
 int unnamedCount;
 
-typedef struct Node Node;
-
-
 void sementicAnalysis(const Node* syntaxTreeRootNode);
 void analyseProgram(const Node* Program);
 void analyseExtDefList(const Node* ExtDefList);
@@ -39,6 +36,7 @@ Param* analyseVarList(const Node* VarList);
 Param* analyseParamDec(const Node* ParamDec);
 
 bool equalString(char* s1, char* s2);
+bool usedThisProd(const Node* father, int nodeNum, ...);
 
 void printSemanticError(int errorType, int lineNum, char* msg);
 

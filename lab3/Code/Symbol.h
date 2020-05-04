@@ -2,6 +2,7 @@
 #define __SYMBOL__
 
 #include <stdbool.h>
+#include "InterCode.h"
 
 typedef struct Type_ Type;
 typedef struct Field_ Field;
@@ -35,7 +36,8 @@ struct Symbol_ {
     union {
         Type* type; // VAR & STRUCT & FIEID
         FuncSign* funcSign; // func
-    }; 
+    };
+    Variable* alias;  // just for VAR, 别名
 };
 
 struct Param_ {

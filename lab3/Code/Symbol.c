@@ -6,6 +6,7 @@ Symbol* createSymbol(char* name, SymbolKind kind) {
     Symbol* symbol = (Symbol*)malloc(sizeof(Symbol));
     symbol->name = name;
     symbol->symbolKind = kind;
+    symbol->alias = NULL;
     switch (kind) {
     case VAR:
     case FIELD:

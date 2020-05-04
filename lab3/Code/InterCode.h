@@ -1,8 +1,8 @@
 #ifndef __INTERCODE__
 #define __INTERCODE__
 
-int tCount = 0;
-int vCount = 0;
+extern int tCount;
+extern int vCount;
 
 typedef struct InterCode_ InterCode;
 typedef struct InterCodes_ InterCodes;
@@ -52,9 +52,10 @@ struct Variable_ {
     int id;
 };
 
+typedef enum RelopKind { EQ, NEQ, LT, GT, LE, GE } RelopKind;
 struct CondExp_ {
     Operand* op1;
-    enum { EQ, NEQ, LT, GT, LE, GE } relop;
+    RelopKind relop;
     Operand* op2;
 };
 
@@ -67,6 +68,7 @@ typedef struct CodesListHT {
 int getVarID(VarKind kind);
 Variable* createVar(VarKind kind);
 Operand* createOperand(OperandKind kind);
+CondExp* createCondExp(Operand* op1, RelopKind relop, Operand* op2);
 
 InterCode* createLABEL(int id);
 InterCode* createFUNCTION(char* funcName);

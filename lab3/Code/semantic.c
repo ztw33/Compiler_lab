@@ -130,17 +130,32 @@ bool usedThisProd(const Node* father, int nodeNum, ...) {
     return usedFlag;
 }
 
-void initGlobalVar() {
+void semanticInit() {
     symbolTable = initHashSet(HASH_SIZE);
     typeInt.kind = BASIC; typeInt.basic = INT; typeInt.Rvalue = false;
     typeFloat.kind = BASIC; typeFloat.basic = FLOAT; typeInt.Rvalue = false;
     unnamedCount = 0;
+
+    // 添加read和write
+    Symbol* read = createSymbol("read", FUNC);
+    read->funcSign->retType = TYPE_INT;
+    read->funcSign->paramNum = 0;
+    read->funcSign->paramList = NULL;
+    insert(symbolTable, read);
+    Symbol* write = createSymbol("write", FUNC);
+    write->funcSign->retType = TYPE_INT;
+    write->funcSign->paramNum = 1;
+    Param* param = (Param*)malloc(sizeof(Param));
+    param->type = TYPE_INT;
+    param->next = NULL;
+    write->funcSign->paramList = param;
+    insert(symbolTable, write);
 }
 
 void sementicAnalysis(const Node* syntaxTreeRoot) {
     if(debug) 
         printf("\n---------Sementic Analysis---------\n");
-    initGlobalVar();
+    semanticInit();
     analyseProgram(syntaxTreeRoot);
     if(debug) 
         printSymbolTable(symbolTable);

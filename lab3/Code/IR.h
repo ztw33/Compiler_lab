@@ -2,10 +2,11 @@
 #define __IR__
 
 #include "InterCode.h"
-#include <stddef.h>
+#include "SyntaxTree.h"
+#include <stdio.h>
 
-InterCodes* codesHead = NULL;
-InterCodes* codesTail = NULL;
+InterCodes* codesHead;
+InterCodes* codesTail;
 
 void addCode(InterCode* code);
 void addCodes(CodesListHT codes);
@@ -16,5 +17,15 @@ char* getOperandName(Operand* op);
 char* getRelop(CondExp* cond);
 
 InterCodes* generateIR(const Node* syntaxTreeRootNode);
+void translateProgram(const Node* Program);
+void translateExtDefList(const Node* ExtDefList);
+void translateExtDef(const Node* ExtDef);
+void translateFunDec(const Node* FunDec);
+void translateCompSt(const Node* CompSt);
+void translateVarList(const Node* VarList);
+void translateStmtList(const Node* StmtList);
+void translateStmt(const Node* Stmt);
+Operand* translateExp(const Node* Exp);
+
 
 #endif

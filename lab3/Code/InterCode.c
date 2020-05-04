@@ -1,5 +1,9 @@
 #include "InterCode.h"
 #include <stdio.h>
+#include <stdlib.h>
+
+int tCount = 0;
+int vCount = 0;
 
 int getVarID(VarKind kind) {
     if (kind == T) {
@@ -25,6 +29,14 @@ Operand* createOperand(OperandKind kind) {
     Operand* opr = (Operand*)malloc(sizeof(Operand));
     opr->kind = kind;
     return opr;
+}
+
+CondExp* createCondExp(Operand* op1, RelopKind relop, Operand* op2) {
+    CondExp* exp = (CondExp*)malloc(sizeof(CondExp));
+    exp->op1 = op1;
+    exp->relop = relop;
+    exp->op2 = op2;
+    return exp;
 }
 
 /* create IR */

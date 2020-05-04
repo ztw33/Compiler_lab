@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct Node Node;
+
 /* 
     * Type of the node:
     *  - NonTerm: Non-Terminal, line number should be printed
