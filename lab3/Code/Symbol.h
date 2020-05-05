@@ -29,7 +29,8 @@ struct Field_ {
 };
 
 // 符号类型：变量(程序变量&函数形参)；结构体域；结构体定义；函数定义
-typedef enum SymbolKind { VAR, FIELD, STRUCT, FUNC } SymbolKind;
+// Lab3新增CONST: 常数, 避免同一个常数被重复赋值
+typedef enum SymbolKind { VAR, FIELD, STRUCT, FUNC, CONST } SymbolKind;
 struct Symbol_ {
     char* name;
     SymbolKind symbolKind;
@@ -37,7 +38,7 @@ struct Symbol_ {
         Type* type; // VAR & STRUCT & FIEID
         FuncSign* funcSign; // func
     };
-    Variable* alias;  // just for VAR, 别名
+    Variable* alias;  // just for VAR & CONST, 别名
 };
 
 struct Param_ {

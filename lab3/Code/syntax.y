@@ -23,14 +23,14 @@
 }
 
 /* declared tokens */
-%token RELOP ASSIGNOP
+%token ASSIGNOP
 %token SEMI COMMA
 %token PLUS MINUS STAR DIV AND OR NOT
 %token DOT
 %token LP RP LB RB LC RC
 %token <type_int> INT
 %token <type_float> FLOAT
-%token <type_string> ID TYPE
+%token <type_string> ID TYPE RELOP
 %token IF ELSE WHILE STRUCT RETURN
 
 /* declared non-terminals */
@@ -588,6 +588,7 @@ Exp : Exp ASSIGNOP Exp {
         }
     | Exp RELOP Exp {
             struct Node* nodeRELOP = createNewNode("RELOP", NonValToken, @2.first_line);
+            nodeRELOP->stringVal = $2;
             struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
             buildRel(nodeExp, 3, $1, nodeRELOP, $3);
             $$ = nodeExp;
@@ -782,6 +783,7 @@ Exp : Exp ASSIGNOP Exp {
             if (isNewError(@3.first_line)) {
                 printError('B', @3.first_line, "Syntax error in Exp");
                 struct Node* nodeRELOP = createNewNode("RELOP", NonValToken, @2.first_line);
+                nodeRELOP->stringVal = $2;
                 struct Node* nodeError = createNewNode("error", NonValToken, @3.first_line);              
                 struct Node* nodeExp = createNewNode("Exp", NonTerm, @$.first_line);
                 buildRel(nodeExp, 3, $1, nodeRELOP, nodeError);

@@ -22,7 +22,10 @@ RELOP   ">"|"<"|">="|"<="|"=="|"!="
 blank   [ \t\r]
 %option yylineno
 %%
-{RELOP} { if (print_lex) printf("RELOP, %s\n", yytext); return RELOP; }
+{RELOP} { 
+            if (print_lex) printf("RELOP, %s\n", yytext);
+            yylval.type_string = strdup(yytext);
+            return RELOP; }
 ";"     { if (print_lex) printf("SEMI\n"); return SEMI; }
 ","     { if (print_lex) printf("COMMA\n"); return COMMA; }
 "="     { if (print_lex) printf("ASSIGNOP\n"); return ASSIGNOP; }

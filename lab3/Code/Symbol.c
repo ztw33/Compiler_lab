@@ -11,6 +11,7 @@ Symbol* createSymbol(char* name, SymbolKind kind) {
     case VAR:
     case FIELD:
     case STRUCT:
+    case CONST:
         symbol->type = NULL;
         break;
     case FUNC:

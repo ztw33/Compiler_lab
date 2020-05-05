@@ -4,6 +4,7 @@
 
 int tCount = 0;
 int vCount = 0;
+int labelID = 0;
 
 int getVarID(VarKind kind) {
     if (kind == T) {
@@ -16,6 +17,11 @@ int getVarID(VarKind kind) {
         fprintf(stderr, "\033[31mERROR in getVarID! Unknown var kind.\033[0m\n");
         return -1;
     }
+}
+
+int createNewLabel() {
+    labelID++;
+    return labelID;
 }
 
 Variable* createVar(VarKind kind) {

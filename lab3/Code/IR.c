@@ -1,5 +1,6 @@
 #include "IR.h"
 #include "semantic.h"
+#include <assert.h>
 
 #define debug 1
 
@@ -18,6 +19,61 @@ void addCode(InterCode* code) {
         tail->next = NULL;
         codesTail->next = tail;
         codesTail = tail;
+    }
+    if (debug) {
+        switch (code->kind) {
+        case LABEL:
+            printf("LABEL label%d :\n", code->labelID);
+            break;
+        case FUNCTION:
+            printf("FUNCTION %s :\n", code->funcName);
+            break;
+        case ASSIGN:
+            printf("%s := %s\n", getOperandName(code->assign.left), getOperandName(code->assign.right));
+            break;
+        case ADD:
+            printf("%s := %s + %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case SUB:
+            printf("%s := %s - %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case MUL:
+            printf("%s := %s * %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case DIV:
+            printf("%s := %s / %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case GOTO:
+            printf("GOTO label%d\n", code->gotoLabelID);
+            break;
+        case IF_GOTO:
+            printf("IF %s %s %s GOTO label%d\n", getOperandName(code->if_goto.cond->op1), getRelop(code->if_goto.cond), getOperandName(code->if_goto.cond->op2), code->if_goto.gotoLabelID);
+            break;
+        case RETURN:
+            printf("RETURN %s\n", getOperandName(code->retVal));
+            break;
+        case DEC:
+            printf("DEC %s %d\n", getVarName(code->dec.var), code->dec.size);
+            break;
+        case ARG:
+            printf("ARG %s\n", getOperandName(code->arg));
+            break;
+        case CALL:
+            printf("%s := CALL %s\n", getVarName(code->call.ret), code->call.funcName);
+            break;
+        case PARAM:
+            printf("PARAM %s\n", getVarName(code->param));
+            break;
+        case READ:
+            printf("READ %s\n", getVarName(code->rwVar));
+            break;
+        case WRITE:
+            printf("WRITE %s\n", getVarName(code->rwVar));
+            break; 
+        default:
+            fprintf(stderr, "\033[31mERROR in addCode! Unknown code kind.\033[0m\n");
+            break;
+        }
     }
 }
 
@@ -140,6 +196,33 @@ char* getRelop(CondExp* cond) {
     }
 }
 
+Operand* getConstant(int val) {
+    if(debug) printf("getConstant:\tval=%d\n", val);
+    char* s = (char*)malloc(16*sizeof(char));
+    sprintf(s, "%d", val);
+    Symbol* symbol = get(symbolTable, s, CONST);
+    if (symbol != NULL) {
+        Variable* t = symbol->alias;
+        Operand* op = createOperand(VARIABLE);
+        op->var = t;
+        return op;
+    } else {
+        Variable* t = createVar(T);
+        
+        Symbol* symbol = createSymbol(s, CONST);
+        symbol->type = TYPE_INT;
+        symbol->alias = t;
+        insert(symbolTable, symbol);
+
+        Operand* op_t = createOperand(VARIABLE);
+        op_t->var = t;
+        Operand* op_i = createOperand(CONSTANT);
+        op_i->constVal = val;
+        addCode(createASSIGN(op_t, op_i));
+        return op_t;
+    }
+}
+
 void IRInit() {
     codesHead = NULL;
     codesTail = NULL;
@@ -147,7 +230,7 @@ void IRInit() {
 
 InterCodes* generateIR(const Node* syntaxTreeRootNode) {
     IRInit();
-    /* 首次尝试*/
+    /* 首次尝试
     addCode(createFUNCTION("main"));
     Variable* t1 = createVar(T);
     addCode(createREAD(t1));
@@ -186,8 +269,8 @@ InterCodes* generateIR(const Node* syntaxTreeRootNode) {
     addCode(createWRITE(t4));
     addCode(createLABEL(3));
     addCode(createRETURN(op_t2));
-    
-    // translateProgram(syntaxTreeRootNode);
+    */
+    translateProgram(syntaxTreeRootNode);
     return codesHead;
 }
 
@@ -338,11 +421,28 @@ void translateStmt(const Node* Stmt) {
         // Stmt := IF LP Exp RP Stmt
         if(debug) printf("Stmt := IF LP Exp RP Stmt\n");
 
-        
+        Node* nodeExp = Stmt->firstChild->nextSibling->nextSibling;
+        int trueLabelID = createNewLabel();
+        int nextLabelID = createNewLabel();
+        translateCondExp(nodeExp, trueLabelID, nextLabelID);
+        addCode(createLABEL(trueLabelID));
+        translateStmt(nodeExp->nextSibling->nextSibling);
+        addCode(createLABEL(nextLabelID));
     } else if (usedThisProd(Stmt, 7, "IF", "LP", "Exp", "RP", "Stmt", "ELSE", "Stmt")) {
         // Stmt := IF LP Exp RP Stmt ELSE Stmt
         if(debug) printf("Stmt := IF LP Exp RP Stmt ELSE Stmt\n");
 
+        Node* nodeExp = Stmt->firstChild->nextSibling->nextSibling;
+        int trueLabelID = createNewLabel();
+        int falseLabelID = createNewLabel();
+        int nextLabelID = createNewLabel();
+        translateCondExp(nodeExp, trueLabelID, falseLabelID);
+        addCode(createLABEL(trueLabelID));
+        translateStmt(nodeExp->nextSibling->nextSibling);
+        addCode(createGOTO(nextLabelID));
+        addCode(createLABEL(falseLabelID));
+        translateStmt(nodeExp->nextSibling->nextSibling->nextSibling->nextSibling);
+        addCode(createLABEL(nextLabelID));
     } else if (usedThisProd(Stmt, 1, "CompSt")) {
         // Stmt := CompSt
         if(debug) printf("Stmt := CompSt\n");
@@ -351,11 +451,22 @@ void translateStmt(const Node* Stmt) {
         // Stmt := WHILE LP Exp RP Stmt
         if(debug) printf("Stmt := WHILE LP Exp RP Stmt\n");
         
+        int beginLabelID = createNewLabel();
+        int trueLabelID = createNewLabel();
+        int nextLabelID = createNewLabel();
+        Node* nodeExp = Stmt->firstChild->nextSibling->nextSibling;
+        addCode(createLABEL(beginLabelID));
+        translateCondExp(nodeExp, trueLabelID, nextLabelID);
+        addCode(createLABEL(trueLabelID));
+        translateStmt(nodeExp->nextSibling->nextSibling);
+        addCode(createGOTO(beginLabelID));
+        addCode(createLABEL(nextLabelID));
     } else {
         fprintf(stderr, "\033[31mERROR in translateStmt! No matched production.\033[0m\n");
     }
 }
 
+// 算术表达式
 Operand* translateExp(const Node* Exp) {
     if(debug) printf("translateExp:\t");
 
@@ -366,18 +477,211 @@ Operand* translateExp(const Node* Exp) {
         Operand* right = translateExp(Exp->firstChild->nextSibling->nextSibling);
         addCode(createASSIGN(left, right));
         return left;
-    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp") || usedThisProd(Exp, 3, "Exp", "OR", "Exp") || usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
-        /* 逻辑运算
+    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp")) {
         // Exp := Exp AND Exp
+        if(debug) printf("Exp := Exp AND Exp\n");
+
+        Operand* op1 = translateExp(Exp->firstChild);
+        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
+        
+        Operand* op_0 = getConstant(0);
+        CondExp* cond1 = createCondExp(op1, EQ, op_0);
+        CondExp* cond2 = createCondExp(op2, EQ, op_0);
+        Variable* ret = createVar(T);
+        Operand* op_ret = createOperand(VARIABLE);
+        op_ret->var = ret;
+        int falseLabelID = createNewLabel();
+        int nextLabelID = createNewLabel();
+        addCode(createIFGOTO(cond1, falseLabelID));
+        addCode(createIFGOTO(cond2, falseLabelID));
+        addCode(createASSIGN(op_ret, getConstant(1)));
+        addCode(createGOTO(nextLabelID));
+        addCode(createLABEL(falseLabelID));
+        addCode(createASSIGN(op_ret, op_0));
+        addCode(createLABEL(nextLabelID));
+        return op_ret;
+    } else if (usedThisProd(Exp, 3, "Exp", "OR", "Exp")) {
         // Exp := Exp OR Exp
+        if(debug) printf("Exp := Exp OR Exp\n");
+
+        Operand* op1 = translateExp(Exp->firstChild);
+        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
+        
+        Operand* op_1 = getConstant(1);
+        CondExp* cond1 = createCondExp(op1, EQ, op_1);
+        CondExp* cond2 = createCondExp(op2, EQ, op_1);
+        Variable* ret = createVar(T);
+        Operand* op_ret = createOperand(VARIABLE);
+        op_ret->var = ret;
+        int trueLabelID = createNewLabel();
+        int nextLabelID = createNewLabel();
+        addCode(createIFGOTO(cond1, trueLabelID));
+        addCode(createIFGOTO(cond2, trueLabelID));
+        addCode(createASSIGN(op_ret, getConstant(0)));
+        addCode(createGOTO(nextLabelID));
+        addCode(createLABEL(trueLabelID));
+        addCode(createASSIGN(op_ret, op_1));
+        addCode(createLABEL(nextLabelID));
+        return op_ret;
+    } else if (usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
         // Exp := Exp RELOP Exp
-        */
-        if(debug) printf("Exp := Exp AND/OR/RELOP Exp\n");
+        if(debug) printf("Exp := Exp RELOP Exp\n");
 
     } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
         /* 逻辑运算
         // Exp := NOT Exp
         */
+        if(debug) printf("Exp := NOT Exp\n");
+
+    } else if (usedThisProd(Exp, 3, "Exp", "PLUS", "Exp") || usedThisProd(Exp, 3, "Exp", "MINUS", "Exp") || usedThisProd(Exp, 3, "Exp", "STAR", "Exp") || usedThisProd(Exp, 3, "Exp", "DIV", "Exp")) {
+        /* 算术运算
+        // Exp := Exp PLUS Exp
+        // Exp := Exp MINUS Exp
+        // Exp := Exp STAR Exp
+        // Exp := Exp DIV Exp
+        */
+        if(debug) printf("Exp := Exp PLUS/MINUS/STAR/DIV Exp\n");
+        
+    } else if (usedThisProd(Exp, 2, "MINUS", "Exp")) {
+        // Exp := MINUS Exp
+        if(debug) printf("Exp := MINUS Exp\n");
+
+        // 负数
+        if (usedThisProd(Exp->firstChild->nextSibling, 1, "INT")) {
+            return getConstant(0 - Exp->firstChild->nextSibling->firstChild->intVal);
+        } else {
+            Operand* op_0 = getConstant(0);
+            Operand* op = translateExp(Exp->firstChild->nextSibling);
+
+            Variable* res = createVar(T);
+            Operand* op_res = createOperand(VARIABLE);
+            op_res->var = res;
+            addCode(createBinOp(op_res, SUB, op_0, op));
+            return op_res;
+        }
+    } else if (usedThisProd(Exp, 3, "LP", "Exp", "RP")) {
+        // Exp := LP Exp RP
+        if(debug) printf("Exp := LP Exp RP\n");
+
+    } else if (usedThisProd(Exp, 4, "ID", "LP", "Args", "RP")) {
+        // Exp := ID LP Args RP
+        if(debug) printf("Exp := ID LP Args RP\n");
+
+        if (equalString(Exp->firstChild->stringVal, "write")) {
+            Node* nodeArgs = Exp->firstChild->nextSibling->nextSibling;
+            Operand* op = translateExp(nodeArgs->firstChild);
+            if (op->kind != VARIABLE) {
+                fprintf(stderr, "\033[31mERROR in translateExp! Write object is not a variable.\033[0m\n");
+                assert(0);
+            }
+            addCode(createWRITE(op->var));
+        } else {
+            
+        }
+        
+    } else if (usedThisProd(Exp, 3, "ID", "LP", "RP")) {
+        // Exp := ID LP RP
+        if(debug) printf("Exp := ID LP RP\n");
+
+        if (equalString(Exp->firstChild->stringVal, "read")) {
+            Variable* t = createVar(T);
+            addCode(createREAD(t));
+            Operand* op_t = createOperand(VARIABLE);
+            op_t->var = t;
+            return op_t;
+        } else {
+
+        }
+    } else if (usedThisProd(Exp, 4, "Exp", "LB", "Exp", "RB")) {
+        // Exp := Exp LB Exp RB
+        if(debug) printf("Exp := Exp LB Exp RB\n");
+
+    } else if (usedThisProd(Exp, 3, "Exp", "DOT", "ID")) {
+        // Exp := Exp DOT ID
+        if(debug) printf("Exp := Exp DOT ID\n");
+
+        // TODO
+    } else if (usedThisProd(Exp, 1, "ID")) {
+        // Exp := ID
+        if(debug) printf("Exp := ID\n");
+
+        Symbol* symbol = get(symbolTable, Exp->firstChild->stringVal, VAR);
+        if (symbol == NULL) {
+            fprintf(stderr, "\033[31mERROR in translateExp! Cannot get ID from symbolTable.\033[0m\n");
+            return NULL;
+        }
+        if (symbol->alias == NULL) {
+            Variable* v = createVar(V);
+            symbol->alias = v;
+            Operand* op_v = createOperand(VARIABLE);
+            op_v->var = v;
+            return op_v;
+        } else {
+            Operand* op = createOperand(VARIABLE);
+            op->var = symbol->alias;
+            return op;
+        }
+    } else if (usedThisProd(Exp, 1, "INT")) {
+        // Exp := INT
+        if(debug) printf("Exp := INT\n");
+
+        return getConstant(Exp->firstChild->intVal);
+    } else if (usedThisProd(Exp, 1, "FLOAT")) {
+        // Exp := FLOAT
+        if(debug) printf("Exp := FLOAT\n");
+
+        fprintf(stderr, "\033[31mERROR in translateExp! 不应存在浮点数.\033[0m\n");
+    } else {
+        fprintf(stderr, "\033[31mERROR in translateExp! No matched production.\033[0m\n");
+    }
+}
+
+// if和while语句中的条件表达式
+void translateCondExp(const Node* Exp, int trueLabelID, int falseLabelID) {
+    if(debug) printf("translateCondExp:\t");
+
+    if (usedThisProd(Exp, 3, "Exp", "ASSIGNOP", "Exp")) {
+        // Exp := Exp ASSIGNOP Exp
+        if(debug) printf("Exp := Exp ASSIGNOP Exp\n");
+        
+        
+    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp")) {
+        // Exp := Exp AND Exp
+        if(debug) printf("Exp := Exp AND Exp\n");
+
+    } else if (usedThisProd(Exp, 3, "Exp", "OR", "Exp")) {
+        // Exp := Exp OR Exp
+        if(debug) printf("Exp := Exp OR Exp\n");
+
+    } else if (usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
+        // Exp := Exp RELOP Exp
+        if(debug) printf("Exp := Exp RELOP Exp\n");
+
+        Operand* op1 = translateExp(Exp->firstChild);
+        Node* nodeRELOP = Exp->firstChild->nextSibling;
+        RelopKind rk;
+        if (equalString(nodeRELOP->stringVal, "==")) {
+            rk = EQ;
+        } else if (equalString(nodeRELOP->stringVal, "!=")) {
+            rk = NEQ;
+        } else if (equalString(nodeRELOP->stringVal, "<")) {
+            rk = LT;
+        } else if (equalString(nodeRELOP->stringVal, ">")) {
+            rk = GT;
+        } else if (equalString(nodeRELOP->stringVal, "<=")) {
+            rk = LE;
+        } else if (equalString(nodeRELOP->stringVal, ">=")) {
+            rk = GE;
+        } else {
+            fprintf(stderr, "\033[31mERROR in translateCondExp! Unknown relop.\033[0m\n");
+            assert(0);
+        }
+        Operand* op2 = translateExp(nodeRELOP->nextSibling);
+        CondExp* cond = createCondExp(op1, rk, op2);
+        addCode(createIFGOTO(cond, trueLabelID));
+        addCode(createGOTO(falseLabelID));
+    } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
+        // Exp := NOT Exp
         if(debug) printf("Exp := NOT Exp\n");
 
     } else if (usedThisProd(Exp, 3, "Exp", "PLUS", "Exp") || usedThisProd(Exp, 3, "Exp", "MINUS", "Exp") || usedThisProd(Exp, 3, "Exp", "STAR", "Exp") || usedThisProd(Exp, 3, "Exp", "DIV", "Exp")) {
@@ -407,15 +711,6 @@ Operand* translateExp(const Node* Exp) {
         // Exp := ID LP RP
         if(debug) printf("Exp := ID LP RP\n");
 
-        if (equalString(Exp->firstChild->stringVal, "read")) {
-            Variable* t = createVar(T);
-            addCode(createREAD(t));
-            Operand* op_t = createOperand(VARIABLE);
-            op_t->var = t;
-            return op_t;
-        } else {
-
-        }
     } else if (usedThisProd(Exp, 4, "Exp", "LB", "Exp", "RB")) {
         // Exp := Exp LB Exp RB
         if(debug) printf("Exp := Exp LB Exp RB\n");
@@ -428,22 +723,6 @@ Operand* translateExp(const Node* Exp) {
         // Exp := ID
         if(debug) printf("Exp := ID\n");
 
-        Symbol* symbol = get(symbolTable, Exp->firstChild->stringVal, VAR);
-        if (symbol == NULL) {
-            fprintf(stderr, "\033[31mERROR in translateExp! Cannot get ID from symbolTable.\033[0m\n");
-            return NULL;
-        }
-        if (symbol->alias == NULL) {
-            Variable* v = createVar(V);
-            symbol->alias = v;
-            Operand* op_v = createOperand(VARIABLE);
-            op_v->var = v;
-            return op_v;
-        } else {
-            Operand* op = createOperand(VARIABLE);
-            op->var = symbol->alias;
-            return op;
-        }
     } else if (usedThisProd(Exp, 1, "INT")) {
         // Exp := INT
         if(debug) printf("Exp := INT\n");
@@ -452,7 +731,8 @@ Operand* translateExp(const Node* Exp) {
         // Exp := FLOAT
         if(debug) printf("Exp := FLOAT\n");
 
+        fprintf(stderr, "\033[31mERROR in translateCondExp! 不存在浮点数.\033[0m\n");
     } else {
-        fprintf(stderr, "\033[31mERROR in translateExp! No matched production.\033[0m\n");
+        fprintf(stderr, "\033[31mERROR in translateCondExp! No matched production.\033[0m\n");
     }
 }

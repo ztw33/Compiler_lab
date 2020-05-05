@@ -3,6 +3,7 @@
 
 extern int tCount;
 extern int vCount;
+extern int labelID;
 
 typedef struct InterCode_ InterCode;
 typedef struct InterCodes_ InterCodes;
@@ -66,6 +67,7 @@ typedef struct CodesListHT {
 } CodesListHT;
 
 int getVarID(VarKind kind);
+int createNewLabel();
 Variable* createVar(VarKind kind);
 Operand* createOperand(OperandKind kind);
 CondExp* createCondExp(Operand* op1, RelopKind relop, Operand* op2);

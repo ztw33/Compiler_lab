@@ -26,6 +26,6 @@ void translateVarList(const Node* VarList);
 void translateStmtList(const Node* StmtList);
 void translateStmt(const Node* Stmt);
 Operand* translateExp(const Node* Exp);
-
+void translateCondExp(const Node* Exp, int trueLabelID, int falseLabelID);
 
 #endif
