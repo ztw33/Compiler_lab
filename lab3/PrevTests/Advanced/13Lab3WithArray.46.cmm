@@ -1,0 +1,61 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_96) {
+  int i_L1767;
+  int i_L1766;
+  int i_L1768;
+  int a1_i_L134[1];
+  int a2_i_L140[2];
+  if (top_caller_i_96 <= 0) {
+    return 1456267993;
+  } else {
+    top_caller_i_96 = top_caller_i_96 - 1;
+  }
+
+  top_caller_i_96 = top_caller_i_96 - 1;
+  i_L1767 = top_caller(top_caller_i_96);
+  top_caller_i_96 = top_caller_i_96 - 1;
+  i_L1766 = i_L1767 = top_caller(top_caller_i_96);
+  i_L1768 = 1015635299;
+  a1_i_L134[0] = i_L1767 = (i_L1766 > i_L1768);
+  a2_i_L140[1] = a1_i_L134[safe_index(i_L1767, 1)] = (i_L1766 = i_L1768);
+  a2_i_L140[0] = a1_i_L134[safe_index(i_L1767, 1)] = (i_L1766 < i_L1768);
+  top_caller_i_96 = top_caller_i_96 - 1;
+  a2_i_L140[a1_i_L134[(1116753113 + -1116753113)]] = top_caller(top_caller_i_96);
+  a2_i_L140[a1_i_L134[(548786531 + -548786531)]] = (!i_L1767);
+  
+  write(i_L1767);
+  write(i_L1766);
+  write(i_L1768);
+  return a2_i_L140[a1_i_L134[(668535593 + -668535593)]] = (1032360007 != i_L1767);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

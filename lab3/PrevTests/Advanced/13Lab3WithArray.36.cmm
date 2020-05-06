@@ -1,0 +1,294 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int i_func_89(int i_func_89_i_0, int i_func_89_i_1, int i_func_89_i_2, int i_func_89_i_3, int i_func_89_i_4, int i_func_89_i_5) {
+  int i_L1555;
+  int a2_i_L92[2];
+  int i_L1556;
+  int i_L1557;
+  if (i_func_89_i_5 <= 0) {
+    return -1171968378;
+  } else {
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+  }
+
+  i_L1555 = i_func_89_i_0 = (i_func_89_i_1 / i_func_89_i_2);
+  a2_i_L92[1] = i_func_89_i_0 = safe_mul(i_func_89_i_1, i_func_89_i_2);
+  a2_i_L92[0] = i_func_89_i_0 = (i_func_89_i_1 / i_func_89_i_2);
+  i_func_89_i_5 = i_func_89_i_5 - 1;
+  i_L1556 = a2_i_L92[safe_index(i_func_89_i_0, 2)] = i_func_89(-1888192347, i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, 147368215, i_func_89_i_5);
+  i_L1557 = 0;
+  while (((a2_i_L92[(1008440985 + -1008440985)] = safe_sub(-790234829, i_func_89_i_0))) && (i_L1557 < 4)) {
+    int i_L1558;
+    int a2_i_L93[2];
+    int i_L1560;
+    int i_L1561;
+    int i_L1562;
+    int i_L1559;
+    i_L1558 = a2_i_L92[safe_index(i_func_89_i_0, 2)] = (i_func_89_i_1 && i_func_89_i_2);
+    a2_i_L93[1] = a2_i_L92[safe_index(i_func_89_i_0, 2)] = (i_func_89_i_1 >= i_func_89_i_2);
+    a2_i_L93[0] = a2_i_L92[(-1409885698 + 1409885698)] = (i_func_89_i_0 = i_func_89_i_1);
+    i_L1560 = -1543885661;
+    i_L1561 = 317896260;
+    i_L1562 = -1264714618;
+    i_func_89_i_5 = i_func_89_i_5 - 3;
+    i_L1559 = i_func_89((a2_i_L92[(-620240357 + 620240357)] < a2_i_L93[(-1808642099 + 1808642100)]), (i_func_89_i_0 < i_func_89_i_1), safe_add(i_func_89_i_2, 1140318889), i_func_89(i_func_89_i_3, i_func_89_i_4, i_L1555, i_L1556, -836692853, i_func_89_i_5), i_func_89(i_L1558, i_L1560, i_L1561, i_L1562, 405704611, i_func_89_i_5), i_func_89_i_5);
+    i_L1557 = i_L1557 + 1;
+    a2_i_L92[safe_index(a2_i_L93[(679824805 + -679824805)], 2)] = i_func_89_i_0;
+    a2_i_L92[a2_i_L93[(1367267826 + -1367267825)]] = (i_func_89_i_0 < -547962896);
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+    a2_i_L92[a2_i_L93[(1238381787 + -1238381786)]] = i_func_89(i_func_89_i_0, i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_func_89_i_5);
+    
+    write(i_L1558);
+    write(i_L1560);
+    write(i_L1561);
+    write(i_L1562);
+    write(i_L1559);
+  }
+  i_func_89_i_5 = i_func_89_i_5 - 10;
+  if (a2_i_L92[safe_index(i_func_89_i_0, 2)] = (i_func_89_i_1 < i_func_89_i_2)) {
+    int i_L1563;
+    int i_L1564;
+    int i_L1565;
+    int i_L1566;
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+    i_L1563 = a2_i_L92[safe_index(i_func_89_i_0, 2)] = i_func_89(i_func_89_i_1, i_func_89_i_2, -1993248906, i_func_89_i_3, i_func_89_i_4, i_func_89_i_5);
+    i_L1564 = a2_i_L92[(-480235879 + 480235880)] = safe_div(i_func_89_i_0, i_func_89_i_1);
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+    i_L1565 = a2_i_L92[safe_index(i_func_89_i_0, 2)] = i_func_89(-1721794796, i_func_89_i_1, -984016222, i_func_89_i_2, i_func_89_i_3, i_func_89_i_5);
+    i_L1566 = 0;
+    a2_i_L92[safe_index(i_func_89_i_0, 2)] = (-690492524 < i_func_89_i_1);
+    while (((a2_i_L92[safe_index(i_func_89_i_0, 2)] = safe_sub(i_func_89_i_1, i_func_89_i_2))) && (i_L1566 < 4)) {
+      int a1_i_L98[1];
+      int i_L1567;
+      int i_L1568;
+      int i_L1569;
+      int i_L1570;
+      int i_L1571;
+      int i_L1572;
+      i_func_89_i_5 = i_func_89_i_5 - 1;
+      a1_i_L98[0] = a2_i_L92[safe_index(i_func_89_i_0, 2)] = i_func_89(i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_L1555, i_func_89_i_5);
+      i_L1567 = a2_i_L92[safe_index(a1_i_L98[(-2140896690 + 2140896690)], 2)] = (i_func_89_i_0 != i_func_89_i_1);
+      i_func_89_i_5 = i_func_89_i_5 - 1;
+      i_L1568 = a1_i_L98[a2_i_L92[(-359212800 + 359212800)]] = i_func_89(i_func_89_i_0, i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_func_89_i_5);
+      i_L1569 = 830060902;
+      i_L1570 = -683069578;
+      i_L1571 = 1007166676;
+      i_L1572 = -158226176;
+      i_L1566 = i_L1566 + 1;
+      i_func_89_i_5 = i_func_89_i_5 - 1;
+      a2_i_L92[safe_index(a1_i_L98[(-50143363 + 50143363)], 2)] = i_func_89(i_func_89_i_0, i_func_89_i_1, 1457337594, i_func_89_i_2, i_func_89_i_3, i_func_89_i_5);
+      a2_i_L92[safe_index(a1_i_L98[(-1458676192 + 1458676192)], 2)] = i_func_89_i_0;
+      i_func_89_i_5 = i_func_89_i_5 - 4;
+      i_func_89(i_func_89(a2_i_L92[(-1443805964 + 1443805964)], a1_i_L98[(-179446922 + 179446922)], 1149450957, i_func_89_i_0, i_func_89_i_1, i_func_89_i_5), i_func_89(i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_L1555, i_L1556, i_func_89_i_5), (i_L1563 || i_L1564), (i_L1565 >= i_L1567), i_func_89(i_L1568, i_L1569, i_L1570, i_L1571, i_L1572, i_func_89_i_5), i_func_89_i_5);
+      
+      write(i_L1567);
+      write(i_L1568);
+      write(i_L1569);
+      write(i_L1570);
+      write(i_L1571);
+      write(i_L1572);
+    }
+    
+    write(i_L1563);
+    write(i_L1564);
+    write(i_L1565);
+  }
+  else {
+    int a1_i_L99[1];
+    int i_L1573;
+    int i_L1574;
+    int i_L1575;
+    int i_L1576;
+    int i_L1577;
+    int i_L1578;
+    int i_L1579;
+    int i_L1580;
+    int i_L1581;
+    int i_L1582;
+    int i_L1583;
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+    a1_i_L99[0] = a2_i_L92[safe_index(i_func_89_i_0, 2)] = i_func_89(i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_L1555, i_func_89_i_5);
+    i_func_89_i_5 = i_func_89_i_5 - 1;
+    i_L1573 = a1_i_L99[safe_index(a2_i_L92[(1434280844 + -1434280844)], 1)] = i_func_89(i_func_89_i_0, i_func_89_i_1, 1752330575, i_func_89_i_2, i_func_89_i_3, i_func_89_i_5);
+    i_L1574 = a1_i_L99[safe_index(a2_i_L92[(-360341692 + 360341692)], 1)] = safe_add(i_func_89_i_0, i_func_89_i_1);
+    i_L1575 = -1698884731;
+    i_L1576 = -804831301;
+    i_L1577 = 2028275901;
+    i_L1578 = 765404308;
+    i_L1579 = -166771161;
+    i_L1580 = -1971122530;
+    i_L1581 = 1070228203;
+    i_L1582 = 1598992299;
+    i_L1583 = -1482342755;
+    a1_i_L99[safe_index(a2_i_L92[(847053098 + -847053097)], 1)] = (i_func_89_i_0 || i_func_89_i_1);
+    i_func_89_i_5 = i_func_89_i_5 - 6;
+    i_func_89(i_func_89(1245153396, a2_i_L92[(-1003926213 + 1003926213)], a1_i_L99[(-249931522 + 249931522)], i_func_89_i_0, i_func_89_i_1, i_func_89_i_5), i_func_89(-1060908682, i_func_89_i_2, i_func_89_i_3, i_func_89_i_4, i_L1555, i_func_89_i_5), i_func_89(i_L1556, i_L1573, i_L1574, i_L1575, i_L1576, i_func_89_i_5), i_func_89(i_L1577, i_L1578, i_L1579, 418953253, -977025104, i_func_89_i_5), i_func_89(i_L1580, i_L1581, 1734385687, i_L1582, i_L1583, i_func_89_i_5), i_func_89_i_5);
+    a1_i_L99[safe_index(a2_i_L92[(-1937925594 + 1937925594)], 1)] = safe_add(i_func_89_i_0, i_func_89_i_1);
+    
+    write(i_L1573);
+    write(i_L1574);
+    write(i_L1575);
+    write(i_L1576);
+    write(i_L1577);
+    write(i_L1578);
+    write(i_L1579);
+    write(i_L1580);
+    write(i_L1581);
+    write(i_L1582);
+    write(i_L1583);
+  }
+  a2_i_L92[safe_index(i_func_89_i_0, 2)] = (i_func_89_i_1 < i_func_89_i_2);
+  
+  write(i_L1555);
+  write(i_L1556);
+  i_func_89_i_5 = i_func_89_i_5 - 1;
+  return a2_i_L92[(-1714598896 + 1714598897)] = i_func_89(i_func_89_i_0, i_func_89_i_1, i_func_89_i_2, i_func_89_i_3, 62206162, i_func_89_i_5);
+}
+
+int i_func_90(int i_func_90_i_0, int i_func_90_i_1, int i_func_90_i_2, int i_func_90_i_3) {
+  int a2_i_L94[2];
+  int i_L1584;
+  int a2_i_L95[2];
+  int i_L1586;
+  int i_L1587;
+  int i_L1588;
+  int i_L1590;
+  int i_L1589;
+  int i_L1585;
+  if (i_func_90_i_3 <= 0) {
+    return 3165136;
+  } else {
+    i_func_90_i_3 = i_func_90_i_3 - 1;
+  }
+
+  a2_i_L94[1] = i_func_90_i_0 = -1344222132;
+  a2_i_L94[0] = i_func_90_i_0 = (i_func_90_i_1 <= i_func_90_i_2);
+  i_L1584 = a2_i_L94[(-1266304500 + 1266304501)] = (i_func_90_i_0 >= i_func_90_i_1);
+  a2_i_L95[1] = a2_i_L94[i_func_90_i_0] = (-46974582 >= i_func_90_i_1);
+  i_func_90_i_3 = i_func_90_i_3 - 1;
+  a2_i_L95[0] = a2_i_L94[i_func_90_i_0] = i_func_89(i_func_90_i_1, i_func_90_i_2, -935932806, 784920027, i_L1584, i_func_90_i_3);
+  i_L1586 = 1656641597;
+  i_L1587 = 828245375;
+  i_L1588 = 417671825;
+  i_L1590 = -543160364;
+  i_L1589 = i_L1590;
+  i_L1585 = 0;
+  i_func_90_i_3 = i_func_90_i_3 - 2;
+  while ((i_func_89((a2_i_L94[(1566402037 + -1566402036)] && a2_i_L95[(1507372259 + -1507372258)]), i_func_90(i_func_90_i_0, i_func_90_i_1, i_func_90_i_2, i_func_90_i_3), (i_L1584 = i_L1586), (i_L1587 > i_L1588), i_L1589, i_func_90_i_3)) && (i_L1585 < 4)) {
+    int i_L1591;
+    int i_L1592;
+    int a1_i_L100[1];
+    int i_L1593;
+    i_L1591 = a2_i_L94[safe_index(a2_i_L95[(-1317084446 + 1317084446)], 2)] = (i_func_90_i_0 < -1855370879);
+    i_func_90_i_3 = i_func_90_i_3 - 1;
+    i_L1592 = a2_i_L94[a2_i_L95[(-1335678579 + 1335678580)]] = i_func_89(i_func_90_i_0, i_func_90_i_1, i_func_90_i_2, i_L1584, -2031844666, i_func_90_i_3);
+    i_func_90_i_3 = i_func_90_i_3 - 2;
+    a1_i_L100[0] = i_func_90(i_func_90(a2_i_L94[(493370856 + -493370856)], a2_i_L95[(1766504820 + -1766504819)], i_func_90_i_0, i_func_90_i_3), (i_func_90_i_1 / i_func_90_i_2), (i_L1584 > i_L1586), i_func_90_i_3);
+    i_L1593 = 0;
+    i_L1585 = i_L1585 + 1;
+    i_func_90_i_3 = i_func_90_i_3 - 1;
+    while (((a2_i_L94[safe_index(a1_i_L100[(-1859137502 + 1859137502)], 2)] = i_func_89(a2_i_L95[(1843436334 + -1843436334)], i_func_90_i_0, i_func_90_i_1, i_func_90_i_2, i_L1584, i_func_90_i_3))) && (i_L1593 < 4)) {
+      int a2_i_L96[2];
+      int a2_i_L97[2];
+      int i_L1594;
+      a2_i_L96[1] = a1_i_L100[safe_index(a2_i_L94[(-1562468817 + 1562468817)], 1)] = (a2_i_L95[(1263207852 + -1263207852)] * i_func_90_i_0);
+      i_func_90_i_3 = i_func_90_i_3 - 2;
+      a2_i_L96[0] = i_func_89(1481336642, (a1_i_L100[(1694544197 + -1694544197)] - a2_i_L94[(97467200 + -97467200)]), (a2_i_L95[(25565694 + -25565694)] <= i_func_90_i_0), i_func_89(i_func_90_i_1, i_func_90_i_2, i_L1584, i_L1586, i_L1587, i_func_90_i_3), (!i_L1588), i_func_90_i_3);
+      a2_i_L97[1] = a1_i_L100[safe_index(a2_i_L94[(758067243 + -758067243)], 1)] = (a2_i_L95[(1473710233 + -1473710233)] && a2_i_L96[(1709630212 + -1709630211)]);
+      a2_i_L97[0] = a2_i_L94[safe_index(a2_i_L95[(1602720638 + -1602720638)], 2)] = (a2_i_L96[(-653542196 + 653542196)] <= a1_i_L100[(784706518 + -784706518)]);
+      i_L1594 = a2_i_L94[safe_index(a2_i_L95[(1472538886 + -1472538886)], 2)] = (a2_i_L96[(-1229417496 + 1229417496)] - a1_i_L100[(-289039932 + 289039932)]);
+      i_L1593 = i_L1593 + 1;
+      i_func_90_i_3 = i_func_90_i_3 - 1;
+      a1_i_L100[safe_index(a2_i_L94[(1187611061 + -1187611061)], 1)] = i_func_89(a2_i_L95[(-671466447 + 671466447)], a2_i_L96[(921461384 + -921461384)], a2_i_L97[(-1763145053 + 1763145054)], i_func_90_i_0, i_func_90_i_1, i_func_90_i_3);
+      i_func_90_i_3 = i_func_90_i_3 - 1;
+      a1_i_L100[safe_index(a2_i_L94[(806494244 + -806494243)], 1)] = i_func_90(-1784598920, a2_i_L95[(-1750508913 + 1750508913)], a2_i_L96[(431534099 + -431534098)], i_func_90_i_3);
+      
+      write(i_L1594);
+    }
+    
+    write(i_L1591);
+    write(i_L1592);
+  }
+  
+  write(i_L1584);
+  write(i_L1586);
+  write(i_L1587);
+  write(i_L1588);
+  write(i_L1590);
+  write(i_L1589);
+  return a2_i_L94[safe_index(a2_i_L95[(-1158095508 + 1158095508)], 2)] = (i_func_90_i_0 < i_func_90_i_1);
+}
+
+int top_caller(int top_caller_i_86) {
+  int i_L1597;
+  int i_L1596;
+  int i_L1598;
+  int i_L1595;
+  int i_L1599;
+  int i_L1600;
+  int i_L1601;
+  int i_L1602;
+  int a2_i_L98[2];
+  int i_L1603;
+  int i_L1604;
+    top_caller_i_86 = top_caller_i_86 - 1;
+
+  i_L1597 = 1316825732;
+  i_L1596 = i_L1597;
+  i_L1598 = -1212922372;
+  i_L1595 = i_L1596 = i_L1598;
+  i_L1599 = -1459230312;
+  i_L1600 = 506009787;
+  i_L1601 = 2073914621;
+  i_L1602 = 1689343155;
+  top_caller_i_86 = top_caller_i_86 - 1;
+  a2_i_L98[1] = i_L1595 = i_func_89(i_L1599, -1912704705, i_L1600, i_L1601, i_L1602, top_caller_i_86);
+  a2_i_L98[0] = i_L1597 = (i_L1596 != i_L1598);
+  i_L1603 = a2_i_L98[i_L1597] = (-304657757 && i_L1596);
+  i_L1604 = a2_i_L98[i_L1597] = (i_L1596 < i_L1598);
+  top_caller_i_86 = top_caller_i_86 - 1;
+  a2_i_L98[(1081743310 + -1081743310)] = i_func_90(i_L1597, i_L1596, i_L1598, top_caller_i_86);
+  
+  write(i_L1597);
+  write(i_L1596);
+  write(i_L1598);
+  write(i_L1595);
+  write(i_L1599);
+  write(i_L1600);
+  write(i_L1601);
+  write(i_L1602);
+  write(i_L1603);
+  write(i_L1604);
+  top_caller_i_86 = top_caller_i_86 - 1;
+  return a2_i_L98[i_L1597] = i_func_89(i_L1596, i_L1598, i_L1595, 1001528135, i_L1599, top_caller_i_86);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

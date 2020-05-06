@@ -1,0 +1,63 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_97) {
+  int i_L1769;
+  int i_L1770;
+  int i_L1771;
+  int a1_i_L135[1];
+  int a2_i_L141[2];
+  int a1_i_L136[1];
+  if (top_caller_i_97 <= 0) {
+    return 925439660;
+  } else {
+    top_caller_i_97 = top_caller_i_97 - 1;
+  }
+
+  i_L1769 = -83036157;
+  i_L1770 = -994519838;
+  i_L1771 = 1567296810;
+  a1_i_L135[0] = i_L1769 = (i_L1770 >= i_L1771);
+  top_caller_i_97 = top_caller_i_97 - 1;
+  a2_i_L141[1] = a1_i_L135[i_L1769] = top_caller(top_caller_i_97);
+  a2_i_L141[0] = a1_i_L135[i_L1769] = (!i_L1770);
+  top_caller_i_97 = top_caller_i_97 - 1;
+  a1_i_L136[0] = a1_i_L135[safe_index(a2_i_L141[(-2019577804 + 2019577805)], 1)] = top_caller(top_caller_i_97);
+  a2_i_L141[safe_index(a1_i_L135[(-715771154 + 715771154)], 2)] = (a1_i_L136[(1237330458 + -1237330458)] >= i_L1769);
+  a2_i_L141[safe_index(a1_i_L135[(-1232416202 + 1232416202)], 2)] = (-1138808494 >= a1_i_L136[(2078761022 + -2078761022)]);
+  a1_i_L135[safe_index(a1_i_L136[(1330945944 + -1330945944)], 1)] = (a2_i_L141[(577688463 + -577688462)] != i_L1769);
+  
+  write(i_L1769);
+  write(i_L1770);
+  write(i_L1771);
+  return a1_i_L135[safe_index(a1_i_L136[(706980774 + -706980774)], 1)] = (-1528161714 && -1932589955);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

@@ -1,0 +1,115 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_47) {
+  int i_L1041;
+  int i_L1040;
+  int i_L1042;
+  int i_L1039;
+  int i_L1038;
+  int i_L1043;
+  int i_L1044;
+  if (top_caller_i_47 <= 0) {
+    return 1572519739;
+  } else {
+    top_caller_i_47 = top_caller_i_47 - 1;
+  }
+
+  i_L1041 = -256368887;
+  i_L1040 = i_L1041;
+  i_L1042 = 697011303;
+  i_L1039 = i_L1040 = i_L1042;
+  top_caller_i_47 = top_caller_i_47 - 1;
+  i_L1038 = i_L1039 = top_caller(top_caller_i_47);
+  i_L1043 = i_L1041 = -57541546;
+  top_caller_i_47 = top_caller_i_47 - 1;
+  i_L1044 = i_L1041 = top_caller(top_caller_i_47);
+  i_L1041 = (2109439829 > i_L1040);
+  top_caller_i_47 = top_caller_i_47 - 5;
+  if (i_L1041 = (i_L1040 == i_L1042)) {
+    int i_L1045;
+    int i_L1046;
+    int i_L1047;
+    int i_L1048;
+    top_caller_i_47 = top_caller_i_47 - 1;
+    i_L1045 = i_L1041 = top_caller(top_caller_i_47);
+    top_caller_i_47 = top_caller_i_47 - 1;
+    i_L1046 = i_L1041 = top_caller(top_caller_i_47);
+    top_caller_i_47 = top_caller_i_47 - 1;
+    i_L1047 = top_caller(top_caller_i_47);
+    i_L1048 = 0;
+    while ((i_L1041 = (i_L1040 > i_L1042))) {
+      int i_L1049;
+      int i_L1050;
+      int i_L1051;
+      i_L1049 = i_L1041 = (i_L1040 < i_L1042);
+      i_L1050 = i_L1041 = (i_L1040 * -2065697812);
+      top_caller_i_47 = top_caller_i_47 - 1;
+      i_L1051 = i_L1041 = top_caller(top_caller_i_47);
+      
+      i_L1041 = (i_L1040 != i_L1042);
+      
+      write(i_L1049);
+      write(i_L1050);
+      write(i_L1051);
+    }
+    
+    write(i_L1045);
+    write(i_L1046);
+    write(i_L1047);
+  }
+  else {
+    int i_L1052;
+    int i_L1053;
+    int i_L1054;
+    top_caller_i_47 = top_caller_i_47 - 1;
+    i_L1052 = i_L1041 = top_caller(top_caller_i_47);
+    i_L1053 = i_L1041 = (i_L1040 - i_L1042);
+    i_L1054 = i_L1041 = (!820411590);
+    i_L1041 = (i_L1040 * i_L1042);
+    top_caller_i_47 = top_caller_i_47 - 1;
+    i_L1041 = top_caller(top_caller_i_47);
+    
+    write(i_L1052);
+    write(i_L1053);
+    write(i_L1054);
+  }
+  
+  write(i_L1041);
+  write(i_L1040);
+  write(i_L1042);
+  write(i_L1039);
+  write(i_L1038);
+  write(i_L1043);
+  write(i_L1044);
+  return i_L1041 = safe_add(1881897658, i_L1040);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

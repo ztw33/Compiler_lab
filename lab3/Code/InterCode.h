@@ -1,5 +1,6 @@
 #ifndef __INTERCODE__
 #define __INTERCODE__
+#include <stdbool.h>
 
 extern int tCount;
 extern int vCount;
@@ -26,7 +27,7 @@ struct InterCode_ {
         Operand* arg;  // ARG
         struct { Variable* ret; char* funcName; } call;  // CALL
         Variable* param;  // PARAM
-        Variable* rwVar;  // READ/WRITE
+        Operand* rwOperand;  // READ/WRITE
     };
 };
 
@@ -51,6 +52,7 @@ typedef enum VarKind { T, V } VarKind;
 struct Variable_ {
     VarKind kind;  // 临时变量/变量
     int id;
+    bool isAddr;  // 是否表示一个地址，函数参数为结构体类型的形参此域即为true
 };
 
 typedef enum RelopKind { EQ, NEQ, LT, GT, LE, GE } RelopKind;
@@ -83,7 +85,7 @@ InterCode* createDEC(Variable* var, int size);
 InterCode* createARG(Operand* arg);
 InterCode* createCALL(Variable* ret, char* funcName);
 InterCode* createPARAM(Variable* param);
-InterCode* createREAD(Variable* var);
-InterCode* createWRITE(Variable* var);
+InterCode* createREAD(Operand* op);
+InterCode* createWRITE(Operand* op);
 
 #endif

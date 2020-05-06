@@ -1,0 +1,65 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_81) {
+  int i_L1516;
+  int i_L1517;
+  int i_L1515;
+  int i_L1514;
+  int i_L1518;
+  int a2_i_L86[2];
+  if (top_caller_i_81 <= 0) {
+    return 1766917148;
+  } else {
+    top_caller_i_81 = top_caller_i_81 - 1;
+  }
+
+  i_L1516 = -316163085;
+  i_L1517 = 663424651;
+  i_L1515 = i_L1516 == i_L1517;
+  top_caller_i_81 = top_caller_i_81 - 1;
+  i_L1514 = i_L1515 = top_caller(top_caller_i_81);
+  top_caller_i_81 = top_caller_i_81 - 1;
+  i_L1518 = i_L1516 = top_caller(top_caller_i_81);
+  top_caller_i_81 = top_caller_i_81 - 1;
+  a2_i_L86[1] = i_L1516 = top_caller(top_caller_i_81);
+  a2_i_L86[0] = i_L1516 = (i_L1517 != i_L1515);
+  top_caller_i_81 = top_caller_i_81 - 1;
+  a2_i_L86[i_L1516] = top_caller(top_caller_i_81);
+  
+  write(i_L1516);
+  write(i_L1517);
+  write(i_L1515);
+  write(i_L1514);
+  write(i_L1518);
+  return a2_i_L86[i_L1516] = i_L1517;
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

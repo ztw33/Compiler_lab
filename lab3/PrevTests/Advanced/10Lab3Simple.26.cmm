@@ -1,0 +1,65 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_26) {
+  int i_L537;
+  int i_L538;
+  int i_L539;
+  int i_L536;
+  int i_L540;
+  int i_L541;
+  if (top_caller_i_26 <= 0) {
+    return 1811273637;
+  } else {
+    top_caller_i_26 = top_caller_i_26 - 1;
+  }
+
+  top_caller_i_26 = top_caller_i_26 - 1;
+  i_L537 = top_caller(top_caller_i_26);
+  i_L538 = -1104603696;
+  i_L539 = 914961703;
+  i_L536 = i_L537 = (i_L538 == i_L539);
+  top_caller_i_26 = top_caller_i_26 - 1;
+  i_L540 = i_L537 = top_caller(top_caller_i_26);
+  top_caller_i_26 = top_caller_i_26 - 1;
+  i_L541 = i_L537 = top_caller(top_caller_i_26);
+  top_caller_i_26 = top_caller_i_26 - 1;
+  top_caller(top_caller_i_26);
+  
+  write(i_L537);
+  write(i_L538);
+  write(i_L539);
+  write(i_L536);
+  write(i_L540);
+  write(i_L541);
+  return i_L537 = (i_L538 <= i_L539);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

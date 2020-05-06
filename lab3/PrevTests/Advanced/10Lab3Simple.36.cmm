@@ -1,0 +1,277 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int i_func_40(int i_func_40_i_0, int i_func_40_i_1) {
+  int i_L765;
+  int i_L766;
+  int i_L764;
+  int i_L767;
+  int i_L768;
+  int i_L769;
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+
+  i_L765 = 1425735415;
+  i_L766 = -549724012;
+  i_L764 = i_func_40_i_0 = (i_L765 / i_L766);
+  i_func_40_i_1 = i_func_40_i_1 - 1;
+  i_L767 = i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+  i_L768 = i_func_40_i_0 = (i_L765 - i_L766);
+  i_L769 = 0;
+  while ((i_func_40_i_0 = (i_L765 || i_L766))) {
+    int i_L770;
+    int i_L771;
+    int i_L772;
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_L770 = i_func_40_i_0 = i_func_40(-1244910843, i_func_40_i_1);
+    i_L771 = i_func_40_i_0 = (i_L765 < i_L766);
+    i_L772 = i_func_40_i_0 = (i_L765 != i_L766);
+    
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_func_40((i_func_40_i_0 == i_L765), i_func_40_i_1);
+    i_func_40_i_0 = (i_L765 / i_L766);
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_func_40_i_0 = i_func_40(803750276, i_func_40_i_1);
+    
+    write(i_L770);
+    write(i_L771);
+    write(i_L772);
+  }
+  i_func_40_i_1 = i_func_40_i_1 - 1;
+  i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+  i_func_40_i_1 = i_func_40_i_1 - 8;
+  if (i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1)) {
+    int i_L773;
+    int i_L774;
+    int i_L775;
+    int i_L776;
+    int i_L780;
+    i_L773 = i_func_40_i_0 = (i_L765 - i_L766);
+    i_L774 = i_func_40_i_0 = (i_L765 == i_L766);
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_L775 = i_func_40((i_func_40_i_0 > i_L765), i_func_40_i_1);
+    i_L776 = 0;
+    i_L780 = 0;
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    while ((i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1))) {
+      int i_L777;
+      int i_L778;
+      int i_L779;
+      i_L777 = i_func_40_i_0 = (i_L765 == i_L766);
+      i_func_40_i_1 = i_func_40_i_1 - 1;
+      i_L778 = i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+      i_L779 = i_func_40_i_0 = (i_L765 <= i_L766);
+      
+      i_func_40_i_1 = i_func_40_i_1 - 1;
+      i_func_40((i_func_40_i_0 - i_L765), i_func_40_i_1);
+      
+      write(i_L777);
+      write(i_L778);
+      write(i_L779);
+    }
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    while ((i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1))) {
+      int i_L781;
+      int i_L782;
+      int i_L783;
+      i_L781 = i_func_40_i_0 = (i_L765 || i_L766);
+      i_L782 = i_func_40_i_0 = (i_L765 >= i_L766);
+      i_L783 = i_func_40_i_0 = (i_L765 < i_L766);
+      
+      i_func_40_i_1 = i_func_40_i_1 - 1;
+      i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+      
+      write(i_L781);
+      write(i_L782);
+      write(i_L783);
+    }
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_func_40_i_0 = i_func_40(1302046963, i_func_40_i_1);
+    
+    write(i_L773);
+    write(i_L774);
+    write(i_L775);
+  }
+  else {
+    int i_L784;
+    int i_L785;
+    int i_L786;
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_L784 = i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+    i_L785 = i_func_40_i_0 = (!i_L765);
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_L786 = i_func_40((-263052785 <= i_func_40_i_0), i_func_40_i_1);
+    i_func_40_i_0 = (!i_L765);
+    i_func_40_i_1 = i_func_40_i_1 - 1;
+    i_func_40_i_0 = i_func_40(1120536145, i_func_40_i_1);
+    
+    write(i_L784);
+    write(i_L785);
+    write(i_L786);
+  }
+  
+  write(i_L765);
+  write(i_L766);
+  write(i_L764);
+  write(i_L767);
+  write(i_L768);
+  i_func_40_i_1 = i_func_40_i_1 - 1;
+  return i_func_40_i_0 = i_func_40(i_L765, i_func_40_i_1);
+}
+
+int i_func_41(int i_func_41_i_0, int i_func_41_i_1, int i_func_41_i_2) {
+  int i_L787;
+  int i_L788;
+  int i_L789;
+  int i_L790;
+  if (i_func_41_i_2 <= 0) {
+    return -14794675;
+  } else {
+    i_func_41_i_2 = i_func_41_i_2 - 1;
+  }
+
+  i_func_41_i_2 = i_func_41_i_2 - 2;
+  i_L787 = i_func_41(i_func_41(2097243706, 1363856131, i_func_41_i_2), (i_func_41_i_0 = -1495824572), i_func_41_i_2);
+  i_L788 = i_func_41_i_0 = (i_func_41_i_1 == i_L787);
+  i_L789 = i_func_41_i_0 = (i_func_41_i_1 != 1027009072);
+  i_L790 = 0;
+  i_func_41_i_2 = i_func_41_i_2 - 1;
+  while ((i_func_41((!i_func_41_i_0), (i_func_41_i_1 || 1186445475), i_func_41_i_2)) && (i_L790 < 4)) {
+    int i_L791;
+    int i_L792;
+    int i_L793;
+    i_L791 = i_func_41_i_0 = (i_func_41_i_1 < i_L787);
+    i_func_41_i_2 = i_func_41_i_2 - 1;
+    i_L792 = i_func_41_i_0 = i_func_41(i_func_41_i_1, i_L787, i_func_41_i_2);
+    i_L793 = i_func_41_i_0 = (i_func_41_i_1 <= i_L787);
+    i_L790 = i_L790 + 1;
+    i_func_41_i_2 = i_func_41_i_2 - 3;
+    if (i_func_41_i_0 = (i_func_41_i_1 - i_L787)) {
+      int i_L794;
+      int i_L795;
+      int i_L796;
+      i_L794 = i_func_41_i_0 = i_func_41_i_1;
+      i_L795 = i_func_41_i_0 = (i_func_41_i_1 >= i_L787);
+      i_L796 = i_func_41_i_0 = i_func_41_i_1;
+      i_func_41_i_0 = (i_func_41_i_1 / i_L787);
+      
+      write(i_L794);
+      write(i_L795);
+      write(i_L796);
+    }
+    else {
+      int i_L797;
+      int i_L798;
+      int i_L799;
+      i_func_41_i_2 = i_func_41_i_2 - 1;
+      i_L797 = i_func_41_i_0 = i_func_41(i_func_41_i_1, i_L787, i_func_41_i_2);
+      i_L798 = i_func_41_i_0 = (i_func_41_i_1 - i_L787);
+      i_func_41_i_2 = i_func_41_i_2 - 1;
+      i_L799 = i_func_41_i_0 = i_func_40(1186031225, i_func_41_i_2);
+      i_func_41_i_2 = i_func_41_i_2 - 1;
+      i_func_41_i_0 = i_func_41(i_func_41_i_1, i_L787, i_func_41_i_2);
+      i_func_41_i_0 = (i_func_41_i_1 + i_L787);
+      
+      write(i_L797);
+      write(i_L798);
+      write(i_L799);
+    }
+    i_func_41_i_0 = (i_func_41_i_1 && i_L787);
+    
+    write(i_L791);
+    write(i_L792);
+    write(i_L793);
+  }
+  
+  write(i_L787);
+  write(i_L788);
+  write(i_L789);
+  return i_func_41_i_0 = (i_func_41_i_1 - i_L787);
+}
+
+int top_caller(int top_caller_i_36) {
+  int i_L802;
+  int i_L803;
+  int i_L801;
+  int i_L804;
+  int i_L805;
+  int i_L800;
+  int i_L806;
+  int i_L807;
+  int i_L808;
+  if (top_caller_i_36 <= 0) {
+    return 1620759891;
+  } else {
+    top_caller_i_36 = top_caller_i_36 - 1;
+  }
+
+  i_L802 = 765160786;
+  i_L803 = -688949832;
+  i_L801 = i_L802 >= i_L803;
+  i_L804 = -195061707;
+  i_L805 = -184355054;
+  i_L800 = i_L801 = (i_L804 <= i_L805);
+  top_caller_i_36 = top_caller_i_36 - 1;
+  i_L806 = i_L802 = top_caller(top_caller_i_36);
+  top_caller_i_36 = top_caller_i_36 - 1;
+  i_L807 = i_L802 = top_caller(top_caller_i_36);
+  i_L808 = 0;
+  while (((i_L802 = (960426421 > i_L803))) && (i_L808 < 4)) {
+    int i_L809;
+    int i_L810;
+    int i_L811;
+    top_caller_i_36 = top_caller_i_36 - 1;
+    i_L809 = i_L802 = top_caller(top_caller_i_36);
+    top_caller_i_36 = top_caller_i_36 - 1;
+    i_L810 = i_L802 = i_func_41(i_L803, i_L801, top_caller_i_36);
+    i_L811 = i_L802 = (i_L803 - i_L801);
+    i_L808 = i_L808 + 1;
+    i_L802 = (i_L803 + -307114716);
+    i_L802 = (i_L803 > i_L801);
+    
+    write(i_L809);
+    write(i_L810);
+    write(i_L811);
+  }
+  top_caller_i_36 = top_caller_i_36 - 1;
+  i_L802 = i_func_41(i_L803, i_L801, top_caller_i_36);
+  i_L802 = (i_L803 / i_L801);
+  
+  write(i_L802);
+  write(i_L803);
+  write(i_L801);
+  write(i_L804);
+  write(i_L805);
+  write(i_L800);
+  write(i_L806);
+  write(i_L807);
+  return i_L802 = (i_L803 <= i_L801);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

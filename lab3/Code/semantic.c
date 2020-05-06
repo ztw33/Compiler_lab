@@ -60,19 +60,20 @@ bool argsCheck(Param* args, Param* params, int paramNum) {
     return true;
 }
 
-Field* concatField(SymbolList* symbols) {
+Field* concatField(SymbolList* symbols, int offset) {
     if (symbols == NULL) return NULL;
     SymbolList* head = symbols;
     if (head->symbol == NULL) {
         if (head->next == NULL)
             return NULL;
         else
-            return concatField(head->next);       
+            return concatField(head->next, offset);       
     }
     Field* field = (Field*)malloc(sizeof(Field));
     field->name = head->symbol->name;
     field->type = head->symbol->type;
-    field->next = concatField(head->next);
+    field->offset = offset;
+    field->next = concatField(head->next, offset + getSizeofType(field->type));
     return field;
 }
 
@@ -324,7 +325,7 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
         newStruct->kind = STRUCTURE;
         newStruct->Rvalue = false;
         newStruct->structure.name = structName;
-        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling, FIELD);
+        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling, FIELD, 0);
         
         Symbol* symbol = createSymbol(structName, STRUCT);
         symbol->type = newStruct;
@@ -344,7 +345,7 @@ Type* analyseStructSpecifier(const Node* StructSpecifier) {
         newStruct->kind = STRUCTURE;
         newStruct->Rvalue = false;
         newStruct->structure.name = ID->stringVal;
-        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling->nextSibling, FIELD);
+        newStruct->structure.fields = analyseDefList(StructSpecifier->firstChild->nextSibling->nextSibling->nextSibling, FIELD, 0);
         if (insertFlag) {
             Symbol* symbol = createSymbol(ID->stringVal, STRUCT);
             symbol->type = newStruct;
@@ -454,12 +455,12 @@ void analyseCompSt(const Node* CompSt, Symbol* func) {
     if (usedThisProd(CompSt, 4, "LC", "DefList", "StmtList", "RC")) {
         // CompSt := LC DefList(!= NULL) StmtList(!= NULL) RC
         if(debug) printf("CompSt := LC DefList(!= NULL) StmtList(!= NULL) RC\n");
-        analyseDefList(CompSt->firstChild->nextSibling, VAR);
+        analyseDefList(CompSt->firstChild->nextSibling, VAR, -1);
         analyseStmtList(CompSt->firstChild->nextSibling->nextSibling, func);
     } else if (usedThisProd(CompSt, 3, "LC", "DefList", "RC")) {
         // CompSt := LC DefList(!= NULL) StmtList(== NULL) RC
         if(debug) printf("CompSt := LC DefList(!= NULL) StmtList(== NULL) RC\n");
-        analyseDefList(CompSt->firstChild->nextSibling, VAR);
+        analyseDefList(CompSt->firstChild->nextSibling, VAR, -1);
     } else if (usedThisProd(CompSt, 3, "LC", "StmtList", "RC")) {
         // CompSt := LC DefList(== NULL) StmtList(!= NULL) RC
         if(debug) printf("CompSt := LC DefList(== NULL) StmtList(!= NULL) RC\n");
@@ -475,25 +476,26 @@ void analyseCompSt(const Node* CompSt, Symbol* func) {
 
 /*
  * if kind == VAR, return NULL; if kind == FIELD, return fieldlist.
+ * offset: Lab3 for kind == FIELD, if kind == VAR, offset = -1.
  */
-Field* analyseDefList(const Node* DefList, SymbolKind kind) {
+Field* analyseDefList(const Node* DefList, SymbolKind kind, int offset) {
     if(debug) printf("analyseDefList:\t");
 
     if (usedThisProd(DefList, 2, "Def", "DefList")) {
         // DefList := Def DefList(!=NULL)
         if(debug) printf("DefList := Def DefList(!=NULL)\n");
         if (kind == VAR) {
-            analyseDef(DefList->firstChild, kind);
-            analyseDefList(DefList->firstChild->nextSibling, kind);
+            analyseDef(DefList->firstChild, kind, -1);
+            analyseDefList(DefList->firstChild->nextSibling, kind, -1);
             return NULL;
         } else if (kind == FIELD) {
-            Field* field = analyseDef(DefList->firstChild, kind);
+            Field* field = analyseDef(DefList->firstChild, kind, offset);
             if (field == NULL) {
-                return analyseDefList(DefList->firstChild->nextSibling, kind);
+                return analyseDefList(DefList->firstChild->nextSibling, kind, offset);
             } else {
                 Field* tail = field;
                 for (; tail->next != NULL; tail = tail->next);
-                tail->next = analyseDefList(DefList->firstChild->nextSibling, kind);
+                tail->next = analyseDefList(DefList->firstChild->nextSibling, kind, tail->offset + getSizeofType(tail->type));
                 return field;
             }
         } else {
@@ -505,10 +507,10 @@ Field* analyseDefList(const Node* DefList, SymbolKind kind) {
         // DefList := Def DefList(==NULL)
         if(debug) printf("DefList := Def DefList(==NULL)\n");
         if (kind == VAR) {
-            analyseDef(DefList->firstChild, kind);
+            analyseDef(DefList->firstChild, kind, -1);
             return NULL;
         } else if (kind == FIELD) {
-            return analyseDef(DefList->firstChild, kind);
+            return analyseDef(DefList->firstChild, kind, offset);
         } else {
             fprintf(stderr, "\033[31mERROR in analyseDefList! Wrong symbol kind.\033[0m\n");
             return NULL;
@@ -522,7 +524,7 @@ Field* analyseDefList(const Node* DefList, SymbolKind kind) {
 /*
  * if kind == VAR, return NULL; if kind == FIELD, return field.
  */
-Field* analyseDef(const Node* Def, SymbolKind kind) {
+Field* analyseDef(const Node* Def, SymbolKind kind, int offset) {
     if(debug) printf("analyseDef:\t");
     if (usedThisProd(Def, 3, "Specifier", "DecList", "SEMI")) {
         // Def := Specifier DecList SEMI
@@ -534,7 +536,7 @@ Field* analyseDef(const Node* Def, SymbolKind kind) {
         if (kind == VAR) {
             return NULL;
         } else if (kind == FIELD) {
-            return concatField(decList);
+            return concatField(decList, offset);
         } else {
             fprintf(stderr, "\033[31mERROR in analyseDef! Wrong symbol kind.\033[0m\n");
             return NULL;

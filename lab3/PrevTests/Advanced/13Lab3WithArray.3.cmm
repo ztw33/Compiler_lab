@@ -1,0 +1,64 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_53) {
+  int i_L1158;
+  int i_L1159;
+  int i_L1157;
+  int i_L1156;
+  int i_L1160;
+  int a2_i_L12[2];
+  if (top_caller_i_53 <= 0) {
+    return 2095123334;
+  } else {
+    top_caller_i_53 = top_caller_i_53 - 1;
+  }
+
+  i_L1158 = -812266056;
+  i_L1159 = 203469366;
+  i_L1157 = i_L1158 != i_L1159;
+  top_caller_i_53 = top_caller_i_53 - 1;
+  i_L1156 = i_L1157 = top_caller(top_caller_i_53);
+  top_caller_i_53 = top_caller_i_53 - 1;
+  i_L1160 = i_L1158 = top_caller(top_caller_i_53);
+  a2_i_L12[1] = i_L1158 = (i_L1159 && i_L1157);
+  top_caller_i_53 = top_caller_i_53 - 1;
+  a2_i_L12[0] = top_caller(top_caller_i_53);
+  a2_i_L12[i_L1158] = (-1813145808 != i_L1159);
+  
+  write(i_L1158);
+  write(i_L1159);
+  write(i_L1157);
+  write(i_L1156);
+  write(i_L1160);
+  return a2_i_L12[i_L1158] = (!2147483647);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

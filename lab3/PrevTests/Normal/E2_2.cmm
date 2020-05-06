@@ -1,0 +1,32 @@
+int print(int array[4]) {
+	int ii = 0;
+	while (ii < 4) {
+		write(array[ii]);
+		ii = ii + 1;
+	}
+	return 0;
+}
+
+int product(int a[4], int b[4]) {
+	int result = 0;
+	int i = 0;
+	while (i < 4) {
+		result = result + a[i] * b[i];
+		i = i  +1;
+	}
+	return result;
+}
+
+int main() {
+	int p[4], pp[4];
+	int j = 0;
+	while (j < 4) {
+		p[j] = read();
+		pp[j] = read();
+		j = j + 1;
+	}
+	j = 0;
+	print(p);
+	write(product(p,pp));
+	return 0; 
+}

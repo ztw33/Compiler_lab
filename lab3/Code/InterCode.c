@@ -28,6 +28,7 @@ Variable* createVar(VarKind kind) {
     Variable* var = (Variable*)malloc(sizeof(Variable));
     var->kind = kind;
     var->id = getVarID(kind);
+    var->isAddr = false;
     return var;
 }
 
@@ -116,31 +117,45 @@ InterCode* createRETURN(Operand* retVal) {
 }
 
 InterCode* createDEC(Variable* var, int size) {
-
-}
-
-InterCode* createARG(Operand* arg) {
-
-}
-
-InterCode* createCALL(Variable* ret, char* funcName) {
-
-}
-
-InterCode* createPARAM(Variable* param) {
-
-}
-
-InterCode* createREAD(Variable* var) {
     InterCode* code = (InterCode*)malloc(sizeof(InterCode));
-    code->kind = READ;
-    code->rwVar = var;
+    code->kind = DEC;
+    code->dec.var = var;
+    code->dec.size = size;
     return code;
 }
 
-InterCode* createWRITE(Variable* var) {
+InterCode* createARG(Operand* arg) {
+    InterCode* code = (InterCode*)malloc(sizeof(InterCode));
+    code->kind = ARG;
+    code->arg = arg;
+    return code;
+}
+
+InterCode* createCALL(Variable* ret, char* funcName) {
+    InterCode* code = (InterCode*)malloc(sizeof(InterCode));
+    code->kind = CALL;
+    code->call.ret = ret;
+    code->call.funcName = funcName;
+    return code;
+}
+
+InterCode* createPARAM(Variable* param) {
+    InterCode* code = (InterCode*)malloc(sizeof(InterCode));
+    code->kind = PARAM;
+    code->param = param;
+    return code;
+}
+
+InterCode* createREAD(Operand* op) {
+    InterCode* code = (InterCode*)malloc(sizeof(InterCode));
+    code->kind = READ;
+    code->rwOperand = op;
+    return code;
+}
+
+InterCode* createWRITE(Operand* op) {
     InterCode* code = (InterCode*)malloc(sizeof(InterCode));
     code->kind = WRITE;
-    code->rwVar = var;
+    code->rwOperand = op;
     return code;
 }

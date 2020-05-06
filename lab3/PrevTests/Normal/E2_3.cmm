@@ -1,0 +1,75 @@
+int display(int chess[10], int number[1], int sum){
+	int board[10][10], i1 = 0, j1 = 0, tem = 1;
+	if (number[0] == 1) {
+		while (i1 < sum) {
+			j1 = 0;
+			tem = 1;
+			while (j1 < sum) {
+				if (j1 == chess[i1]) {
+					board[i1][j1] = 1;
+					tem = tem * 10 + 1;
+				} else {
+					board[i1][j1] = 0;
+					tem = tem * 10;
+				}
+				j1 = j1 + 1;
+			}
+			write(tem);
+			i1 = i1 + 1;
+		}
+	}
+	return 0;
+}
+
+int dfs(int p[10], int r[10], int ld[10], int rd[10], int current, int target, int c[1]){
+	int j = 0, nld[10], nrd[10], k;	
+	if (current == target) {
+		c[0] = c[0] + 1;
+		display(p,c,target);
+		return 0;
+	}
+	while (j < target) {
+		if (r[j] == 1 && ld[j] == 1 && rd[j] == 1 ) {
+			p[current] = j;
+			r[j] = 0;	
+			k = 0;
+			while (k< target - 1){
+				nld[k] = ld[k + 1];
+				k = k + 1;			
+			}
+			nld[target -1] = 1;
+			if (j != 0) {
+				nld[j - 1] = 0;		
+			}
+			k = target-1;
+			while (k > 0){
+				nrd[k] = rd[k-1];
+				k = k - 1;			
+			}
+			nrd[0] = 1;
+			if (j != target -1){
+				nrd[j + 1] = 0;		
+			}
+			dfs(p, r, nld, nrd, current + 1, target, c);
+			r[j] = 1;
+		}
+		j =  j + 1;
+	}
+	return 0;
+}
+int main() {
+	int place[10], N, count[1];
+	int row[10], ldiag[10], rdiag[10] ,i = 0;
+	N = read();
+	if (N == 0 || N > 10) { return 0;}
+	while(i < N) {
+		row[i] = 1;
+		ldiag[i] = 1;
+		rdiag[i] = 1;
+		i = i + 1;
+	}
+	count[0] = 0;
+	dfs(place,row,ldiag,rdiag,0,N,count);
+	write(count[0]);
+	return 0;
+}

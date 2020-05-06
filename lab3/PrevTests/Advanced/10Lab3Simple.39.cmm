@@ -1,0 +1,71 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_39) {
+  int i_L861;
+  int i_L862;
+  int i_L860;
+  int i_L863;
+  int i_L864;
+  int i_L859;
+  int i_L865;
+  int i_L866;
+  if (top_caller_i_39 <= 0) {
+    return -1091586566;
+  } else {
+    top_caller_i_39 = top_caller_i_39 - 1;
+  }
+
+  i_L861 = 32923510;
+  i_L862 = 2121577922;
+  i_L860 = i_L861 > i_L862;
+  i_L863 = -830059238;
+  i_L864 = 1442120678;
+  i_L859 = i_L860 = (i_L863 >= i_L864);
+  i_L865 = i_L861 = (i_L862 && i_L860);
+  i_L866 = i_L861 = (i_L862 && i_L860);
+  top_caller_i_39 = top_caller_i_39 - 1;
+  i_L861 = top_caller(top_caller_i_39);
+  i_L861 = safe_div(i_L862, i_L860);
+  top_caller_i_39 = top_caller_i_39 - 1;
+  i_L861 = top_caller(top_caller_i_39);
+  
+  write(i_L861);
+  write(i_L862);
+  write(i_L860);
+  write(i_L863);
+  write(i_L864);
+  write(i_L859);
+  write(i_L865);
+  write(i_L866);
+  return i_L861 = (i_L862 == i_L860);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

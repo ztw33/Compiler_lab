@@ -1,0 +1,108 @@
+
+int safe_add(int lhs_add, int rhs_add) {
+  if((((lhs_add>0) && (rhs_add>0) && (lhs_add > (2147483647-rhs_add))) || ((lhs_add<0) && (rhs_add<0) && (lhs_add < (-2147483648-rhs_add))))) { return lhs_add; }
+  return lhs_add + rhs_add;
+}
+
+int safe_sub(int lhs_sub, int rhs_sub) {
+  if(((lhs_sub > 0) && (rhs_sub < 0) && (lhs_sub > 2147483647 + rhs_sub))|| ((lhs_sub < 0) && (rhs_sub > 0) && (lhs_sub < -2147483648 + rhs_sub))) { return lhs_sub; }
+  return lhs_sub - rhs_sub;
+}
+
+int safe_mul(int lhs_mul, int rhs_mul) {
+  if((((lhs_mul > 0) && (rhs_mul > 0) && (lhs_mul > (2147483647 / rhs_mul))) || ((lhs_mul > 0) && (rhs_mul <= 0) && (rhs_mul < (-2147483648 / lhs_mul))) || ((lhs_mul <= 0) && (rhs_mul > 0) && (lhs_mul < (-2147483648 / rhs_mul))) || ((lhs_mul <= 0) && (rhs_mul <= 0) && (lhs_mul != 0) && (rhs_mul < (2147483647 / lhs_mul))))) { return lhs_mul; }
+  return lhs_mul * rhs_mul;
+}
+
+int safe_div(int lhs_div, int rhs_div) {
+  if(((rhs_div == 0) || ((lhs_div == -2147483648) && (rhs_div == (-1))))) { return lhs_div; }
+  return lhs_div / rhs_div;
+}
+
+int safe_index(int i, int size) {
+  if(i < 0 || i >= size) { return 0; }
+  return i;
+}
+
+int top_caller(int top_caller_i_62) {
+  int i_L1241;
+  int i_L1242;
+  int i_L1240;
+  int i_L1243;
+  int a2_i_L33[2];
+  int a2_i_L34[2];
+  int i_L1244;
+  int i_L1245;
+  if (top_caller_i_62 <= 0) {
+    return 836240619;
+  } else {
+    top_caller_i_62 = top_caller_i_62 - 1;
+  }
+
+  i_L1241 = -1881499509;
+  i_L1242 = 2131125374;
+  i_L1240 = i_L1241 <= i_L1242;
+  i_L1243 = -943735789;
+  a2_i_L33[1] = i_L1240 = (i_L1243 + 1352255217);
+  top_caller_i_62 = top_caller_i_62 - 1;
+  a2_i_L33[0] = top_caller(top_caller_i_62);
+  a2_i_L34[1] = a2_i_L33[(-1981418757 + 1981418758)] = (357748769 >= i_L1241);
+  a2_i_L34[0] = a2_i_L33[safe_index(i_L1241, 2)] = (i_L1242 > i_L1240);
+  top_caller_i_62 = top_caller_i_62 - 1;
+  i_L1244 = a2_i_L33[a2_i_L34[(2085988805 + -2085988805)]] = top_caller(top_caller_i_62);
+  i_L1245 = 0;
+  while (((a2_i_L33[a2_i_L34[(1615881225 + -1615881224)]] = (1349207664 >= i_L1241))) && (i_L1245 < 4)) {
+    int i_L1246;
+    int i_L1247;
+    int i_L1248;
+    int i_L1249;
+    i_L1246 = a2_i_L33[a2_i_L34[(-1254175549 + 1254175550)]] = (i_L1241 >= 265899749);
+    i_L1247 = a2_i_L33[a2_i_L34[(-1616879955 + 1616879955)]] = (i_L1241 + i_L1242);
+    i_L1248 = a2_i_L33[(-1159129753 + 1159129753)] = (a2_i_L34[(1568337758 + -1568337758)] == i_L1241);
+    i_L1249 = 0;
+    i_L1245 = i_L1245 + 1;
+    while (((a2_i_L33[a2_i_L34[(-1161217487 + 1161217487)]] = (i_L1241 && i_L1242))) && (i_L1249 < 4)) {
+      int i_L1250;
+      int i_L1251;
+      int a2_i_L35[2];
+      top_caller_i_62 = top_caller_i_62 - 1;
+      i_L1250 = a2_i_L33[a2_i_L34[(-1341360191 + 1341360192)]] = top_caller(top_caller_i_62);
+      top_caller_i_62 = top_caller_i_62 - 1;
+      i_L1251 = a2_i_L33[a2_i_L34[(1821603595 + -1821603594)]] = top_caller(top_caller_i_62);
+      a2_i_L35[1] = a2_i_L33[a2_i_L34[(2027772451 + -2027772451)]] = (i_L1241 <= 1034064825);
+      a2_i_L35[0] = a2_i_L33[a2_i_L34[(1808315572 + -1808315571)]] = safe_mul(i_L1241, i_L1242);
+      i_L1249 = i_L1249 + 1;
+      a2_i_L33[a2_i_L34[(-2085353340 + 2085353340)]] = (a2_i_L35[(1844948432 + -1844948431)] = i_L1241);
+      top_caller_i_62 = top_caller_i_62 - 1;
+      a2_i_L33[a2_i_L34[(2010097434 + -2010097433)]] = top_caller(top_caller_i_62);
+      top_caller_i_62 = top_caller_i_62 - 1;
+      a2_i_L33[a2_i_L34[(1067115859 + -1067115859)]] = top_caller(top_caller_i_62);
+      
+      write(i_L1250);
+      write(i_L1251);
+    }
+    top_caller_i_62 = top_caller_i_62 - 1;
+    a2_i_L33[a2_i_L34[(1198197810 + -1198197810)]] = top_caller(top_caller_i_62);
+    top_caller_i_62 = top_caller_i_62 - 1;
+    a2_i_L33[a2_i_L34[(-997638388 + 997638389)]] = top_caller(top_caller_i_62);
+    
+    write(i_L1246);
+    write(i_L1247);
+    write(i_L1248);
+  }
+  a2_i_L33[a2_i_L34[(-938537475 + 938537476)]] = (i_L1241 || 76136526);
+  a2_i_L33[a2_i_L34[(924669737 + -924669737)]] = 799217503;
+  
+  write(i_L1241);
+  write(i_L1242);
+  write(i_L1240);
+  write(i_L1243);
+  write(i_L1244);
+  return a2_i_L33[a2_i_L34[(922217442 + -922217442)]] = (i_L1241 || -889750007);
+}
+
+
+int main() {
+  top_caller(10);
+  return 0;
+}

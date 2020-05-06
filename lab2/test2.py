@@ -47,7 +47,7 @@ def checkCase(type):
     for i in range(10):
         cmmFile = generateSingleCase(type, i)+".cmm"
         cmmLog = generateSingleCase(type, i) + ".log"
-        os.system("./Code/parser PreTests/advanced/%s 2> temp.output" % (cmmFile))
+        os.system("./Code/parser PrevTests/advanced/%s 2> temp.output" % (cmmFile))
         #os.system("./Code/parser Advanced/%s"%(cmmFile))
         myOutput = open("temp.output", "r").readlines()
         log = open("PreTests/advanced/%s" % (cmmLog), "r").readlines()
@@ -60,7 +60,7 @@ def checkMultiCase():
     for i in range(9):
         cmmFile = "30Lab2MultipleErrorMultipleTimes." + str(i) + ".cmm"
         cmmLog = "30Lab2MultipleErrorMultipleTimes." + str(i) + ".log"
-        os.system("./Code/parser PreTests/advanced/%s 2> temp.output" % (cmmFile))
+        os.system("./Code/parser PrevTests/advanced/%s 2> temp.output" % (cmmFile))
         myOutput = open("temp.output", "r").readlines()
         log = open("PreTests/advanced/%s" % (cmmLog), "r").readlines()
         if compare(myOutput, log):
@@ -69,10 +69,10 @@ def checkMultiCase():
             print("\033[31m %s wrong \033[0m" % (cmmFile))
     cmmFile = "17Lab2MultipleError.0.cmm"
     cmmLog = "17Lab2MultipleError.0.log"
-    os.system("./Code/parser PreTests/advanced/%s 2> temp.output" % (cmmFile))
+    os.system("./Code/parser PrevTests/advanced/%s 2> temp.output" % (cmmFile))
     #os.system("./Code/parser Advanced/%s" % (cmmFile))
     myOutput = open("temp.output", "r").readlines()
-    log = open("PreTests/advanced/%s" % (cmmLog), "r").readlines()
+    log = open("PrevTests/advanced/%s" % (cmmLog), "r").readlines()
     if compare(myOutput, log):
         print("\033[32m %s passed \033[0m" % (cmmFile))
     else:

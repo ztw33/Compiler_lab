@@ -1,0 +1,36 @@
+struct Student{
+	int name;
+	int grade;	
+};
+
+struct Class{
+	struct Student students[10];
+	int average;
+};
+
+int isStudentInClass(struct Class ccc, struct Student stu) {
+	int ii = 0;
+	while (ii < 10) {
+		if (ccc.students[ii].name == stu.name) {
+			return ccc.students[ii].grade;
+		}
+		ii = ii + 1;
+	}
+	return 0;
+}
+
+int main() {
+	struct Class cl;
+	int i = 0, result;
+	struct Student ss;
+	ss.name = read();
+	ss.grade = 0;
+	cl.average = 0;
+	while (i < 10) {
+		cl.students[i].name = i;
+		cl.students[i].grade = i * i;
+		i = i + 1;
+	}
+	write(isStudentInClass(cl,ss));
+	return 0;
+} 

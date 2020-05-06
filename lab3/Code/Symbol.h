@@ -26,6 +26,7 @@ struct Field_ {
     char* name; // 域的名字
     Type* type; // 域的类型
     Field* next; // 下一个域
+    int offset; // Lab3: 域在结构体中的偏移量
 };
 
 // 符号类型：变量(程序变量&函数形参)；结构体域；结构体定义；函数定义
@@ -58,6 +59,9 @@ struct SymbolList {
 };
 
 Symbol* createSymbol(char* name, SymbolKind kind);
+
+int getSizeofType(Type* type);
+int getFieldOffset(Type* type, char* fieldName);
 
 void printType(Type* type);
 #endif

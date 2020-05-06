@@ -1,0 +1,26 @@
+int main() {
+	int price;
+	int money;
+	price = read();
+	money = read();
+	if (price > money) {
+		if (price > money * 2) {
+			write(price);
+		} else {
+			write(money * 2);
+		}
+	} else if (price == money) {
+		if (money > 100) {
+			write(100);
+		} else {
+			write(money);
+		}
+	} else {
+		if (price * 2 < money) {
+			write(money);
+		} else {
+			write(price * 2);
+		}
+	}
+	return 0;
+}

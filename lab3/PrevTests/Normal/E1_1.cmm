@@ -1,0 +1,15 @@
+struct Food{
+	int name;
+	int price;
+};
+
+int main() {
+	struct Food burger;
+	struct Food cola;
+	burger.name = 1;
+	burger.price = 2;
+	cola.name = 3;
+	cola.price = 4;
+	write(cola.name + burger.price);
+	return 0;
+}
