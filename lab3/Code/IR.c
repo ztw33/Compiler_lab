@@ -401,7 +401,8 @@ void translateParamDec(const Node* ParamDec) {
         } else if (usedThisProd(nodeVarDec, 4, "VarDec", "LB", "INT", "RB")) {
             // VarDec := VarDec LB INT RB
             if(debug) printf("VarDec := VarDec LB INT RB\n");
-            fprintf(stderr, "\033[31mERROR in translateParamDec! 数组不应作为参数传递.\033[0m\n");           
+            fprintf(stderr, "\033[31m无法翻译：数组不应作为参数传递.\033[0m\n");
+            exit(0);           
         } else {
             fprintf(stderr, "\033[31mERROR in translateParamDec when analyse VarDec! No matched production.\033[0m\n");
         }
@@ -506,45 +507,63 @@ Operand* translateExp(const Node* Exp) {
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
         
-        Operand* op_0 = getConstant(0);
-        CondExp* cond1 = createCondExp(op1, EQ, op_0);
-        CondExp* cond2 = createCondExp(op2, EQ, op_0);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        int falseLabelID = createNewLabel();
-        int nextLabelID = createNewLabel();
-        addCode(createIFGOTO(cond1, falseLabelID));
-        addCode(createIFGOTO(cond2, falseLabelID));
-        addCode(createASSIGN(op_ret, getConstant(1)));
-        addCode(createGOTO(nextLabelID));
-        addCode(createLABEL(falseLabelID));
-        addCode(createASSIGN(op_ret, op_0));
-        addCode(createLABEL(nextLabelID));
-        return op_ret;
+        // 优化：判断恒真或恒假的情况
+        if (op1->kind == CONSTANT && op1->constVal == 0) { // 恒假
+            return getConstant(0);
+        } else if (op2->kind == CONSTANT && op2->constVal == 0) { // 恒假
+            return getConstant(0);
+        } else if (op1->kind == CONSTANT && op1->constVal == 1 && op2->constVal == 1) { // 恒真
+            return getConstant(1);
+        } else {
+            Operand* op_0 = getConstant(0);
+            CondExp* cond1 = createCondExp(op1, EQ, op_0);
+            CondExp* cond2 = createCondExp(op2, EQ, op_0);
+            Variable* ret = createVar(T);
+            Operand* op_ret = createOperand(VARIABLE);
+            op_ret->var = ret;
+            int falseLabelID = createNewLabel();
+            int nextLabelID = createNewLabel();
+            addCode(createIFGOTO(cond1, falseLabelID));
+            addCode(createIFGOTO(cond2, falseLabelID));
+            addCode(createASSIGN(op_ret, getConstant(1)));
+            addCode(createGOTO(nextLabelID));
+            addCode(createLABEL(falseLabelID));
+            addCode(createASSIGN(op_ret, op_0));
+            addCode(createLABEL(nextLabelID));
+            return op_ret;
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "OR", "Exp")) {
         // Exp := Exp OR Exp
         if(debug) printf("Exp := Exp OR Exp\n");
 
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        
-        Operand* op_1 = getConstant(1);
-        CondExp* cond1 = createCondExp(op1, EQ, op_1);
-        CondExp* cond2 = createCondExp(op2, EQ, op_1);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        int trueLabelID = createNewLabel();
-        int nextLabelID = createNewLabel();
-        addCode(createIFGOTO(cond1, trueLabelID));
-        addCode(createIFGOTO(cond2, trueLabelID));
-        addCode(createASSIGN(op_ret, getConstant(0)));
-        addCode(createGOTO(nextLabelID));
-        addCode(createLABEL(trueLabelID));
-        addCode(createASSIGN(op_ret, op_1));
-        addCode(createLABEL(nextLabelID));
-        return op_ret;
+
+        // 优化：判断恒真或恒假的情况
+        if (op1->kind == CONSTANT && op1->constVal == 1) { // 恒真
+            return getConstant(1);
+        } else if (op2->kind == CONSTANT && op2->constVal == 1) { // 恒真
+            return getConstant(1);
+        } else if (op1->kind == CONSTANT && op1->constVal == 0 && op2->constVal == 0) { // 恒假
+            return getConstant(0);
+        } else {
+            Operand* op_1 = getConstant(1);
+            CondExp* cond1 = createCondExp(op1, EQ, op_1);
+            CondExp* cond2 = createCondExp(op2, EQ, op_1);
+            Variable* ret = createVar(T);
+            Operand* op_ret = createOperand(VARIABLE);
+            op_ret->var = ret;
+            int trueLabelID = createNewLabel();
+            int nextLabelID = createNewLabel();
+            addCode(createIFGOTO(cond1, trueLabelID));
+            addCode(createIFGOTO(cond2, trueLabelID));
+            addCode(createASSIGN(op_ret, getConstant(0)));
+            addCode(createGOTO(nextLabelID));
+            addCode(createLABEL(trueLabelID));
+            addCode(createASSIGN(op_ret, op_1));
+            addCode(createLABEL(nextLabelID));
+            return op_ret;
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
         // Exp := Exp RELOP Exp
         if(debug) printf("Exp := Exp RELOP Exp\n");
@@ -569,94 +588,192 @@ Operand* translateExp(const Node* Exp) {
             assert(0);
         }
         Operand* op2 = translateExp(nodeRELOP->nextSibling);
-        CondExp* cond = createCondExp(op1, rk, op2);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        int trueLabelID = createNewLabel();
-        int nextLabelID = createNewLabel();
-        addCode(createIFGOTO(cond, trueLabelID));
-        addCode(createASSIGN(op_ret, getConstant(0)));
-        addCode(createGOTO(nextLabelID));
-        addCode(createLABEL(trueLabelID));
-        addCode(createASSIGN(op_ret, getConstant(1)));
-        addCode(createLABEL(nextLabelID));
-        return op_ret;
+
+        // 优化：若操作数为常数则可以直接判断值为1还是0
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            switch (rk) {
+            case EQ:
+                if (op1->constVal == op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            case NEQ:
+                if (op1->constVal != op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            case LT:
+                if (op1->constVal < op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            case GT:
+                if (op1->constVal > op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            case LE:
+                if (op1->constVal <= op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            case GE:
+                if (op1->constVal >= op2->constVal)
+                    return getConstant(1);
+                else
+                    return getConstant(0);
+                break;
+            default:
+                break;
+            }
+        } else {
+            CondExp* cond = createCondExp(op1, rk, op2);
+            Variable* ret = createVar(T);
+            Operand* op_ret = createOperand(VARIABLE);
+            op_ret->var = ret;
+            int trueLabelID = createNewLabel();
+            int nextLabelID = createNewLabel();
+            addCode(createIFGOTO(cond, trueLabelID));
+            addCode(createASSIGN(op_ret, getConstant(0)));
+            addCode(createGOTO(nextLabelID));
+            addCode(createLABEL(trueLabelID));
+            addCode(createASSIGN(op_ret, getConstant(1)));
+            addCode(createLABEL(nextLabelID));
+            return op_ret;
+        }
     } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
         // Exp := NOT Exp
         if(debug) printf("Exp := NOT Exp\n");
 
         Operand* op = translateExp(Exp->firstChild->nextSibling);
-        Operand* op_0 = getConstant(0);
-        Operand* op_1 = getConstant(1);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        int trueLabelID = createNewLabel();
-        int nextLabelID = createNewLabel();
-        CondExp* cond = createCondExp(op, EQ, op_0);
-        addCode(createIFGOTO(cond, trueLabelID));
-        addCode(createASSIGN(op_ret, op_0));
-        addCode(createGOTO(nextLabelID));
-        addCode(createLABEL(trueLabelID));
-        addCode(createASSIGN(op_ret, op_1));
-        addCode(createLABEL(nextLabelID));
-        return op_ret;
+
+        // 优化
+        if (op->kind == CONSTANT && op->constVal == 1) {
+            return getConstant(0);
+        } else if (op->kind == CONSTANT && op->constVal == 0) {
+            return getConstant(1);
+        } else {
+            Operand* op_0 = getConstant(0);
+            Operand* op_1 = getConstant(1);
+            Variable* ret = createVar(T);
+            Operand* op_ret = createOperand(VARIABLE);
+            op_ret->var = ret;
+            int trueLabelID = createNewLabel();
+            int nextLabelID = createNewLabel();
+            CondExp* cond = createCondExp(op, EQ, op_0);
+            addCode(createIFGOTO(cond, trueLabelID));
+            addCode(createASSIGN(op_ret, op_0));
+            addCode(createGOTO(nextLabelID));
+            addCode(createLABEL(trueLabelID));
+            addCode(createASSIGN(op_ret, op_1));
+            addCode(createLABEL(nextLabelID));
+            return op_ret;
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "PLUS", "Exp")) {
         // Exp := Exp PLUS Exp
         if(debug) printf("Exp := Exp PLUS Exp\n");
-        
+
         Operand* op1 = translateExp(Exp->firstChild);
-        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        addCode(createBinOp(op_ret, ADD, op1, op2));
-        return op_ret;
+        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);        
+        // 优化：若算术表达式的操作数为立即数，则可以直接把结果计算出来
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            return getConstant(op1->constVal + op2->constVal);
+        } else {
+            if (op1->kind == CONSTANT && op1->constVal == 0){
+                return op2;
+            } else if (op2->kind == CONSTANT && op2->constVal == 0) {
+                return op1;
+            } else {
+                Variable* ret = createVar(T);
+                Operand* op_ret = createOperand(VARIABLE);
+                op_ret->var = ret;
+                addCode(createBinOp(op_ret, ADD, op1, op2));
+                return op_ret;
+            }
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "MINUS", "Exp")) {
         // Exp := Exp MINUS Exp
         if(debug) printf("Exp := Exp MINUS Exp\n");
         
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        addCode(createBinOp(op_ret, SUB, op1, op2));
-        return op_ret;
+        // 优化：若算术表达式的操作数为立即数，则可以直接把结果计算出来
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            return getConstant(op1->constVal - op2->constVal);
+        } else {
+            if (op2->kind == CONSTANT && op2->constVal == 0) {
+                return op1;
+            } else {
+                Variable* ret = createVar(T);
+                Operand* op_ret = createOperand(VARIABLE);
+                op_ret->var = ret;
+                addCode(createBinOp(op_ret, SUB, op1, op2));
+                return op_ret;
+            }
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "STAR", "Exp")) {
         // Exp := Exp STAR Exp
         if(debug) printf("Exp := Exp STAR Exp\n");
         
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        addCode(createBinOp(op_ret, MUL, op1, op2));
-        return op_ret;
+        // 优化：若算术表达式的操作数为立即数，则可以直接把结果计算出来
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            return getConstant(op1->constVal * op2->constVal);
+        } else {
+            if (op1->kind == CONSTANT && op1->constVal == 0) {
+                return getConstant(0);
+            } else if (op1->kind == CONSTANT && op1->constVal == 1) {
+                return op2;
+            } else if (op2->kind == CONSTANT && op2->constVal == 0) {
+                return getConstant(0);
+            } else if (op2->kind == CONSTANT && op2->constVal == 1) {
+                return op1;
+            } else {
+                Variable* ret = createVar(T);
+                Operand* op_ret = createOperand(VARIABLE);
+                op_ret->var = ret;
+                addCode(createBinOp(op_ret, MUL, op1, op2));
+                return op_ret;
+            }
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "DIV", "Exp")) {
         // Exp := Exp DIV Exp
         if(debug) printf("Exp := Exp DIV Exp\n");
         
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        Variable* ret = createVar(T);
-        Operand* op_ret = createOperand(VARIABLE);
-        op_ret->var = ret;
-        addCode(createBinOp(op_ret, DIV, op1, op2));
-        return op_ret;
+        
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            return getConstant(op1->constVal / op2->constVal);
+        } else {
+            if (op1->kind == CONSTANT && op1->constVal == 0) {
+                return getConstant(0);
+            } else if (op2->kind == CONSTANT && op2->constVal == 1) {
+                return op1;
+            } else {
+                Variable* ret = createVar(T);
+                Operand* op_ret = createOperand(VARIABLE);
+                op_ret->var = ret;
+                addCode(createBinOp(op_ret, DIV, op1, op2));
+                return op_ret;
+            }
+        }
     } else if (usedThisProd(Exp, 2, "MINUS", "Exp")) {
         // Exp := MINUS Exp
         if(debug) printf("Exp := MINUS Exp\n");
 
-        // 负数
-        if (usedThisProd(Exp->firstChild->nextSibling, 1, "INT")) {
-            return getConstant(0 - Exp->firstChild->nextSibling->firstChild->intVal);
+        Operand* op = translateExp(Exp->firstChild->nextSibling);
+        // 优化：若算术表达式的操作数为立即数，则可以直接把结果计算出来
+        if (op->kind == CONSTANT) {
+            return getConstant(0 - op->constVal);
         } else {
             Operand* op_0 = getConstant(0);
-            Operand* op = translateExp(Exp->firstChild->nextSibling);
-
             Variable* res = createVar(T);
             Operand* op_res = createOperand(VARIABLE);
             op_res->var = res;
@@ -666,7 +783,6 @@ Operand* translateExp(const Node* Exp) {
     } else if (usedThisProd(Exp, 3, "LP", "Exp", "RP")) {
         // Exp := LP Exp RP
         if(debug) printf("Exp := LP Exp RP\n");
-
         return translateExp(Exp->firstChild->nextSibling);
     } else if (usedThisProd(Exp, 4, "ID", "LP", "Args", "RP")) {
         // Exp := ID LP Args RP
@@ -705,20 +821,45 @@ Operand* translateExp(const Node* Exp) {
         // Exp := Exp LB Exp RB
         if(debug) printf("Exp := Exp LB Exp RB\n");
 
+        Type* type = analyseExp(Exp->firstChild);
+        if (type->kind != ARRAY) {
+            fprintf(stderr, "\033[31mERROR in translateExp! Not array.\033[0m\n");
+        }
         Operand* op_array = translateExp(Exp->firstChild);
-        Operand* array_addr = createOperand(REF);
-        array_addr->refObj = op_array;
-        Operand* index = translateExp(Exp->firstChild->nextSibling);
-        Variable* offset = createVar(T);
-        Operand* op_offset = createOperand(VARIABLE);
-        op_offset->var = offset;
+        Operand* array_addr = NULL;
+        if (op_array->kind == DEREF) {
+            array_addr = op_array->derefObj;
+        } else {
+            array_addr = createOperand(REF);
+            array_addr->refObj = op_array;
+        }
+        
+        Operand* index = translateExp(Exp->firstChild->nextSibling->nextSibling);
         Variable* addr = createVar(T);
         Operand* op_addr = createOperand(VARIABLE);
         op_addr->var = addr;
-        Operand* elem = createOperand(DEREF);
-        elem->derefObj = op_addr;
-        addCode(createBinOp(op_offset, MUL, index, getConstant(4)));  // offset := index * #4
-        addCode(createBinOp(op_addr, ADD, array_addr, op_offset));  // addr = &array + offset
+        Operand* elem = NULL;
+        if (op_addr->kind == REF) {
+            elem = op_addr->refObj;
+        } else {
+            elem = createOperand(DEREF);
+            elem->derefObj = op_addr;
+        }
+        int elem_size = getSizeofType(type->array.elem);
+        if (index->kind == CONSTANT) {
+            int offset = index->constVal * elem_size;
+            if (offset == 0) {
+                addCode(createASSIGN(op_addr, array_addr));
+            } else {
+                addCode(createBinOp(op_addr, ADD, array_addr, getConstant(offset)));  // addr = &array + offset
+            }
+        } else {
+            Variable* offset = createVar(T);
+            Operand* op_offset = createOperand(VARIABLE);
+            op_offset->var = offset;
+            addCode(createBinOp(op_offset, MUL, index, getConstant(elem_size)));  // offset := index * #[size]
+            addCode(createBinOp(op_addr, ADD, array_addr, op_offset));  // addr = &array + offset
+        }
         return elem;  // *addr
     } else if (usedThisProd(Exp, 3, "Exp", "DOT", "ID")) {
         // Exp := Exp DOT ID
@@ -734,14 +875,22 @@ Operand* translateExp(const Node* Exp) {
         if (op_struct->kind == VARIABLE && op_struct->var->isAddr) {
             struct_addr = op_struct;
         } else {
-            struct_addr = createOperand(REF);
-            struct_addr->refObj = op_struct;
+            if (op_struct->kind == DEREF) {
+                struct_addr = op_struct->derefObj;
+            } else {
+                struct_addr = createOperand(REF);
+                struct_addr->refObj = op_struct;
+            }
         }
         int offset = getFieldOffset(type, Exp->firstChild->nextSibling->nextSibling->stringVal);
         Variable* addr = createVar(T);
         Operand* op_addr = createOperand(VARIABLE);
         op_addr->var = addr;
-        addCode(createBinOp(op_addr, ADD, struct_addr, getConstant(offset)));
+        if (offset == 0) {
+            addCode(createASSIGN(op_addr, struct_addr));
+        } else {
+            addCode(createBinOp(op_addr, ADD, struct_addr, getConstant(offset)));
+        }
         Operand* field = createOperand(DEREF);
         field->derefObj = op_addr;
         return field;
@@ -768,7 +917,6 @@ Operand* translateExp(const Node* Exp) {
     } else if (usedThisProd(Exp, 1, "INT")) {
         // Exp := INT
         if(debug) printf("Exp := INT\n");
-
         return getConstant(Exp->firstChild->intVal);
     } else if (usedThisProd(Exp, 1, "FLOAT")) {
         // Exp := FLOAT
@@ -839,9 +987,17 @@ void translateCondExp(const Node* Exp, int trueLabelID, int falseLabelID) {
         // other condition
         if(debug) printf("other condition\n");
         Operand* op = translateExp(Exp);
-        CondExp* cond = createCondExp(op, NEQ, getConstant(0));
-        addCode(createIFGOTO(cond, trueLabelID));
-        addCode(createGOTO(falseLabelID));
+        if (op->kind == CONSTANT) {
+            if (op->constVal == 0) {
+                addCode(createGOTO(falseLabelID));
+            } else {
+                addCode(createGOTO(trueLabelID));
+            }
+        } else {
+            CondExp* cond = createCondExp(op, NEQ, getConstant(0));
+            addCode(createIFGOTO(cond, trueLabelID));
+            addCode(createGOTO(falseLabelID));
+        }
     } else if (usedThisProd(Exp, 1, "FLOAT")) {
         // Exp := FLOAT
         if(debug) printf("Exp := FLOAT\n");
@@ -862,8 +1018,13 @@ void translateArgs(const Node* Args) {
             addCode(createARG(translateExp(Args->firstChild)));
         } else if (type->kind == STRUCTURE) {
             Operand* op = translateExp(Args->firstChild);
-            Operand* op_ref = createOperand(REF);
-            op_ref->refObj = op;
+            Operand* op_ref = NULL;
+            if (op->kind == DEREF) {
+                op_ref = op->derefObj;
+            } else {
+                op_ref = createOperand(REF);
+                op_ref->refObj = op;
+            }
             addCode(createARG(op_ref));
         } else {
             fprintf(stderr, "\033[31mERROR in translateArgs! Wrong arg type.\033[0m\n");
@@ -999,7 +1160,8 @@ Operand* translateVarDec(const Node* VarDec, Type* type) {
                 return op;
             }
         } else {
-            fprintf(stderr, "\033[31mERROR in translateVarDec! 不应该出现高维数组.\033[0m\n");
+            fprintf(stderr, "\033[31m无法翻译：不应该出现高维数组.\033[0m\n");
+            exit(0);
         }
     } else {
         fprintf(stderr, "\033[31mERROR in translateVarDec! No matched production.\033[0m\n");
