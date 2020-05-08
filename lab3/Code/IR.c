@@ -1,8 +1,9 @@
 #include "IR.h"
 #include "semantic.h"
 #include <assert.h>
+#include "optimizeIR.h"
 
-#define debug 1
+#define debug 0
 
 void addCode(InterCode* code) {
     if (codesHead == NULL) {
@@ -21,59 +22,7 @@ void addCode(InterCode* code) {
         codesTail = tail;
     }
     if (debug) {
-        switch (code->kind) {
-        case LABEL:
-            printf("LABEL label%d :\n", code->labelID);
-            break;
-        case FUNCTION:
-            printf("FUNCTION %s :\n", code->funcName);
-            break;
-        case ASSIGN:
-            printf("%s := %s\n", getOperandName(code->assign.left), getOperandName(code->assign.right));
-            break;
-        case ADD:
-            printf("%s := %s + %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
-            break;
-        case SUB:
-            printf("%s := %s - %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
-            break;
-        case MUL:
-            printf("%s := %s * %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
-            break;
-        case DIV:
-            printf("%s := %s / %s\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
-            break;
-        case GOTO:
-            printf("GOTO label%d\n", code->gotoLabelID);
-            break;
-        case IF_GOTO:
-            printf("IF %s %s %s GOTO label%d\n", getOperandName(code->if_goto.cond->op1), getRelop(code->if_goto.cond), getOperandName(code->if_goto.cond->op2), code->if_goto.gotoLabelID);
-            break;
-        case RETURN:
-            printf("RETURN %s\n", getOperandName(code->retVal));
-            break;
-        case DEC:
-            printf("DEC %s %d\n", getVarName(code->dec.var), code->dec.size);
-            break;
-        case ARG:
-            printf("ARG %s\n", getOperandName(code->arg));
-            break;
-        case CALL:
-            printf("%s := CALL %s\n", getVarName(code->call.ret), code->call.funcName);
-            break;
-        case PARAM:
-            printf("PARAM %s\n", getVarName(code->param));
-            break;
-        case READ:
-            printf("READ %s\n", getOperandName(code->rwOperand));
-            break;
-        case WRITE:
-            printf("WRITE %s\n", getOperandName(code->rwOperand));
-            break; 
-        default:
-            fprintf(stderr, "\033[31mERROR in addCode! Unknown code kind.\033[0m\n");
-            break;
-        }
+        printCode(code);
     }
 }
 
@@ -85,6 +34,13 @@ void addCodes(CodesListHT codes) {
         codesTail->next = codes.head;
         codes.head->prev = codesTail;
         codesTail = codes.tail;
+    }
+    if (debug) {
+        InterCodes* p = codes.head;
+        while (p != codes.tail) {
+            printCode(p->code);
+        }
+        printCode(codes.tail->code);
     }
 }
 
@@ -149,57 +105,7 @@ void outputIR(FILE* file, InterCodes* codes) {
     } 
 }
 
-char* getVarName(Variable* var) {
-    char* name = (char*)malloc(16*sizeof(char));
-    sprintf(name, "%c%d", var->kind == T ? 't' : 'v', var->id);
-    return name;
-}
-
-char* getOperandName(Operand* op) {
-    if (op->kind == VARIABLE) {
-        return getVarName(op->var);
-    } else if (op->kind == CONSTANT) {
-        char* name = (char*)malloc(16*sizeof(char));
-        sprintf(name, "#%d", op->constVal);
-        return name;
-    } else if (op->kind == REF) {
-        char* name = (char*)malloc(16*sizeof(char));
-        sprintf(name, "&%s", getOperandName(op->refObj));
-        return name;
-    } else if (op->kind == DEREF) {
-        char* name = (char*)malloc(16*sizeof(char));
-        sprintf(name, "*%s", getOperandName(op->derefObj));
-        return name;
-    } else {
-        fprintf(stderr, "\033[31mERROR in getOperandName! Unknown operand kind.\033[0m\n");
-        return NULL;
-    }
-}
-
-char* getRelop(CondExp* cond) {
-    switch (cond->relop) {
-    case EQ:
-        return "==";
-    case NEQ:
-        return "!=";
-    case LT:
-        return "<";
-    case GT:
-        return ">";
-    case LE:
-        return "<=";
-    case GE:
-        return ">=";
-    default:
-        fprintf(stderr, "\033[31mERROR in getRelop! Unknown relop kind.\033[0m\n");
-        return NULL;
-    }
-}
-
 Operand* getConstant(int val) {
-    if(debug) printf("getConstant:\tval=%d\n", val);
-    char* s = (char*)malloc(16*sizeof(char));
-    sprintf(s, "%d", val);
     Operand* op_i = createOperand(CONSTANT);
     op_i->constVal = val;
     return op_i;
@@ -212,47 +118,8 @@ void IRInit() {
 
 InterCodes* generateIR(const Node* syntaxTreeRootNode) {
     IRInit();
-    /* 首次尝试
-    addCode(createFUNCTION("main"));
-    Variable* t1 = createVar(T);
-    addCode(createREAD(t1));
-    Variable* v1 = createVar(V);
-    Operand* op_v1 = createOperand(VARIABLE);
-    op_v1->var = v1;
-    Operand* op_t1 = createOperand(VARIABLE);
-    op_t1->var = t1;
-    Operand* op_0 = createOperand(CONSTANT);
-    op_0->constVal = 0;
-    addCode(createASSIGN(op_v1, op_t1));
-    Variable* t2 = createVar(T);
-    Operand* op_t2 = createOperand(VARIABLE);
-    op_t2->var = t2;
-    addCode(createASSIGN(op_t2, op_0));
-    addCode(createIFGOTO(createCondExp(op_v1, GT, op_t2), 1));
-    addCode(createIFGOTO(createCondExp(op_v1, LT, op_t2), 2));
-    addCode(createWRITE(t2));
-    addCode(createGOTO(3));
-    addCode(createLABEL(1));
-    Variable* t3 = createVar(T);
-    Operand* op_t3 = createOperand(VARIABLE);
-    op_t3->var = t3;
-    Operand* op_1 = createOperand(CONSTANT);
-    op_1->constVal = 1;
-    addCode(createASSIGN(op_t3, op_1));
-    addCode(createWRITE(t3));
-    addCode(createGOTO(3));
-    addCode(createLABEL(2));
-    Variable* t4 = createVar(T);
-    Operand* op_t4 = createOperand(VARIABLE);
-    op_t4->var = t4;
-    Operand* op_m1 = createOperand(CONSTANT);
-    op_m1->constVal = -1;
-    addCode(createASSIGN(op_t4, op_m1));
-    addCode(createWRITE(t4));
-    addCode(createLABEL(3));
-    addCode(createRETURN(op_t2));
-    */
     translateProgram(syntaxTreeRootNode);
+    optimizeIR(codesHead);
     return codesHead;
 }
 
@@ -293,7 +160,6 @@ void translateExtDef(const Node* ExtDef) {
     if (usedThisProd(ExtDef, 2, "Specifier", "SEMI")) {
         //ExtDef := Specifier SEMI
         return;
-
     } else if (usedThisProd(ExtDef, 3, "Specifier", "FunDec", "CompSt")) {
         //ExtDef := Specifier FunDec CompSt
         if(debug) printf("ExtDef := Specifier FunDec CompSt\n");
@@ -500,180 +366,22 @@ Operand* translateExp(const Node* Exp) {
         Operand* right = translateExp(Exp->firstChild->nextSibling->nextSibling);
         addCode(createASSIGN(left, right));
         return left;
-    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp")) {
-        // Exp := Exp AND Exp
-        if(debug) printf("Exp := Exp AND Exp\n");
+    } else if (usedThisProd(Exp, 3, "Exp", "AND", "Exp") || usedThisProd(Exp, 3, "Exp", "OR", "Exp") || usedThisProd(Exp, 3, "Exp", "RELOP", "Exp") || usedThisProd(Exp, 2, "NOT", "Exp")) {
+        // Exp := Exp AND/OR/RELOP Exp / NOT Exp
+        if(debug) printf("Exp := Exp AND/OR/RELOP Exp / NOT Exp\n");
 
-        Operand* op1 = translateExp(Exp->firstChild);
-        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-        
-        // 优化：判断恒真或恒假的情况
-        if (op1->kind == CONSTANT && op1->constVal == 0) { // 恒假
-            return getConstant(0);
-        } else if (op2->kind == CONSTANT && op2->constVal == 0) { // 恒假
-            return getConstant(0);
-        } else if (op1->kind == CONSTANT && op1->constVal == 1 && op2->constVal == 1) { // 恒真
-            return getConstant(1);
-        } else {
-            Operand* op_0 = getConstant(0);
-            CondExp* cond1 = createCondExp(op1, EQ, op_0);
-            CondExp* cond2 = createCondExp(op2, EQ, op_0);
-            Variable* ret = createVar(T);
-            Operand* op_ret = createOperand(VARIABLE);
-            op_ret->var = ret;
-            int falseLabelID = createNewLabel();
-            int nextLabelID = createNewLabel();
-            addCode(createIFGOTO(cond1, falseLabelID));
-            addCode(createIFGOTO(cond2, falseLabelID));
-            addCode(createASSIGN(op_ret, getConstant(1)));
-            addCode(createGOTO(nextLabelID));
-            addCode(createLABEL(falseLabelID));
-            addCode(createASSIGN(op_ret, op_0));
-            addCode(createLABEL(nextLabelID));
-            return op_ret;
-        }
-    } else if (usedThisProd(Exp, 3, "Exp", "OR", "Exp")) {
-        // Exp := Exp OR Exp
-        if(debug) printf("Exp := Exp OR Exp\n");
+        Variable* ret = createVar(T);
+        Operand* op_ret = createOperand(VARIABLE);
+        op_ret->var = ret;
+        int label1 = createNewLabel();
+        int label2 = createNewLabel();
 
-        Operand* op1 = translateExp(Exp->firstChild);
-        Operand* op2 = translateExp(Exp->firstChild->nextSibling->nextSibling);
-
-        // 优化：判断恒真或恒假的情况
-        if (op1->kind == CONSTANT && op1->constVal == 1) { // 恒真
-            return getConstant(1);
-        } else if (op2->kind == CONSTANT && op2->constVal == 1) { // 恒真
-            return getConstant(1);
-        } else if (op1->kind == CONSTANT && op1->constVal == 0 && op2->constVal == 0) { // 恒假
-            return getConstant(0);
-        } else {
-            Operand* op_1 = getConstant(1);
-            CondExp* cond1 = createCondExp(op1, EQ, op_1);
-            CondExp* cond2 = createCondExp(op2, EQ, op_1);
-            Variable* ret = createVar(T);
-            Operand* op_ret = createOperand(VARIABLE);
-            op_ret->var = ret;
-            int trueLabelID = createNewLabel();
-            int nextLabelID = createNewLabel();
-            addCode(createIFGOTO(cond1, trueLabelID));
-            addCode(createIFGOTO(cond2, trueLabelID));
-            addCode(createASSIGN(op_ret, getConstant(0)));
-            addCode(createGOTO(nextLabelID));
-            addCode(createLABEL(trueLabelID));
-            addCode(createASSIGN(op_ret, op_1));
-            addCode(createLABEL(nextLabelID));
-            return op_ret;
-        }
-    } else if (usedThisProd(Exp, 3, "Exp", "RELOP", "Exp")) {
-        // Exp := Exp RELOP Exp
-        if(debug) printf("Exp := Exp RELOP Exp\n");
-
-        Operand* op1 = translateExp(Exp->firstChild);
-        Node* nodeRELOP = Exp->firstChild->nextSibling;
-        RelopKind rk;
-        if (equalString(nodeRELOP->stringVal, "==")) {
-            rk = EQ;
-        } else if (equalString(nodeRELOP->stringVal, "!=")) {
-            rk = NEQ;
-        } else if (equalString(nodeRELOP->stringVal, "<")) {
-            rk = LT;
-        } else if (equalString(nodeRELOP->stringVal, ">")) {
-            rk = GT;
-        } else if (equalString(nodeRELOP->stringVal, "<=")) {
-            rk = LE;
-        } else if (equalString(nodeRELOP->stringVal, ">=")) {
-            rk = GE;
-        } else {
-            fprintf(stderr, "\033[31mERROR in translateExp! Unknown relop.\033[0m\n");
-            assert(0);
-        }
-        Operand* op2 = translateExp(nodeRELOP->nextSibling);
-
-        // 优化：若操作数为常数则可以直接判断值为1还是0
-        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
-            switch (rk) {
-            case EQ:
-                if (op1->constVal == op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            case NEQ:
-                if (op1->constVal != op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            case LT:
-                if (op1->constVal < op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            case GT:
-                if (op1->constVal > op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            case LE:
-                if (op1->constVal <= op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            case GE:
-                if (op1->constVal >= op2->constVal)
-                    return getConstant(1);
-                else
-                    return getConstant(0);
-                break;
-            default:
-                break;
-            }
-        } else {
-            CondExp* cond = createCondExp(op1, rk, op2);
-            Variable* ret = createVar(T);
-            Operand* op_ret = createOperand(VARIABLE);
-            op_ret->var = ret;
-            int trueLabelID = createNewLabel();
-            int nextLabelID = createNewLabel();
-            addCode(createIFGOTO(cond, trueLabelID));
-            addCode(createASSIGN(op_ret, getConstant(0)));
-            addCode(createGOTO(nextLabelID));
-            addCode(createLABEL(trueLabelID));
-            addCode(createASSIGN(op_ret, getConstant(1)));
-            addCode(createLABEL(nextLabelID));
-            return op_ret;
-        }
-    } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
-        // Exp := NOT Exp
-        if(debug) printf("Exp := NOT Exp\n");
-
-        Operand* op = translateExp(Exp->firstChild->nextSibling);
-
-        // 优化
-        if (op->kind == CONSTANT && op->constVal == 1) {
-            return getConstant(0);
-        } else if (op->kind == CONSTANT && op->constVal == 0) {
-            return getConstant(1);
-        } else {
-            Operand* op_0 = getConstant(0);
-            Operand* op_1 = getConstant(1);
-            Variable* ret = createVar(T);
-            Operand* op_ret = createOperand(VARIABLE);
-            op_ret->var = ret;
-            int trueLabelID = createNewLabel();
-            int nextLabelID = createNewLabel();
-            CondExp* cond = createCondExp(op, EQ, op_0);
-            addCode(createIFGOTO(cond, trueLabelID));
-            addCode(createASSIGN(op_ret, op_0));
-            addCode(createGOTO(nextLabelID));
-            addCode(createLABEL(trueLabelID));
-            addCode(createASSIGN(op_ret, op_1));
-            addCode(createLABEL(nextLabelID));
-            return op_ret;
-        }
+        addCode(createASSIGN(op_ret, getConstant(0)));
+        translateCondExp(Exp, label1, label2);
+        addCode(createLABEL(label1));
+        addCode(createASSIGN(op_ret, getConstant(1)));
+        addCode(createLABEL(label2));
+        return op_ret;
     } else if (usedThisProd(Exp, 3, "Exp", "PLUS", "Exp")) {
         // Exp := Exp PLUS Exp
         if(debug) printf("Exp := Exp PLUS Exp\n");
@@ -764,7 +472,7 @@ Operand* translateExp(const Node* Exp) {
                 return op_ret;
             }
         }
-    } else if (usedThisProd(Exp, 2, "MINUS", "Exp")) {
+    } else if (usedThisProd(Exp, 2, "MINUS", "Exp")) {\
         // Exp := MINUS Exp
         if(debug) printf("Exp := MINUS Exp\n");
 
@@ -773,11 +481,10 @@ Operand* translateExp(const Node* Exp) {
         if (op->kind == CONSTANT) {
             return getConstant(0 - op->constVal);
         } else {
-            Operand* op_0 = getConstant(0);
             Variable* res = createVar(T);
             Operand* op_res = createOperand(VARIABLE);
             op_res->var = res;
-            addCode(createBinOp(op_res, SUB, op_0, op));
+            addCode(createBinOp(op_res, SUB, getConstant(0), op));
             return op_res;
         }
     } else if (usedThisProd(Exp, 3, "LP", "Exp", "RP")) {
@@ -793,7 +500,8 @@ Operand* translateExp(const Node* Exp) {
             Operand* op = translateExp(nodeArgs->firstChild);
             addCode(createWRITE(op));
         } else {
-            translateArgs(Exp->firstChild->nextSibling->nextSibling);
+            CodesListHT argCodes = translateArgs(Exp->firstChild->nextSibling->nextSibling);
+            addCodes(argCodes);
             Variable* ret = createVar(T);
             Operand* op_ret = createOperand(VARIABLE);
             op_ret->var = ret;
@@ -972,18 +680,72 @@ void translateCondExp(const Node* Exp, int trueLabelID, int falseLabelID) {
         }
         Operand* op1 = translateExp(Exp->firstChild);
         Operand* op2 = translateExp(nodeRELOP->nextSibling);
-        CondExp* cond = createCondExp(op1, rk, op2);
-        addCode(createIFGOTO(cond, trueLabelID));
-        addCode(createGOTO(falseLabelID));
+        // 优化：若操作数为常数则可以直接判断true还是false
+        if (op1->kind == CONSTANT && op2->kind == CONSTANT) {
+            switch (rk) {
+            case EQ:
+                if (op1->constVal == op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            case NEQ:
+                if (op1->constVal != op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            case LT:
+                if (op1->constVal < op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            case GT:
+                if (op1->constVal > op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            case LE:
+                if (op1->constVal <= op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            case GE:
+                if (op1->constVal >= op2->constVal)
+                    createGOTO(trueLabelID);
+                else
+                    createGOTO(falseLabelID);
+                break;
+            default:
+                break;
+            }
+        } else {
+            CondExp* cond = createCondExp(op1, rk, op2);
+            addCode(createIFGOTO(cond, trueLabelID));
+            addCode(createGOTO(falseLabelID));
+        }
     } else if (usedThisProd(Exp, 2, "NOT", "Exp")) {
         // Exp := NOT Exp
         if(debug) printf("Exp := NOT Exp\n");
         translateCondExp(Exp->firstChild->nextSibling, falseLabelID, trueLabelID);
+    } else if (usedThisProd(Exp, 3, "LP", "Exp", "RP")) {
+        if(debug) printf("Exp := LP Exp RP\n");
+        translateCondExp(Exp->firstChild->nextSibling, trueLabelID, falseLabelID);
+    } else if (usedThisProd(Exp, 1, "INT")) {
+        if(debug) printf("Exp := INT\n");
+        Operand* op = translateExp(Exp);
+        if (op->constVal == 0) {
+            addCode(createGOTO(falseLabelID));
+        } else {
+            addCode(createGOTO(trueLabelID));
+        }
     } else if (usedThisProd(Exp, 3, "Exp", "ASSIGNOP", "Exp") ||
                usedThisProd(Exp, 3, "Exp", "PLUS", "Exp") || usedThisProd(Exp, 3, "Exp", "MINUS", "Exp") || usedThisProd(Exp, 3, "Exp", "STAR", "Exp") || usedThisProd(Exp, 3, "Exp", "DIV", "Exp") || usedThisProd(Exp, 2, "MINUS", "Exp") || 
-               usedThisProd(Exp, 3, "LP", "Exp", "RP") || usedThisProd(Exp, 4, "ID", "LP", "Args", "RP") || usedThisProd(Exp, 3, "ID", "LP", "RP") || 
-               usedThisProd(Exp, 4, "Exp", "LB", "Exp", "RB") || usedThisProd(Exp, 3, "Exp", "DOT", "ID") || 
-               usedThisProd(Exp, 1, "ID") || usedThisProd(Exp, 1, "INT")) {
+               usedThisProd(Exp, 4, "ID", "LP", "Args", "RP") || usedThisProd(Exp, 3, "ID", "LP", "RP") || 
+               usedThisProd(Exp, 4, "Exp", "LB", "Exp", "RB") || usedThisProd(Exp, 3, "Exp", "DOT", "ID") || usedThisProd(Exp, 1, "ID")) {
         // other condition
         if(debug) printf("other condition\n");
         Operand* op = translateExp(Exp);
@@ -1007,7 +769,7 @@ void translateCondExp(const Node* Exp, int trueLabelID, int falseLabelID) {
     }
 }
 
-void translateArgs(const Node* Args) {
+CodesListHT translateArgs(const Node* Args) {
     if(debug) printf("translateArgs:\t");
 
     if (usedThisProd(Args, 1, "Exp")) {
@@ -1015,7 +777,15 @@ void translateArgs(const Node* Args) {
         if(debug) printf("Args := Exp\n");
         Type* type = analyseExp(Args->firstChild);
         if (type->kind == BASIC) {
-            addCode(createARG(translateExp(Args->firstChild)));
+            InterCode* code = createARG(translateExp(Args->firstChild));
+            InterCodes* codes = (InterCodes*)malloc(sizeof(InterCodes));
+            codes->code = code;
+            codes->next = NULL;
+            codes->prev = NULL;
+            CodesListHT argCode;
+            argCode.head = codes;
+            argCode.tail = codes;
+            return argCode;
         } else if (type->kind == STRUCTURE) {
             Operand* op = translateExp(Args->firstChild);
             Operand* op_ref = NULL;
@@ -1025,7 +795,15 @@ void translateArgs(const Node* Args) {
                 op_ref = createOperand(REF);
                 op_ref->refObj = op;
             }
-            addCode(createARG(op_ref));
+            InterCode* code = createARG(op_ref);
+            InterCodes* codes = (InterCodes*)malloc(sizeof(InterCodes));
+            codes->code = code;
+            codes->next = NULL;
+            codes->prev = NULL;
+            CodesListHT argCode;
+            argCode.head = codes;
+            argCode.tail = codes;
+            return argCode;
         } else {
             fprintf(stderr, "\033[31mERROR in translateArgs! Wrong arg type.\033[0m\n");
         }
@@ -1033,8 +811,15 @@ void translateArgs(const Node* Args) {
         // Args := Exp COMMA Args
         if(debug) printf("Args := Exp COMMA Args\n");
         
-        translateArgs(Args->firstChild->nextSibling->nextSibling);
-        addCode(createARG(translateExp(Args->firstChild)));
+        CodesListHT prevCodes = translateArgs(Args->firstChild->nextSibling->nextSibling);
+        InterCode* code = createARG(translateExp(Args->firstChild));
+        InterCodes* codes = (InterCodes*)malloc(sizeof(InterCodes));
+        codes->code = code;
+        codes->next = NULL;
+        codes->prev = prevCodes.tail;
+        prevCodes.tail->next = codes;
+        prevCodes.tail = codes;
+        return prevCodes;
     } else {
         fprintf(stderr, "\033[31mERROR in translateArgs! No matched production.\033[0m\n");
     }

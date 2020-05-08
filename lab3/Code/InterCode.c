@@ -159,3 +159,106 @@ InterCode* createWRITE(Operand* op) {
     code->rwOperand = op;
     return code;
 }
+
+char* getVarName(Variable* var) {
+    char* name = (char*)malloc(16*sizeof(char));
+    sprintf(name, "%c%d", var->kind == T ? 't' : 'v', var->id);
+    return name;
+}
+
+char* getOperandName(Operand* op) {
+    if (op->kind == VARIABLE) {
+        return getVarName(op->var);
+    } else if (op->kind == CONSTANT) {
+        char* name = (char*)malloc(16*sizeof(char));
+        sprintf(name, "#%d", op->constVal);
+        return name;
+    } else if (op->kind == REF) {
+        char* name = (char*)malloc(16*sizeof(char));
+        sprintf(name, "&%s", getOperandName(op->refObj));
+        return name;
+    } else if (op->kind == DEREF) {
+        char* name = (char*)malloc(16*sizeof(char));
+        sprintf(name, "*%s", getOperandName(op->derefObj));
+        return name;
+    } else {
+        fprintf(stderr, "\033[31mERROR in getOperandName! Unknown operand kind.\033[0m\n");
+        return NULL;
+    }
+}
+
+char* getRelop(CondExp* cond) {
+    switch (cond->relop) {
+    case EQ:
+        return "==";
+    case NEQ:
+        return "!=";
+    case LT:
+        return "<";
+    case GT:
+        return ">";
+    case LE:
+        return "<=";
+    case GE:
+        return ">=";
+    default:
+        fprintf(stderr, "\033[31mERROR in getRelop! Unknown relop kind.\033[0m\n");
+        return NULL;
+    }
+}
+
+void printCode(InterCode* code) {
+    switch (code->kind) {
+        case LABEL:
+            printf("\033[34mLABEL label%d :\033[0m\n", code->labelID);
+            break;
+        case FUNCTION:
+            printf("\033[34mFUNCTION %s :\033[0m\n", code->funcName);
+            break;
+        case ASSIGN:
+            printf("\033[34m%s := %s\033[0m\n", getOperandName(code->assign.left), getOperandName(code->assign.right));
+            break;
+        case ADD:
+            printf("\033[34m%s := %s + %s\033[0m\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case SUB:
+            printf("\033[34m%s := %s - %s\033[0m\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case MUL:
+            printf("\033[34m%s := %s * %s\033[0m\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case DIV:
+            printf("\033[34m%s := %s / %s\033[0m\n", getOperandName(code->binOp.result), getOperandName(code->binOp.op1), getOperandName(code->binOp.op2));
+            break;
+        case GOTO:
+            printf("\033[34mGOTO label%d\033[0m\n", code->gotoLabelID);
+            break;
+        case IF_GOTO:
+            printf("\033[34mIF %s %s %s GOTO label%d\033[0m\n", getOperandName(code->if_goto.cond->op1), getRelop(code->if_goto.cond), getOperandName(code->if_goto.cond->op2), code->if_goto.gotoLabelID);
+            break;
+        case RETURN:
+            printf("\033[34mRETURN %s\033[0m\n", getOperandName(code->retVal));
+            break;
+        case DEC:
+            printf("\033[34mDEC %s %d\033[0m\n", getVarName(code->dec.var), code->dec.size);
+            break;
+        case ARG:
+            printf("\033[34mARG %s\033[0m\n", getOperandName(code->arg));
+            break;
+        case CALL:
+            printf("\033[34m%s := CALL %s\033[0m\n", getVarName(code->call.ret), code->call.funcName);
+            break;
+        case PARAM:
+            printf("\033[34mPARAM %s\033[0m\n", getVarName(code->param));
+            break;
+        case READ:
+            printf("\033[34mREAD %s\033[0m\n", getOperandName(code->rwOperand));
+            break;
+        case WRITE:
+            printf("\033[34mWRITE %s\033[0m\n", getOperandName(code->rwOperand));
+            break; 
+        default:
+            fprintf(stderr, "\033[31mERROR in addCode! Unknown code kind.\033[0m\n");
+            break;
+    }
+}

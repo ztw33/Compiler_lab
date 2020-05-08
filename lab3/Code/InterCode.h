@@ -73,6 +73,9 @@ int createNewLabel();
 Variable* createVar(VarKind kind);
 Operand* createOperand(OperandKind kind);
 CondExp* createCondExp(Operand* op1, RelopKind relop, Operand* op2);
+char* getVarName(Variable* var);
+char* getOperandName(Operand* op);
+char* getRelop(CondExp* cond);
 
 InterCode* createLABEL(int id);
 InterCode* createFUNCTION(char* funcName);
@@ -87,5 +90,7 @@ InterCode* createCALL(Variable* ret, char* funcName);
 InterCode* createPARAM(Variable* param);
 InterCode* createREAD(Operand* op);
 InterCode* createWRITE(Operand* op);
+
+void printCode(InterCode* code);
 
 #endif
