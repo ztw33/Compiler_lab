@@ -6,6 +6,6 @@
 
 void optimizeIR(InterCodes* codes);
 void optimizeBlock(InterCodes* begin, InterCodes* end);
-
+void optimizeGOTO(BlockList* blockList, LabelInfo* labels);
 
 #endif

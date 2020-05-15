@@ -1,8 +1,8 @@
 #include "Block.h"
-#include <stddef.h>
 #include <stdlib.h>
+#include <stdio.h>
 
-BlockList* divToBlocks(InterCodes* codesListHead) {
+BlockList* divToBlocks(InterCodes* codesListHead, LabelInfo* labelsInfo) {
     InterCodes* p = codesListHead;
     BlockList* blocksHead = NULL;
     BlockList* currentBlock = NULL;
@@ -14,6 +14,7 @@ BlockList* divToBlocks(InterCodes* codesListHead) {
                 currentBlock->beginCode = p;
                 currentBlock->endCode = p;
                 currentBlock->nextBlock = NULL;
+                currentBlock->prevBlock = NULL;
                 blocksHead = currentBlock;
             } else if (currentBlock->beginCode == NULL) {
                 currentBlock->beginCode = p;
@@ -25,6 +26,7 @@ BlockList* divToBlocks(InterCodes* codesListHead) {
                 newBlock->beginCode = p;
                 newBlock->endCode = p;
                 newBlock->nextBlock = NULL;
+                newBlock->prevBlock = currentBlock;
                 currentBlock = newBlock;
             }
         } else if (code->kind == GOTO || code->kind == RETURN) {
@@ -39,13 +41,25 @@ BlockList* divToBlocks(InterCodes* codesListHead) {
                 newBlock->beginCode = NULL;
                 newBlock->endCode = NULL;
                 newBlock->nextBlock = NULL;
+                newBlock->prevBlock = currentBlock;
                 currentBlock = newBlock;
+            }
+            if (code->kind == GOTO) {
+                labelsInfo[code->gotoLabelID].refCount += 1;
             }
         } else {
             if (currentBlock->beginCode == NULL) {
                 currentBlock->beginCode = p;
             }
             currentBlock->endCode = p;
+            if (code->kind == LABEL) {
+                if (labelsInfo[code->labelID].block != NULL || labelsInfo[code->labelID].labelID != code->labelID) {
+                    fprintf(stderr, "\033[31mERROR in divToBlocks! Sth. wrong with this label.\033[0m\n");
+                }
+                labelsInfo[code->labelID].block = currentBlock;
+            } else if (code->kind == IF_GOTO) {
+                labelsInfo[code->if_goto.gotoLabelID].refCount += 1;
+            }
         }
         p = p->next;
     }

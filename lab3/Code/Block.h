@@ -12,6 +12,7 @@ struct BlockList_ {
     InterCodes* beginCode;
     InterCodes* endCode;
     BlockList* nextBlock;
+    BlockList* prevBlock;
 };
 
 typedef enum NodeAttr { CONST_NODE, ADD_NODE, SUB_NODE, MUL_NODE, DIV_NODE } NodeAttr;
@@ -34,7 +35,13 @@ struct VarList_ {
     Variable* nextVar;
 };
 
-BlockList* divToBlocks(InterCodes* codesListHead);
+typedef struct LabelInfo_ {
+    int labelID;
+    BlockList* block;  // 此label属于哪一个Block
+    int refCount;  // goto到此label的引用次数
+} LabelInfo;
+
+BlockList* divToBlocks(InterCodes* codesListHead, LabelInfo* labelsInfo);
 
 void printBlocks(BlockList* blocks);
 #endif

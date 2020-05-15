@@ -262,3 +262,21 @@ void printCode(InterCode* code) {
             break;
     }
 }
+
+void removeCode(InterCodes* code) {
+    if (code == NULL || code->code == NULL) return;
+    InterCodes* prev = code->prev;
+    InterCodes* next = code->next;
+    if (prev != NULL && next != NULL) {
+        prev->next = next;
+        next->prev = prev;
+    } else if (prev != NULL && next == NULL) {
+        prev->next = next;
+    } else if (prev == NULL && next != NULL) {
+        printf("\033[33m删除的代码位于链表头部\033[0m\n");
+        next->prev = prev;
+    }
+    free(code->code);
+    free(code);
+    code = NULL;
+}

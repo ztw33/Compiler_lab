@@ -76,6 +76,7 @@ CondExp* createCondExp(Operand* op1, RelopKind relop, Operand* op2);
 char* getVarName(Variable* var);
 char* getOperandName(Operand* op);
 char* getRelop(CondExp* cond);
+void removeCode(InterCodes* code);
 
 InterCode* createLABEL(int id);
 InterCode* createFUNCTION(char* funcName);
