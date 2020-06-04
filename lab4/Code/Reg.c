@@ -1,5 +1,6 @@
 #include "Reg.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 char* getReg(Operand* op) {
     if (op->kind == VARIABLE) {

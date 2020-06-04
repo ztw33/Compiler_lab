@@ -4,6 +4,8 @@
 #include <string.h>
 #include "Reg.h"
 
+#define debug 1
+
 void addAsmCode(AsmCode* code) {
     if (asmCodesHead == NULL) {
         asmCodesHead = code;
@@ -42,6 +44,7 @@ AsmCode* generateAsm(InterCodes* irs) {
         switch (ir->kind) {
         case LABEL: {
             // LABEL x :
+            if (debug) printf("LABEL\n");
             char* code = (char*)malloc(17);
             sprintf(code, "label%d:", ir->labelID);
             addAsmCode(createAsmCode(code, false));
@@ -49,8 +52,9 @@ AsmCode* generateAsm(InterCodes* irs) {
         }
         case FUNCTION: {
             // FUNCTION f :
-            char* code = (char*)malloc(strlen(ir->funcName) + 1);
-            sprintf(code, "%s:", ir->funcName);
+            if (debug) printf("FUNCTION\n");
+            char* code = (char*)malloc(strlen(ir->funcName) + 2);
+            sprintf(code, "\n%s:", ir->funcName);
             addAsmCode(createAsmCode(code, false));
             break;
         }
@@ -316,6 +320,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO EQ. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
+                break;
             }
             case NEQ: {
                 if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
@@ -350,6 +355,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO NEQ. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
+                break;
             }
             case LT: {
                 if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
@@ -384,6 +390,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO LT. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
+                break;
             }
             case GT: {
                 if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
@@ -418,6 +425,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO GT. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
+                break;
             }
             case LE: {
                 if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
@@ -452,6 +460,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO LE. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
+                break;
             }
             case GE: {
                 if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
@@ -486,8 +495,8 @@ AsmCode* generateAsm(InterCodes* irs) {
                     fprintf(stderr, "\033[31mERROR in generateAsm! Wrong operand kind in case IF_GOTO GE. Wrong operand kind of op1 or op2.\033[0m\n");
                     exit(1);
                 }
-            }
                 break;
+            }
             default:
                 fprintf(stderr, "\033[31mERROR in generateAsm! Unknown relop in case IF_GOTO.\033[0m\n");
                 exit(1);
@@ -495,8 +504,28 @@ AsmCode* generateAsm(InterCodes* irs) {
             }
             break;
         }
-        case RETURN:
+        case RETURN: {
+            if (ir->retVal->kind == VARIABLE) {
+                char* reg = getReg(ir->retVal);
+                char* code1 = (char*)malloc(strlen(reg) + 10);
+                sprintf(code1, "move $v0, %s", reg);
+                addAsmCode(createAsmCode(code1, true));
+                addAsmCode(createAsmCode("jr $ra", true));
+            } else if (ir->retVal->kind == CONSTANT) {
+                char* reg = getReg(ir->retVal);
+                char* code1 = (char*)malloc(strlen(reg) + 16);
+                sprintf(code1, "li %s, %d", reg, ir->retVal->constVal);
+                addAsmCode(createAsmCode(code1, true));
+                char* code2 = (char*)malloc(strlen(reg) + 10);
+                sprintf(code2, "move $v0, %s", reg);
+                addAsmCode(createAsmCode(code2, true));
+                addAsmCode(createAsmCode("jr $ra", true));
+            } else {
+                fprintf(stderr, "\033[31mERROR in generateAsm! Wrong retVal kind in case RETURN.\033[0m\n");
+                exit(1);
+            }
             break;
+        }
         case DEC:
             break;
         case ARG:
@@ -515,6 +544,7 @@ AsmCode* generateAsm(InterCodes* irs) {
         }
         p = p->next;
     }
+    return asmCodesHead;
 }
 
 void outputAsm(FILE* file, AsmCode* codes) {
@@ -522,8 +552,10 @@ void outputAsm(FILE* file, AsmCode* codes) {
     while (p != NULL) {
         if (p->tab) {
             fprintf(file, "\t%s\n", p->code);
+            if (debug) printf("\t%s\n", p->code);
         } else {
             fprintf(file, "%s\n", p->code);
+            if (debug) printf("%s\n", p->code);
         }
         p = p->next;
     }
