@@ -4,5 +4,6 @@
 #include "InterCode.h"
 
 char* getReg(Operand* op);
+void freeReg(char* regName);
 
 #endif

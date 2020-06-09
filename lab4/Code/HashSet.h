@@ -8,7 +8,6 @@
 
 typedef struct HashSet_* HashSet;
 
-
 typedef struct Bucket_ {
     SymbolList* symbolList;
 } Bucket;
