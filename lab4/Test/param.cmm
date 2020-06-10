@@ -1,0 +1,33 @@
+int func(int a, int b, int c, int d, int e, int f, int g, int h, int i, int j, int k)
+{
+    write(k);
+    write(j);
+    write(i);
+    write(h);
+    write(g);
+    write(f);
+    write(e);
+    write(d);
+    write(c);
+    write(b);
+    write(a);
+    return 0;
+}
+
+int main()
+{
+    int A,B,C,D,E,F,G,H,I,J,K;
+    A=read();
+    B=read();
+    C=read();
+    D=read();
+    E=read();
+    F=read();
+    G=read();
+    H=read();
+    I=read();
+    J=read();
+    K=read();
+    func(A,B,C,D,E,F,G,H,I,J,K);
+    return 0;
+}

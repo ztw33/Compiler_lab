@@ -1,0 +1,32 @@
+int main() {
+	int i[5], t, k, changed, tem;
+	t = 0;
+	while(t < 5) {
+		i[t] = read();
+		t = t + 1;
+	}
+	changed = 1;
+	while(changed == 1) {
+		changed = 0;
+		t = 1;
+		while(t < 5) {
+			k = t;			
+
+			while(k > 0 && i[k] < i[k-1]){
+				tem = i[k];
+				i[k] = i[k-1];
+				i[k-1] = tem;
+				changed = 1;
+				k = k - 1;
+			}		
+			t = t + 1;
+																																																																																								
+		}
+	}
+	t = 0;
+	while (t < 5) {
+		write(i[t]);
+		t = t + 1;
+	}
+	return 0;
+}

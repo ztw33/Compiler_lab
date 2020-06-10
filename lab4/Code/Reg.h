@@ -3,7 +3,7 @@
 
 #include "InterCode.h"
 
-char* getReg(Operand* op);
+char* getReg();
 void freeReg(char* regName);
 
 #endif

@@ -6,22 +6,17 @@
 // 代表$t0-$t7共8个寄存器，true代表正在被使用，false代表空闲
 bool regs[8];
 
-char* getReg(Operand* op) {
-    if (op->kind == VARIABLE || op->kind == CONSTANT) {
-        for (int i = 0; i < 7; i++) {
-            if (regs[i] == false) {
-                regs[i] = true;
-                char* reg = (char*)malloc(4);
-                sprintf(reg, "$t%d", i);
-                return reg;
-            }
+char* getReg() {
+    for (int i = 0; i < 7; i++) {
+        if (regs[i] == false) {
+            regs[i] = true;
+            char* reg = (char*)malloc(4);
+            sprintf(reg, "$t%d", i);
+            return reg;
         }
-        fprintf(stderr, "\033[31mERROR in getReg! No spare reg.\033[0m\n");
-        exit(1);
-    } else {
-        fprintf(stderr, "\033[31mERROR in getReg! Wrong operand kind.\033[0m\n");
-        exit(1);
     }
+    fprintf(stderr, "\033[31mERROR in getReg! No spare reg.\033[0m\n");
+    exit(1);
 }
 
 void freeReg(char* regName) {

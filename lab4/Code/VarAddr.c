@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-VarAddrTable initAddrTabel() {
+VarAddrTable initAddrTable() {
     int size = HASH_SIZE;
     VarAddrTable hs = (VarAddrTable)malloc(sizeof(VarAddrTable));
     if (hs == NULL) return NULL;

@@ -1,0 +1,14 @@
+int main(){
+	int a, b, c;
+	int t = 12;
+	int pp = 4, tt = 5;
+	a = t * pp;
+	b = a + tt - pp;
+	c = a + b * pp;
+	write(c);
+	c = c * (a + b) / 25;
+	b = (b + c) - a / c + pp * 12;
+	write(c);
+	write(b);
+	return 0;
+}

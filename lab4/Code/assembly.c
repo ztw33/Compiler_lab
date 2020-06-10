@@ -4,9 +4,8 @@
 #include <string.h>
 #include "Reg.h"
 #include "Stack.h"
-#include "VarAddr.h"
 
-#define debug 1
+#define debug 0
 
 void addAsmCode(AsmCode* code) {
     if (asmCodesHead == NULL) {
@@ -43,7 +42,7 @@ AsmCode* generateAsm(InterCodes* irs) {
     
     Stack s = create_stack();  // 用于存放每次函数调用时相对上次$s8的偏移量
     int offset = 0;
-    VarAddrTable addrTable = initAddrTabel();
+    VarAddrTable addrTable = initAddrTable();
 
     InterCodes* p = irs;
     while (p != NULL) {
@@ -64,12 +63,15 @@ AsmCode* generateAsm(InterCodes* irs) {
 
             if (strcmp(ir->funcName, "main") == 0) {
                 addAsmCode(createAsmCode("move $s8, $sp", true));
+                offset = 0;
+            } else {
+                offset = -8;
             }
             break;
         }
         case ASSIGN: {
             if (ir->assign.left->kind == VARIABLE) {
-                char* leftReg = getReg(ir->assign.left);
+                char* leftReg = getReg();
                 int addr_x = getOffset(addrTable, ir->assign.left->var);
                 if (addr_x == 0) {
                     offset -= 4;
@@ -77,108 +79,25 @@ AsmCode* generateAsm(InterCodes* irs) {
                     addr_x = offset;
                     addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
                 }
-                if (ir->assign.right->kind == VARIABLE) {
-                    // x := y
-                    int addr_y = getOffset(addrTable, ir->assign.right->var);
-                    if (addr_y == 0)
-                        printAsmError("ERROR in generateAsm! Right operand is not in addrTable in case ASSIGN x := y.");
-
-                    char* rightReg = getReg(ir->assign.right);
-                    addLoadCode(rightReg, addr_y);
-
-                    char* code = (char*)malloc(strlen(leftReg) + strlen(rightReg) + 7);
-                    sprintf(code, "move %s, %s", leftReg, rightReg);
-                    addAsmCode(createAsmCode(code, true));
-
-                    addStoreCode(leftReg, addr_x);
-
-                    freeReg(leftReg);
-                    freeReg(rightReg);
-                } else if (ir->assign.right->kind == CONSTANT) {
-                    // x := #k
-                    addLoadImmCode(leftReg, ir->assign.right->constVal);
-                    addStoreCode(leftReg, addr_x);
-
-                    freeReg(leftReg);
-                } else if (ir->assign.right->kind == REF) {
-                    // x := &y
-                    if (ir->assign.right->refObj->kind != VARIABLE)
-                        printAsmError("ERROR in generateAsm! Wrong operand kind in case ASSIGN x := &y. Ref object is not variable.");
-                    
-                    int addr_y = getOffset(addrTable, ir->assign.right->refObj->var);
-                    if (addr_y == 0)
-                        printAsmError("ERROR in generateAsm! Right operand is not in addrTable in case ASSIGN x := &y.");
-                    
-                    char* code = (char*)malloc(strlen(leftReg) + 23);
-                    sprintf(code, "addi %s, $s8, %d", leftReg, addr_y);
-                    addAsmCode(createAsmCode(code, true));
-
-                    addStoreCode(leftReg, addr_x);
-
-                    freeReg(leftReg);
-                } else if (ir->assign.right->kind == DEREF) {
-                    // x := *y
-                    if (ir->assign.right->derefObj->kind != VARIABLE)
-                        printAsmError("ERROR in generateAsm! Wrong operand kind in case ASSIGN x := *y. Deref object is not variable.");
-            
-                    int addr_y = getOffset(addrTable, ir->assign.right->derefObj->var);
-                    if (addr_y == 0)
-                        printAsmError("ERROR in generateAsm! Right operand is not in addrTable in case ASSIGN x := *y.");
-
-                    char* rightReg = getReg(ir->assign.right->derefObj);
-                    addLoadCode(rightReg, addr_y);
-
-                    char* code = (char*)malloc(strlen(leftReg) + strlen(rightReg) + 8);
-                    sprintf(code, "lw %s, 0(%s)", leftReg, rightReg);
-                    addAsmCode(createAsmCode(code, true));
-
-                    addStoreCode(leftReg, addr_x);
-
-                    freeReg(leftReg);
-                    freeReg(rightReg);
-                } else {
-                    printAsmError("ERROR in generateAsm! Unknown operand kind in case ASSIGN.");
-                }
+                handleOperand(ir->assign.right, leftReg, addrTable);
+                addStoreCode(leftReg, addr_x);
+                freeReg(leftReg);
             } else if (ir->assign.left->kind == DEREF) {
                 if (ir->assign.left->derefObj->kind != VARIABLE)
                     printAsmError("ERROR in generateAsm! Wrong operand kind in case ASSIGN *x := y. Deref object is not variable.");
 
-                char* leftReg = getReg(ir->assign.left->derefObj);
-                int addr_x = getOffset(addrTable, ir->assign.left->derefObj->var);
-                if (addr_x == 0)
-                    printAsmError("ERROR in generateAsm in case ASSIGN *x := y. x is not in the addrTable.");
+                char* reg_x = getReg();
+                handleOperand(ir->assign.left->derefObj, reg_x, addrTable);
 
-                addLoadCode(leftReg, addr_x);
+                char* reg_y = getReg();
+                handleOperand(ir->assign.right, reg_y, addrTable);
 
-                if (ir->assign.right->kind == VARIABLE) {
-                    // *x := y
-                    int addr_y = getOffset(addrTable, ir->assign.right->var);
-                    if (addr_y == 0)
-                        printAsmError("ERROR in generateAsm! Right operand is not in addrTable in case ASSIGN *x := y.");
+                char* code = (char*)malloc(strlen(reg_x) + strlen(reg_y) + 8);
+                sprintf(code, "sw %s, 0(%s)", reg_y, reg_x);
+                addAsmCode(createAsmCode(code, true));
 
-                    char* rightReg = getReg(ir->assign.right);
-                    addLoadCode(rightReg, addr_y);
-
-                    char* code = (char*)malloc(strlen(leftReg) + strlen(rightReg) + 8);
-                    sprintf(code, "sw %s, 0(%s)", rightReg, leftReg);
-                    addAsmCode(createAsmCode(code, true));
-
-                    freeReg(leftReg);
-                    freeReg(rightReg);
-                } else if (ir->assign.right->kind == CONSTANT) {
-                    // *x := #k
-                    char* immReg = getReg(ir->assign.right);
-                    addLoadImmCode(immReg, ir->assign.right->constVal);
-
-                    char* code = (char*)malloc(strlen(leftReg) + strlen(immReg) + 8);
-                    sprintf(code, "sw %s, 0(%s)", immReg, leftReg);
-                    addAsmCode(createAsmCode(code, true));
-
-                    freeReg(leftReg);
-                    freeReg(immReg);
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case ASSIGN *x := y. y is not variable or constant.");
-                }
+                freeReg(reg_x);
+                freeReg(reg_y);
             } else {
                 printAsmError("ERROR in generateAsm! Wrong operand kind in case ASSIGN.");
             }
@@ -188,7 +107,7 @@ AsmCode* generateAsm(InterCodes* irs) {
             if (ir->binOp.result->kind != VARIABLE)
                 printAsmError("ERROR in generateAsm! Wrong operand kind in case ADD. Left operand is not variable");
 
-            char* resultReg = getReg(ir->binOp.result);
+            char* resultReg = getReg();
             int addr_x = getOffset(addrTable, ir->binOp.result->var);
             if (addr_x == 0) {
                 offset -= 4;
@@ -197,78 +116,27 @@ AsmCode* generateAsm(InterCodes* irs) {
                 addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             }
 
-            if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == VARIABLE) {
-                // x := y + z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_y == 0 || addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case ADD x := y + z. y or z is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                addLoadCode(op2Reg, addr_z);
+            char* op1Reg = getReg();
+            char* op2Reg = getReg();
+            handleOperand(ir->binOp.op1, op1Reg, addrTable);
+            handleOperand(ir->binOp.op2, op2Reg, addrTable);
 
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
-                sprintf(code, "add %s, %s, %s", resultReg, op1Reg, op2Reg);
-                addAsmCode(createAsmCode(code, true));
+            char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
+            sprintf(code, "add %s, %s, %s", resultReg, op1Reg, op2Reg);
+            addAsmCode(createAsmCode(code, true));
 
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == CONSTANT) {
-                // x := y + #k
-                char* op1Reg = getReg(ir->binOp.op1);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                if (addr_y == 0)
-                    printAsmError("ERROR in generateAsm in case ADD x := y + #k. y is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + 20);
-                sprintf(code, "addi %s, %s, %d", resultReg, op1Reg, ir->binOp.op2->constVal);
-                addAsmCode(createAsmCode(code, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == VARIABLE) {
-                // x := #k + z
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case ADD x := #k + z. z is not in addrTable.");
-                
-                addLoadCode(op2Reg, addr_z);
-
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op2Reg) + 20);
-                sprintf(code, "addi %s, %s, %d", resultReg, op2Reg, ir->binOp.op1->constVal);
-                addAsmCode(createAsmCode(code, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == CONSTANT) {
-                // x := #k1 + #k2
-                int result = ir->binOp.op1->constVal + ir->binOp.op2->constVal;
-                addLoadImmCode(resultReg, result);
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong operand kind in case ADD x := y + z. Wrong operand kind of y or z.");
-            }
+            addStoreCode(resultReg, addr_x);
+            
+            freeReg(resultReg);
+            freeReg(op1Reg);
+            freeReg(op2Reg);
             break;
         }
         case SUB: {
             if (ir->binOp.result->kind != VARIABLE)
                 printAsmError("ERROR in generateAsm! Wrong operand kind in case SUB. Result is not variable.");
 
-            char* resultReg = getReg(ir->binOp.result);
+            char* resultReg = getReg();
             int addr_x = getOffset(addrTable, ir->binOp.result->var);
             if (addr_x == 0) {
                 offset -= 4;
@@ -277,81 +145,27 @@ AsmCode* generateAsm(InterCodes* irs) {
                 addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             }
 
-            if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == VARIABLE) {
-                // x := y - z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_y == 0 || addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case SUB x := y - z. y or z is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                addLoadCode(op2Reg, addr_z);
+            char* op1Reg = getReg();
+            char* op2Reg = getReg();
+            handleOperand(ir->binOp.op1, op1Reg, addrTable);
+            handleOperand(ir->binOp.op2, op2Reg, addrTable);
 
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
-                sprintf(code, "sub %s, %s, %s", resultReg, op1Reg, op2Reg);
-                addAsmCode(createAsmCode(code, true));
+            char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
+            sprintf(code, "sub %s, %s, %s", resultReg, op1Reg, op2Reg);
+            addAsmCode(createAsmCode(code, true));
 
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == CONSTANT) {
-                // x := y - #k
-                char* op1Reg = getReg(ir->binOp.op1);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                if (addr_y == 0)
-                    printAsmError("ERROR in generateAsm in case SUB x := y - #k. y is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + 20);
-                sprintf(code, "addi %s, %s, %d", resultReg, op1Reg, 0-ir->binOp.op2->constVal);
-                addAsmCode(createAsmCode(code, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == VARIABLE) {
-                // x := #k - z
-                char* immReg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case SUB x := #k - z. z is not in addrTable.");
-                
-                addLoadImmCode(immReg, ir->binOp.op1->constVal);
-                addLoadCode(op2Reg, addr_z);
-
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op2Reg) + 18);
-                sprintf(code, "sub %s, %s, %s", resultReg, immReg, op2Reg);
-                addAsmCode(createAsmCode(code, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(immReg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == CONSTANT) {
-                // x := #k1 - #k2
-                int result = ir->binOp.op1->constVal - ir->binOp.op2->constVal;
-                addLoadImmCode(resultReg, result);
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong operand kind in case SUB x := y - z. Wrong operand kind of y or z.");
-            }
+            addStoreCode(resultReg, addr_x);
+            
+            freeReg(resultReg);
+            freeReg(op1Reg);
+            freeReg(op2Reg);
             break;
         }
         case MUL: {
             if (ir->binOp.result->kind != VARIABLE)
                 printAsmError("ERROR in generateAsm! Wrong operand kind in case MUL. Left operand is not variable.");
 
-            char* resultReg = getReg(ir->binOp.result);
+            char* resultReg = getReg();
             int addr_x = getOffset(addrTable, ir->binOp.result->var);
             if (addr_x == 0) {
                 offset -= 4;
@@ -360,84 +174,27 @@ AsmCode* generateAsm(InterCodes* irs) {
                 addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             }
 
-            if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == VARIABLE) {
-                // x := y * z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_y == 0 || addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case MUL x := y * z. y or z is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                addLoadCode(op2Reg, addr_z);
+            char* op1Reg = getReg();
+            char* op2Reg = getReg();
+            handleOperand(ir->binOp.op1, op1Reg, addrTable);
+            handleOperand(ir->binOp.op2, op2Reg, addrTable);
 
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
-                sprintf(code, "mul %s, %s, %s", resultReg, op1Reg, op2Reg);
-                addAsmCode(createAsmCode(code, true));
+            char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
+            sprintf(code, "mul %s, %s, %s", resultReg, op1Reg, op2Reg);
+            addAsmCode(createAsmCode(code, true));
 
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == CONSTANT) {
-                // x := y * #k
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                if (addr_y == 0)
-                    printAsmError("ERROR in generateAsm in case MUL x := y * #k. y is not in addrTable.");
-
-                addLoadCode(op1Reg, addr_y);
-                addLoadImmCode(op2Reg, ir->binOp.op2->constVal);
-
-                char* code2 = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
-                sprintf(code2, "mul %s, %s, %s", resultReg, op1Reg, op2Reg);
-                addAsmCode(createAsmCode(code2, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == VARIABLE) {
-                // x := #k * z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case MUL x := #k * z. z is not in addrTable.");
-
-                addLoadCode(op2Reg, addr_z);
-                addLoadImmCode(op1Reg, ir->binOp.op1->constVal);
-
-                char* code2 = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 8);
-                sprintf(code2, "mul %s, %s, %s", resultReg, op1Reg, op2Reg);
-                addAsmCode(createAsmCode(code2, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == CONSTANT) {
-                // x := #k1 * #k2
-                int result = ir->binOp.op1->constVal * ir->binOp.op1->constVal;
-                addLoadImmCode(resultReg, result);
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong operand kind in case MUL x := y * z. Wrong operand kind of y or z.");
-            }
+            addStoreCode(resultReg, addr_x);
+            
+            freeReg(resultReg);
+            freeReg(op1Reg);
+            freeReg(op2Reg);
             break;
         }
         case DIV:{
             if (ir->binOp.result->kind != VARIABLE)
                 printAsmError("ERROR in generateAsm! Wrong operand kind in case DIV. Left operand is not variable.");
 
-            char* resultReg = getReg(ir->binOp.result);
+            char* resultReg = getReg();
             int addr_x = getOffset(addrTable, ir->binOp.result->var);
             if (addr_x == 0) {
                 offset -= 4;
@@ -446,77 +203,20 @@ AsmCode* generateAsm(InterCodes* irs) {
                 addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             }
 
-            if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == VARIABLE) {
-                // x := y / z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_y == 0 || addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case DIV x := y / z. y or z is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                addLoadCode(op2Reg, addr_z);
+            char* op1Reg = getReg();
+            char* op2Reg = getReg();
+            handleOperand(ir->binOp.op1, op1Reg, addrTable);
+            handleOperand(ir->binOp.op2, op2Reg, addrTable);
 
-                char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 13);
-                sprintf(code, "div %s, %s\n\tmflo %s", op1Reg, op2Reg, resultReg);
-                addAsmCode(createAsmCode(code, true));
+            char* code = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 13);
+            sprintf(code, "div %s, %s\n\tmflo %s", op1Reg, op2Reg, resultReg);
+            addAsmCode(createAsmCode(code, true));
 
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == VARIABLE && ir->binOp.op2->kind == CONSTANT) {
-                // x := y / #k
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_y = getOffset(addrTable, ir->binOp.op1->var);
-                if (addr_y == 0)
-                    printAsmError("ERROR in generateAsm in case DIV x := y / #k. y is not in addrTable.");
-
-                addLoadCode(op1Reg, addr_y);
-                addLoadImmCode(op2Reg, ir->binOp.op2->constVal);
-                
-                char* code2 = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 13);
-                sprintf(code2, "div %s, %s\n\tmflo %s", op1Reg, op2Reg, resultReg);
-                addAsmCode(createAsmCode(code2, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == VARIABLE) {
-                // x := #k / z
-                char* op1Reg = getReg(ir->binOp.op1);
-                char* op2Reg = getReg(ir->binOp.op2);
-                int addr_z = getOffset(addrTable, ir->binOp.op2->var);
-                if (addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case DIV x := #k / z. z is not in addrTable.");
-
-                addLoadCode(op2Reg, addr_z);
-                addLoadImmCode(op1Reg, ir->binOp.op1->constVal);
-
-                char* code2 = (char*)malloc(strlen(resultReg) + strlen(op1Reg) + strlen(op2Reg) + 13);
-                sprintf(code2, "div %s, %s\n\tmflo %s", op1Reg, op2Reg, resultReg);
-                addAsmCode(createAsmCode(code2, true));
-
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-                freeReg(op1Reg);
-                freeReg(op2Reg);
-            } else if (ir->binOp.op1->kind == CONSTANT && ir->binOp.op2->kind == CONSTANT) {
-                // x := #k1 / #k2
-                int result = ir->binOp.op1->constVal / ir->binOp.op1->constVal;
-                addLoadImmCode(resultReg, result);
-                addStoreCode(resultReg, addr_x);
-
-                freeReg(resultReg);
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong operand kind in case DIV x := y / z. Wrong operand kind of y or z.");
-            }
+            addStoreCode(resultReg, addr_x);
+            
+            freeReg(resultReg);
+            freeReg(op1Reg);
+            freeReg(op2Reg);
             break;
         }
         case GOTO: {
@@ -526,169 +226,46 @@ AsmCode* generateAsm(InterCodes* irs) {
             break;
         }
         case IF_GOTO: {
-            char* op1Reg = getReg(ir->if_goto.cond->op1);
-            char* op2Reg = getReg(ir->if_goto.cond->op2);
-
-            if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                int addr_y = getOffset(addrTable, ir->if_goto.cond->op1->var);
-                int addr_z = getOffset(addrTable, ir->if_goto.cond->op2->var);
-                if (addr_y == 0 || addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case IF_GOTO y op z. y or z is not in addrTable.");
-                
-                addLoadCode(op1Reg, addr_y);
-                addLoadCode(op2Reg, addr_z);
-            } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                int addr_y = getOffset(addrTable, ir->if_goto.cond->op1->var);
-                if (addr_y == 0)
-                    printAsmError("ERROR in generateAsm in case DIV x := y / #k. y is not in addrTable.");
-
-                addLoadCode(op1Reg, addr_y);
-                addLoadImmCode(op2Reg, ir->if_goto.cond->op2->constVal);
-            } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                int addr_z = getOffset(addrTable, ir->if_goto.cond->op2->var);
-                if (addr_z == 0)
-                    printAsmError("ERROR in generateAsm in case DIV x := #k / z. z is not in addrTable.");
-
-                addLoadImmCode(op1Reg, ir->if_goto.cond->op1->constVal);
-                addLoadCode(op2Reg, addr_z);
-            } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                addLoadImmCode(op1Reg, ir->if_goto.cond->op1->constVal);
-                addLoadImmCode(op2Reg, ir->if_goto.cond->op2->constVal);
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO. Wrong operand kind of op1 or op2.");
-            }
+            char* op1Reg = getReg();
+            char* op2Reg = getReg();
+            handleOperand(ir->if_goto.cond->op1, op1Reg, addrTable);
+            handleOperand(ir->if_goto.cond->op2, op2Reg, addrTable);
 
             switch (ir->if_goto.cond->relop) {
             case EQ: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "beq %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "beq %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "beq %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "beq %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO EQ. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "beq %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             case NEQ: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "bne %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bne %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bne %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "bne %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO NEQ. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "bne %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             case LT: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "blt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "blt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "blt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "blt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO LT. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "blt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             case GT: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "bgt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bgt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bgt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "bgt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO GT. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "bgt %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             case LE: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "ble %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "ble %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "ble %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "ble %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO LE. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "ble %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             case GE: {
-                if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code, "bge %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code, true));
-                } else if (ir->if_goto.cond->op1->kind == VARIABLE && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bge %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == VARIABLE) {
-                    char* code2 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code2, "bge %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code2, true));
-                } else if (ir->if_goto.cond->op1->kind == CONSTANT && ir->if_goto.cond->op2->kind == CONSTANT) {
-                    char* code3 = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
-                    sprintf(code3, "bge %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
-                    addAsmCode(createAsmCode(code3, true));
-                } else {
-                    printAsmError("ERROR in generateAsm! Wrong operand kind in case IF_GOTO GE. Wrong operand kind of op1 or op2.");
-                }
+                char* code = (char*)malloc(strlen(op1Reg) + strlen(op2Reg) + 24);
+                sprintf(code, "bge %s, %s, label%d", op1Reg, op2Reg, ir->if_goto.gotoLabelID);
+                addAsmCode(createAsmCode(code, true));
                 break;
             }
             default:
@@ -699,35 +276,123 @@ AsmCode* generateAsm(InterCodes* irs) {
             break;
         }
         case RETURN: {
-            if (ir->retVal->kind == VARIABLE) {
-                char* reg = getReg(ir->retVal);
-                int addr = getOffset(addrTable, ir->retVal->var);
-                if (addr == 0)
-                    printAsmError("ERROR in generateAsm in case RETURN. Return variable is not in addrTable.");
+            handleOperand(ir->retVal, "$v0", addrTable);
+            addAsmCode(createAsmCode("jr $ra", true));
+            break;
+        }
+        case DEC: {
+            if (getOffset(addrTable, ir->dec.var) != 0)
+                printAsmError("ERROR in generateAsm in case DEC! Variable is already in the addrTable.");
+            
+            if (ir->dec.size % 4 != 0)
+                printAsmError("ERROR in generateAsm in case DEC! Dec size不是4的倍数.");
+            
+            offset -= ir->dec.size;
+            insertVar(addrTable, ir->dec.var, offset);
+            char* code = (char*)malloc(26);
+            sprintf(code, "addi $sp, $sp, -%d", ir->dec.size);
+            addAsmCode(createAsmCode(code, true));
+            break;
+        }
+        case ARG: {
+            InterCodes* p_arg = p;
+            InterCodes* last_arg = p;  // 指向最后一个参数
+            int arg_num = 0;
+            while (p_arg->code->kind == ARG) {
+                arg_num++;
+                p_arg = p_arg->next;
+            }
+            p_arg = p_arg->prev;  // 指向第一个参数
+            p = p_arg;  // 所有的arg在这次处理完，p直接指向最后一条arg语句(第一个参数)
+            
+            // 超过4个参数，溢出到栈中
+            if (arg_num > 4) {
+                InterCodes* pp = last_arg;
+                for (int i = 0; i < arg_num - 4; i++) {
+                    ir = pp->code;
+                    // offset -= 4;  把offset当做记录目前函数的活动记录大小的变量，参数在调用返回后占用的空间就消失了，因此此处不再-4
+                    addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+                    char* reg = getReg();
+                    handleOperand(ir->arg, reg, addrTable);
+                    
+                    char* code = (char*)malloc(strlen(reg) + 11);
+                    sprintf(code, "sw %s, 0($sp)", reg);
+                    addAsmCode(createAsmCode(code, true));
+                    freeReg(reg);
 
-                addLoadCode(reg, addr);
+                    pp = pp->next;
+                }
+            }
 
-                char* code1 = (char*)malloc(strlen(reg) + 10);
-                sprintf(code1, "move $v0, %s", reg);
-                addAsmCode(createAsmCode(code1, true));
-                addAsmCode(createAsmCode("jr $ra", true));
-                freeReg(reg);
-            } else if (ir->retVal->kind == CONSTANT) {
-                addLoadImmCode("$v0", ir->retVal->constVal);
-                addAsmCode(createAsmCode("jr $ra", true));
-            } else {
-                printAsmError("ERROR in generateAsm! Wrong retVal kind in case RETURN.");
+            int reg_num = 0;
+            while (p_arg->code->kind == ARG && reg_num < 4) {
+                ir = p_arg->code;
+                char* regName = (char*)malloc(4);
+                sprintf(regName, "$a%d", reg_num);
+
+                handleOperand(ir->arg, regName, addrTable);
+                p_arg = p_arg->prev;
+                reg_num++;
             }
             break;
         }
-        case DEC:
+        case CALL: {
+            addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+            addAsmCode(createAsmCode("sw $ra, 0($sp)", true));  // 保存返回地址
+            addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+            addAsmCode(createAsmCode("sw $s8, 0($sp)", true));  // 保存帧指针
+            addAsmCode(createAsmCode("addi $s8, $sp, 8", true));  // 移动$s8
+
+            //push_stack(s, offset);  // 保存函数调用前offset值
+
+            char* jmpCode = (char*)malloc(strlen(ir->call.funcName) + 4);
+            sprintf(jmpCode, "jal %s", ir->call.funcName);
+            addAsmCode(createAsmCode(jmpCode, true));
+
+            addAsmCode(createAsmCode("lw $ra, -4($s8)", true));  // 恢复返回地址
+            addAsmCode(createAsmCode("lw $s8, -8($s8)", true));  // 恢复$s8
+            char* rs_sp = (char*)malloc(26);
+            sprintf(rs_sp, "addi $sp, $s8, %d", offset);
+            addAsmCode(createAsmCode(rs_sp, true));  // 恢复$sp
+
+            int addr_ret = getOffset(addrTable, ir->call.ret);
+            if (addr_ret == 0) {
+                offset -= 4;
+                insertVar(addrTable, ir->call.ret, offset);
+                addr_ret = offset;
+                addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+            }
+            addStoreCode("$v0", addr_ret);
             break;
-        case ARG:
+        }
+        case PARAM: {
+            InterCodes* p_param = p;
+            int param_count = 0;
+            Operand* tmp = createOperand(VARIABLE);
+            while (p_param->code->kind == PARAM) {
+                addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+                offset -= 4;
+                insertVar(addrTable, p_param->code->param, offset);
+                if (param_count < 4) {
+                    char* code = (char*)malloc(14);
+                    sprintf(code, "sw $a%d, 0($sp)", param_count);
+                    addAsmCode(createAsmCode(code, true));
+                } else {
+                    char* tmpReg = getReg();
+                    int param_offset = 4 * (param_count - 4);
+                    addLoadCode(tmpReg, param_offset);
+                    char* code = (char*)malloc(strlen(tmpReg) + 11);
+                    sprintf(code, "sw %s, 0($sp)", tmpReg);
+                    addAsmCode(createAsmCode(code, true));
+                    freeReg(tmpReg);
+                }
+                param_count++;
+                p_param = p_param->next;
+            }
+            free(tmp);
+            p = p_param->prev;  // 所有的param在这次处理完，p直接指向最后一条param语句
             break;
-        case CALL:
-            break;
-        case PARAM:
-            break;
+        }
         case READ: {
             addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             addAsmCode(createAsmCode("sw $ra, 0($sp)", true));
@@ -737,7 +402,7 @@ AsmCode* generateAsm(InterCodes* irs) {
             if (ir->rwOperand->kind != VARIABLE)
                 printAsmError("ERROR in generateAsm in case READ! Read object is not variable.");
             
-            char* reg = getReg(ir->rwOperand);
+            char* reg = getReg();
             int addr = getOffset(addrTable, ir->rwOperand->var);
             if (addr == 0) {
                 offset -= 4;
@@ -750,54 +415,7 @@ AsmCode* generateAsm(InterCodes* irs) {
             break;
         }
         case WRITE: {
-            if (ir->rwOperand->kind == CONSTANT) {
-                addLoadImmCode("$a0", ir->rwOperand->constVal);
-            } else if (ir->rwOperand->kind == VARIABLE) {
-                int addr = getOffset(addrTable, ir->rwOperand->var);
-                if (addr == 0)
-                    printAsmError("ERROR in generateAsm in case WRITE! Write variable is not in the addrTable.");
-                char* reg = getReg(ir->rwOperand);
-                addLoadCode(reg, addr);
-                char* code = (char*)malloc(strlen(reg) + 10);
-                sprintf(code, "move $a0, %s", reg);
-                addAsmCode(createAsmCode(code, true));
-                freeReg(reg);
-            } else if (ir->rwOperand->kind == REF) {
-                if (ir->rwOperand->refObj->kind != VARIABLE)
-                    printAsmError("ERROR in generateAsm in case WRITE ref! Ref object is not variable.");
-                
-                int addr = getOffset(addrTable, ir->rwOperand->refObj->var);
-                if (addr == 0)
-                    printAsmError("ERROR in generateAsm in case WRITE ref! Write operand is not in addrTable.");
-                
-                char* reg = getReg(ir->rwOperand);
-                char* code1 = (char*)malloc(strlen(reg) + 23);
-                sprintf(code1, "addi %s, $s8, %d", reg, addr);
-                addAsmCode(createAsmCode(code1, true));
-                char* code2 = (char*)malloc(strlen(reg) + 10);
-                sprintf(code2, "move $a0, %s", reg);
-                addAsmCode(createAsmCode(code2, true));
-
-                freeReg(reg);
-            } else if (ir->rwOperand->kind == DEREF) {
-                 if (ir->rwOperand->derefObj->kind != VARIABLE)
-                    printAsmError("ERROR in generateAsm in case WRITE deref! Deref object is not variable.");
-        
-                int addr = getOffset(addrTable, ir->rwOperand->derefObj->var);
-                if (addr == 0)
-                    printAsmError("ERROR in generateAsm in case WRITE deref! Write deref operand is not in addrTable.");
-
-                char* reg = getReg(ir->rwOperand->derefObj);
-                addLoadCode(reg, addr);
-
-                char* code = (char*)malloc(strlen(reg) + 11);
-                sprintf(code, "lw $a0, 0(%s)", reg);
-                addAsmCode(createAsmCode(code, true));
-
-                freeReg(reg);
-            } else {
-                printAsmError("ERROR in generateAsm in case WRITE! Wrong write operand kind.");
-            }
+            handleOperand(ir->rwOperand, "$a0", addrTable);
             addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             addAsmCode(createAsmCode("sw $ra, 0($sp)", true));
             addAsmCode(createAsmCode("jal write", true));
@@ -846,4 +464,46 @@ void addLoadImmCode(char* regName, int imm) {
     char* code = (char*)malloc(strlen(regName) + 16);
     sprintf(code, "li %s, %d", regName, imm);
     addAsmCode(createAsmCode(code, true));
+}
+
+// 把操作数load到寄存器里
+void handleOperand(Operand* op, char* reg, VarAddrTable addrTable) {
+    if (op->kind == CONSTANT) {
+        addLoadImmCode(reg, op->constVal);
+    } else if (op->kind == VARIABLE) {
+        int addr = getOffset(addrTable, op->var);
+        if (addr == 0)
+            printAsmError("ERROR in handleOperand! op->var is not in addrTable.");
+
+        addLoadCode(reg, addr);
+    } else if (op->kind == REF) {
+        if (op->refObj->kind != VARIABLE)
+            printAsmError("ERROR in handleOperand! Ref object is not variable.");
+        
+        int addr = getOffset(addrTable, op->refObj->var);
+        if (addr == 0)
+            printAsmError("ERROR in handleOperand! op->refObj->var is not in addrTable.");
+        
+        char* code = (char*)malloc(strlen(reg) + 23);
+        sprintf(code, "addi %s, $s8, %d", reg, addr);
+        addAsmCode(createAsmCode(code, true));
+    } else if (op->kind == DEREF) {
+        if (op->derefObj->kind != VARIABLE)
+            printAsmError("ERROR in handleOperand! Deref object is not variable.");
+
+        int addr = getOffset(addrTable, op->derefObj->var);
+        if (addr == 0)
+            printAsmError("ERROR in handleOperand! op->derefObj->var is not in addrTable.");
+
+        char* rightReg = getReg();
+        addLoadCode(rightReg, addr);
+
+        char* code = (char*)malloc(strlen(reg) + strlen(rightReg) + 8);
+        sprintf(code, "lw %s, 0(%s)", reg, rightReg);
+        addAsmCode(createAsmCode(code, true));
+
+        freeReg(rightReg);
+    } else {
+        printAsmError("ERROR in handleOperand! Unknown operand kind.");
+    }
 }

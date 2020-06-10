@@ -1,0 +1,48 @@
+int isPrime(int number) {
+	int max = number / 4;
+	int i = 2;
+	while(i < max) {
+		if (number == number / i * i) {
+			return 0;
+		}
+		i = i + 1;
+	}
+	return 1;
+}
+
+int isRever(int num) {
+	int n = num;
+	int array[10];
+	int bit = 0, j = 0;
+	while (n != 0) {
+		array[bit] = n - n / 10 * 10;
+		n = n / 10;
+		bit = bit + 1;
+	}
+	bit = bit - 1;
+	while (j != bit) {
+		if (array[j] != array[bit]){
+			return 0;
+		}
+		j = j + 1;
+		bit = bit -1;
+	}
+	return 1;
+}
+
+int main(){
+	int N = 100, M = 110;
+	int ii = N;
+	while (ii < M) {
+		if (isPrime(ii) == 1) {
+			write(ii);
+		}
+		if (isRever(ii) == 1) {
+			write(-ii);
+		}
+		ii = ii + 1;
+	}
+	return 0;
+}
+
+

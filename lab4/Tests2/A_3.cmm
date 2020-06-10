@@ -1,0 +1,27 @@
+int main(){
+	int a, b;
+	int result;
+	int start;
+	int found = 0;
+	a = read();
+	b = read();
+	if (a > b) {
+		start = a;
+	} else {
+		start = b;
+	}
+	while(found == 0) {
+		if (start == (start / a) * a) {
+			if (start == (start / b) * b) {
+				result = start;
+				found = 1;			
+			} else {
+				start = start + 1;			
+			}
+		} else {
+			start = start + 1;
+		}
+	}
+	write(result);
+	return 0;
+}

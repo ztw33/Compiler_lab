@@ -22,7 +22,7 @@ struct VarHashSet_ {
     VarBucket* buckets;
 };
 
-VarAddrTable initAddrTabel();
+VarAddrTable initAddrTable();
 int getOffset(VarAddrTable table, Variable* var);
 void insertVar(VarAddrTable table, Variable* var, int offset);
 

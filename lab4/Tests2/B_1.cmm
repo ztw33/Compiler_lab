@@ -1,0 +1,17 @@
+int hanoi(int count, int pole1, int pole2, int pole3) {
+	if (count == 1){
+		write(pole1*1000000000+pole3);
+	} else {
+		hanoi(count-1,pole1, pole3, pole2);
+		write(pole1*1000000000+pole3);
+		hanoi(count-1,pole2, pole1, pole3);
+	}
+	return 0;
+}
+
+int main() {
+	int n;
+	n = read();
+	hanoi(n, 1, 2, 3);
+	return 0;
+}

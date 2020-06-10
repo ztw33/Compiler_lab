@@ -1,0 +1,68 @@
+int main() {
+	int N = 10;
+	int heap[10], result[10];
+	int i = 0, start, j, tem1, k, tem2, t;
+	int stop = 0;
+	while (i < 10) {
+		heap[i] = read();
+		i = i + 1;
+	}
+	start = N / 2;
+	while(start >= 0) {
+		stop = 0;
+		i = start;
+		while (stop == 0) {
+			stop = 1;
+			j = i * 2 + 1;
+			k = i * 2 + 2;
+			if (j < N) {
+				tem1 = heap[j];
+				if (k < N && heap[k] < heap[j]) {
+					tem1 = heap[k];
+					j = k;				
+				}
+				if (heap[i] > tem1) {
+					stop = 0;
+					heap[j] = heap[i];
+					heap[i] = tem1;
+					i = j;
+				}
+			}
+		}
+		start = start - 1;
+	}
+	start = 10;
+	i = 0;
+	while (i < N) {
+		result[i] = heap[0];
+		i = i + 1;
+		heap[0] = heap[start-1];
+		stop = 0;
+		start = start - 1;
+		t = 0;
+		while (stop == 0) {
+			stop = 1;
+			j = t * 2 + 1;
+			k = t * 2 + 2;
+			if (j < start){
+				tem1 = heap[j];
+				if (k < start && heap[k] < heap[j]) {
+					tem1 = heap[k];
+					j = k;
+				}
+				if (heap[t] > tem1) {
+					stop = 0;
+					heap[j] = heap[t];
+					heap[t] = tem1;
+					t = j;
+				}
+			}
+		}
+	}
+	i = 0;
+	while (i < N) {
+		write(result[i]);
+		i = i + 1;
+		}
+	return 0;
+}	
