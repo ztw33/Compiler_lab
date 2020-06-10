@@ -41,7 +41,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                              "\tmove $v0, $0\n"
                              "\tjr $ra", false));
     
-    Stack s = create_stack();  // 用于存放每次函数调用时相对上次$fp的偏移量
+    Stack s = create_stack();  // 用于存放每次函数调用时相对上次$s8的偏移量
     int offset = 0;
     VarAddrTable addrTable = initAddrTabel();
 
@@ -61,6 +61,10 @@ AsmCode* generateAsm(InterCodes* irs) {
             char* code = (char*)malloc(strlen(ir->funcName) + 2);
             sprintf(code, "\n%s:", ir->funcName);
             addAsmCode(createAsmCode(code, false));
+
+            if (strcmp(ir->funcName, "main") == 0) {
+                addAsmCode(createAsmCode("move $s8, $sp", true));
+            }
             break;
         }
         case ASSIGN: {
@@ -106,7 +110,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                         printAsmError("ERROR in generateAsm! Right operand is not in addrTable in case ASSIGN x := &y.");
                     
                     char* code = (char*)malloc(strlen(leftReg) + 23);
-                    sprintf(code, "addi %s, $fp, %d", leftReg, addr_y);
+                    sprintf(code, "addi %s, $s8, %d", leftReg, addr_y);
                     addAsmCode(createAsmCode(code, true));
 
                     addStoreCode(leftReg, addr_x);
@@ -768,7 +772,7 @@ AsmCode* generateAsm(InterCodes* irs) {
                 
                 char* reg = getReg(ir->rwOperand);
                 char* code1 = (char*)malloc(strlen(reg) + 23);
-                sprintf(code1, "addi %s, $fp, %d", reg, addr);
+                sprintf(code1, "addi %s, $s8, %d", reg, addr);
                 addAsmCode(createAsmCode(code1, true));
                 char* code2 = (char*)malloc(strlen(reg) + 10);
                 sprintf(code2, "move $a0, %s", reg);
@@ -828,13 +832,13 @@ void printAsmError(char* msg) {
 
 void addLoadCode(char* regName, int offset) {
     char* load = (char*)malloc(strlen(regName) + 21);
-    sprintf(load, "lw %s, %d($fp)", regName, offset);
+    sprintf(load, "lw %s, %d($s8)", regName, offset);
     addAsmCode(createAsmCode(load, true));
 }
 
 void addStoreCode(char* regName, int offset) {
     char* store = (char*)malloc(strlen(regName) + 21);
-    sprintf(store, "sw %s, %d($fp)", regName, offset);
+    sprintf(store, "sw %s, %d($s8)", regName, offset);
     addAsmCode(createAsmCode(store, true));
 }
 
