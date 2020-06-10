@@ -746,7 +746,59 @@ AsmCode* generateAsm(InterCodes* irs) {
             break;
         }
         case WRITE: {
-            
+            if (ir->rwOperand->kind == CONSTANT) {
+                addLoadImmCode("$a0", ir->rwOperand->constVal);
+            } else if (ir->rwOperand->kind == VARIABLE) {
+                int addr = getOffset(addrTable, ir->rwOperand->var);
+                if (addr == 0)
+                    printAsmError("ERROR in generateAsm in case WRITE! Write variable is not in the addrTable.");
+                char* reg = getReg(ir->rwOperand);
+                addLoadCode(reg, addr);
+                char* code = (char*)malloc(strlen(reg) + 10);
+                sprintf(code, "move $a0, %s", reg);
+                addAsmCode(createAsmCode(code, true));
+                freeReg(reg);
+            } else if (ir->rwOperand->kind == REF) {
+                if (ir->rwOperand->refObj->kind != VARIABLE)
+                    printAsmError("ERROR in generateAsm in case WRITE ref! Ref object is not variable.");
+                
+                int addr = getOffset(addrTable, ir->rwOperand->refObj->var);
+                if (addr == 0)
+                    printAsmError("ERROR in generateAsm in case WRITE ref! Write operand is not in addrTable.");
+                
+                char* reg = getReg(ir->rwOperand);
+                char* code1 = (char*)malloc(strlen(reg) + 23);
+                sprintf(code1, "addi %s, $fp, %d", reg, addr);
+                addAsmCode(createAsmCode(code1, true));
+                char* code2 = (char*)malloc(strlen(reg) + 10);
+                sprintf(code2, "move $a0, %s", reg);
+                addAsmCode(createAsmCode(code2, true));
+
+                freeReg(reg);
+            } else if (ir->rwOperand->kind == DEREF) {
+                 if (ir->rwOperand->derefObj->kind != VARIABLE)
+                    printAsmError("ERROR in generateAsm in case WRITE deref! Deref object is not variable.");
+        
+                int addr = getOffset(addrTable, ir->rwOperand->derefObj->var);
+                if (addr == 0)
+                    printAsmError("ERROR in generateAsm in case WRITE deref! Write deref operand is not in addrTable.");
+
+                char* reg = getReg(ir->rwOperand->derefObj);
+                addLoadCode(reg, addr);
+
+                char* code = (char*)malloc(strlen(reg) + 11);
+                sprintf(code, "lw $a0, 0(%s)", reg);
+                addAsmCode(createAsmCode(code, true));
+
+                freeReg(reg);
+            } else {
+                printAsmError("ERROR in generateAsm in case WRITE! Wrong write operand kind.");
+            }
+            addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
+            addAsmCode(createAsmCode("sw $ra, 0($sp)", true));
+            addAsmCode(createAsmCode("jal write", true));
+            addAsmCode(createAsmCode("lw $ra, 0($sp)", true));
+            addAsmCode(createAsmCode("addi $sp, $sp, 4", true));
             break;
         }
         default:
@@ -762,10 +814,8 @@ void outputAsm(FILE* file, AsmCode* codes) {
     while (p != NULL) {
         if (p->tab) {
             fprintf(file, "\t%s\n", p->code);
-            if (debug) printf("\t%s\n", p->code);
         } else {
             fprintf(file, "%s\n", p->code);
-            if (debug) printf("%s\n", p->code);
         }
         p = p->next;
     }
