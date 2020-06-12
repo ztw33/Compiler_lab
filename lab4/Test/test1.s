@@ -4,49 +4,69 @@ _ret: .asciiz "\n"
 .globl main
 .text
 read:
-    li $v0, 4
-    la $a0, _prompt
-    syscall
-    li $v0, 5
-    syscall
-    jr $ra
+	li $v0, 4
+	la $a0, _prompt
+	syscall
+	li $v0, 5
+	syscall
+	jr $ra
 
 write:
-    li $v0, 1
-    syscall
-    li $v0, 4
-    la $a0, _ret
-    syscall
-    move $v0, $0
-    jr $ra
+	li $v0, 1
+	syscall
+	li $v0, 4
+	la $a0, _ret
+	syscall
+	move $v0, $0
+	jr $ra
 
 main:
-    li $t5, 0
-    li $t4, 1
-    li $t3, 0
-    addi $sp, $sp, -4
-    sw $ra, 0($sp)
-    jal read
-    lw $ra, 0($sp)
-    addi $sp, $sp, 4
-    move $t1, $v0
-    move $t2, $t1
+	move $s8, $sp
+	addi $sp, $sp, -4
+	li $t0, 0
+	sw $t0, -4($s8)
+	addi $sp, $sp, -4
+	li $t0, 1
+	sw $t0, -8($s8)
+	addi $sp, $sp, -4
+	li $t0, 0
+	sw $t0, -12($s8)
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal read
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	addi $sp, $sp, -4
+	sw $v0, -16($s8)
+	addi $sp, $sp, -4
+	lw $t0, -16($s8)
+	sw $t0, -20($s8)
 label1:
-    blt $t3, $t2, label2
-    j label3
+	lw $t0, -12($s8)
+	lw $t1, -20($s8)
+	blt $t0, $t1, label2
+	j label3
 label2:
-    add $t1, $t5, $t4
-    move $a0, $t4
-    addi $sp, $sp, -4
-    sw $ra, 0($sp)
-    jal write
-    lw $ra, 0($sp)
-    addi $sp, $sp, 4
-    move $t5, $t4
-    move $t4, $t1
-    addi $t1, $t3, 1
-    move $t3, $t1
-    j label1
+	addi $sp, $sp, -4
+	lw $t1, -4($s8)
+	lw $t2, -8($s8)
+	add $t0, $t1, $t2
+	sw $t0, -24($s8)
+	lw $a0, -8($s8)
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal write
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	lw $t0, -8($s8)
+	sw $t0, -4($s8)
+	lw $t0, -24($s8)
+	sw $t0, -8($s8)
+	lw $t1, -12($s8)
+	li $t2, 1
+	add $t0, $t1, $t2
+	sw $t0, -12($s8)
+	j label1
 label3:
-    move $v0, $0
-    jr $ra
+	li $v0, 0
+	jr $ra

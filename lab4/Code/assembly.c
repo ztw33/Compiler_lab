@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Reg.h"
-#include "Stack.h"
 
 #define debug 0
 
@@ -40,7 +39,6 @@ AsmCode* generateAsm(InterCodes* irs) {
                              "\tmove $v0, $0\n"
                              "\tjr $ra", false));
     
-    Stack s = create_stack();  // 用于存放每次函数调用时相对上次$s8的偏移量
     int offset = 0;
     VarAddrTable addrTable = initAddrTable();
 
@@ -342,8 +340,6 @@ AsmCode* generateAsm(InterCodes* irs) {
             addAsmCode(createAsmCode("addi $sp, $sp, -4", true));
             addAsmCode(createAsmCode("sw $s8, 0($sp)", true));  // 保存帧指针
             addAsmCode(createAsmCode("addi $s8, $sp, 8", true));  // 移动$s8
-
-            //push_stack(s, offset);  // 保存函数调用前offset值
 
             char* jmpCode = (char*)malloc(strlen(ir->call.funcName) + 4);
             sprintf(jmpCode, "jal %s", ir->call.funcName);
